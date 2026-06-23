@@ -3,7 +3,7 @@
 &gt; 一个基于原生 Canvas 的深海冲刺游戏。单文件，零依赖，部署即玩。
 
 ## 在线试玩
-[Netlify 链接]
+[Netlify 链接]https://cheerful-bienenstitch-28078d.netlify.app/
 
 ## 核心机制
 - 点击/空格下潜，松开上浮
