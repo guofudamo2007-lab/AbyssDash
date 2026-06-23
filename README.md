@@ -3,7 +3,8 @@
 > 一款基于 HTML5 原生 Canvas 的反重力深海跑酷游戏。
 > **单文件、零依赖、纯原生、开箱即玩。**
 
-[![Demo](https://img.shields.io/badge/🎮在线试玩-点击潜入深渊-00ffff?style=for-the-badge)](https://cheerful-bienenstitch-28078d.netlify.app/)
+[![GitHub Pages](https://img.shields.io/badge/🎮主站试玩-GitHub_Pages-00ffff?style=for-the-badge)](https://guofudamo2007-lab.github.io/AbyssDash/)
+[![Netlify](https://img.shields.io/badge/🚀备用节点-Netlify-33ffaa?style=for-the-badge)](https://cheerful-bienenstitch-28078d.netlify.app/)
 
 ## 🌊 核心特色玩法
 
@@ -30,8 +31,9 @@
 
 ## 📂 如何运行
 
-**方案一：在线体验**
-直接访问部署好的 Netlify 链接：[Abyss Dash 在线版](https://cheerful-bienenstitch-28078d.netlify.app/)
+**方案一：在线体验 (双节点支持)**
+* 🌐 主站：[GitHub Pages 部署版](https://guofudamo2007-lab.github.io/AbyssDash/)
+* 🚀 备用：[Netlify 部署版](https://cheerful-bienenstitch-28078d.netlify.app/)
 
 **方案二：本地运行**
 1. 克隆本项目或直接下载 `index.html`。
