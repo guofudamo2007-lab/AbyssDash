@@ -3,49 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>深渊冲刺 V3.3 (细节打磨版)</title>
+    <title>深渊冲刺 (Abyss Dash) - Retina HD</title>
     <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            background-color: #050510;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            color: white;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: none; 
-            -webkit-touch-callout: none;
-        }
-        #game-container {
-            position: relative;
-            box-shadow: 0 0 30px rgba(0, 255, 255, 0.3);
-            border-radius: 8px;
-            overflow: hidden;
-            max-width: 100vw;
-            max-height: 100vh;
-        }
-        canvas {
-            background: linear-gradient(180deg, #101f42 0%, #0a1128 50%, #030511 100%);
-            display: block;
-            max-width: 100%;
-            height: auto;
-            object-fit: contain;
-        }
-        #ui-layer {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            right: 20px;
-            z-index: 999; 
-            pointer-events: none;
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
+        body { margin: 0; overflow: hidden; background-color: #050510; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; }
+        #game-container { position: relative; box-shadow: 0 0 30px rgba(0, 255, 255, 0.3); border-radius: 8px; overflow: hidden; max-width: 100vw; max-height: 100vh; }
+        /* 移除 canvas 的背景色渐变，改由 JS 绘制，避免缩放时 CSS 背景与绘制内容不匹配 */
+        canvas { display: block; max-width: 100%; height: auto; object-fit: contain; }
+        
+        #ui-layer { position: absolute; top: 20px; left: 20px; right: 20px; z-index: 999; pointer-events: none; display: flex; justify-content: space-between; align-items: flex-start; }
         #left-ui { display: flex; flex-direction: column; }
         #score-box { font-size: clamp(16px, 4vw, 24px); font-weight: bold; text-shadow: 0 0 10px rgba(0,255,255,0.5); display: flex; align-items: baseline; }
         #multiplier { color: #ffd700; font-size: clamp(14px, 3.5vw, 20px); margin-left: 10px; text-shadow: 0 0 15px #ffaa00; opacity: 0; transition: opacity 0.2s; }
@@ -55,19 +20,7 @@
         #hunt-bar-container { width: clamp(100px, 30vw, 180px); height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 10px; border: 1px solid rgba(0,255,255,0.2); overflow: hidden; }
         #hunt-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00ffff, #0088ff); box-shadow: 0 0 10px #00ffff; transition: width 0.1s; }
         
-        #pause-btn {
-            pointer-events: auto;
-            font-size: clamp(20px, 5vw, 28px);
-            cursor: pointer;
-            background: rgba(0, 20, 40, 0.7);
-            border: 2px solid rgba(0, 255, 255, 0.5);
-            border-radius: 8px;
-            width: 44px; height: 44px;
-            display: none; 
-            justify-content: center; align-items: center;
-            box-shadow: 0 0 10px rgba(0, 255, 255, 0.2);
-            transition: transform 0.1s, opacity 0.3s;
-        }
+        #pause-btn { pointer-events: auto; font-size: clamp(20px, 5vw, 28px); cursor: pointer; background: rgba(0, 20, 40, 0.7); border: 2px solid rgba(0, 255, 255, 0.5); border-radius: 8px; width: 44px; height: 44px; display: none; justify-content: center; align-items: center; box-shadow: 0 0 10px rgba(0, 255, 255, 0.2); transition: transform 0.1s, opacity 0.3s; }
         #pause-btn:active { transform: scale(0.9); }
 
         .blood-screen { animation: flashRed 0.6s ease-out forwards; }
@@ -87,7 +40,7 @@
             </div>
             <div id="pause-btn">⏸</div>
         </div>
-        <canvas id="gameCanvas" width="850" height="450"></canvas>
+        <canvas id="gameCanvas"></canvas>
     </div>
     
 <script>
@@ -117,26 +70,11 @@ class AudioManager {
         let now = this.ctx.currentTime;
 
         switch (type) {
-            case 'eat':
-                osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(1000, now + 0.1);
-                gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
-                osc.start(now); osc.stop(now + 0.1); break;
-            case 'dash':
-                osc.type = 'triangle'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.4);
-                gain.gain.setValueAtTime(0.4, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.4);
-                osc.start(now); osc.stop(now + 0.4); break;
-            case 'crash':
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(40, now + 0.3);
-                gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-                osc.start(now); osc.stop(now + 0.3); break;
-            case 'smash':
-                osc.type = 'square'; osc.frequency.setValueAtTime(100, now); osc.frequency.exponentialRampToValueAtTime(30, now + 0.15);
-                gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
-                osc.start(now); osc.stop(now + 0.15); break;
-            case 'shock':
-                osc.type = 'sawtooth'; osc.frequency.setValueAtTime(800, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2);
-                gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.2);
-                osc.start(now); osc.stop(now + 0.2); break;
+            case 'eat': osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(1000, now + 0.1); gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1); osc.start(now); osc.stop(now + 0.1); break;
+            case 'dash': osc.type = 'triangle'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.4); gain.gain.setValueAtTime(0.4, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.4); osc.start(now); osc.stop(now + 0.4); break;
+            case 'crash': osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(40, now + 0.3); gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3); osc.start(now); osc.stop(now + 0.3); break;
+            case 'smash': osc.type = 'square'; osc.frequency.setValueAtTime(100, now); osc.frequency.exponentialRampToValueAtTime(30, now + 0.15); gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15); osc.start(now); osc.stop(now + 0.15); break;
+            case 'shock': osc.type = 'sawtooth'; osc.frequency.setValueAtTime(800, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2); gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.2); osc.start(now); osc.stop(now + 0.2); break;
         }
     }
 }
@@ -173,22 +111,53 @@ class UIManager {
     clearBloodScreen() { this.container.classList.remove('blood-screen'); }
 }
 
+/** =========================================================================
+ * 渲染系统 (Renderer) - V3.5 高清 DPI 适配核心
+ * ========================================================================= */
 class Renderer {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
+        
+        // 核心：分离物理宽高与逻辑宽高
+        this.baseWidth = 850;
+        this.baseHeight = 450;
+        
+        // 限制最大 dpr 为 2，平衡清晰度与性能
+        const dpr = Math.min(window.devicePixelRatio || 1, 2); 
+        
+        // 设置画布物理像素分辨率 (高倍数)
+        this.canvas.width = this.baseWidth * dpr;
+        this.canvas.height = this.baseHeight * dpr;
+        
+        // 设置 CSS 逻辑尺寸 (屏幕显示尺寸)
+        this.canvas.style.width = this.baseWidth + 'px';
+        this.canvas.style.height = this.baseHeight + 'px';
+        
+        // 缩放上下文，使得后续所有绘制指令仍基于 baseWidth/baseHeight
+        this.ctx.scale(dpr, dpr);
     }
+    
     draw(engine) {
-        const { ctx, canvas } = this;
+        const { ctx, baseWidth, baseHeight } = this;
         const shark = engine.shark;
         
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        // 注意：由于 scale 已经被应用，这里的 clearRect 依然使用 base 宽高
+        ctx.clearRect(0, 0, baseWidth, baseHeight);
 
-        let gradient = ctx.createLinearGradient(canvas.width/2, 0, canvas.width/2, canvas.height);
+        // 绘制底层背景（原先在 CSS 里，现在移到 JS 确保自适应）
+        let bgGradient = ctx.createLinearGradient(0, 0, 0, baseHeight);
+        bgGradient.addColorStop(0, '#101f42');
+        bgGradient.addColorStop(0.5, '#0a1128');
+        bgGradient.addColorStop(1, '#030511');
+        ctx.fillStyle = bgGradient;
+        ctx.fillRect(0, 0, baseWidth, baseHeight);
+
+        let gradient = ctx.createLinearGradient(baseWidth/2, 0, baseWidth/2, baseHeight);
         gradient.addColorStop(0, 'rgba(0, 255, 255, 0.08)'); gradient.addColorStop(0.3, 'rgba(0, 100, 255, 0.03)'); gradient.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = gradient; ctx.beginPath();
         ctx.moveTo(150 + Math.sin(engine.frameCount*0.02)*40, 0); ctx.lineTo(280 + Math.sin(engine.frameCount*0.02)*40, 0);
-        ctx.lineTo(450 + Math.sin(engine.frameCount*0.015)*60, canvas.height); ctx.lineTo(200 + Math.sin(engine.frameCount*0.015)*60, canvas.height);
+        ctx.lineTo(450 + Math.sin(engine.frameCount*0.015)*60, baseHeight); ctx.lineTo(200 + Math.sin(engine.frameCount*0.015)*60, baseHeight);
         ctx.fill();
 
         engine.currentZones.forEach(cz => {
@@ -202,7 +171,7 @@ class Renderer {
         engine.planks.forEach(p => { ctx.fillStyle = `rgba(150, 255, 255, ${p.alpha})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); });
         if (shark.isDashing || shark.inCurrent) {
             ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            for(let i=0; i<12; i++) { ctx.fillRect(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 150 + 50, 1.5); }
+            for(let i=0; i<12; i++) { ctx.fillRect(Math.random() * baseWidth, Math.random() * baseHeight, Math.random() * 150 + 50, 1.5); }
         }
 
         ctx.shadowBlur = 15; ctx.shadowColor = '#ff00ff';
@@ -260,40 +229,37 @@ class Renderer {
         ctx.beginPath(); ctx.arc(shark.width - 14, -3, 2.5, 0, Math.PI * 2); ctx.fill();
         ctx.restore(); ctx.shadowBlur = 0;
 
-        // === 修复与新增：UI 提示与状态呈现 ===
         if (engine.state === 'READY') {
-            ctx.fillStyle = 'rgba(5, 5, 15, 0.6)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(5, 5, 15, 0.6)'; ctx.fillRect(0, 0, baseWidth, baseHeight);
             ctx.fillStyle = '#00ffff'; ctx.font = 'bold clamp(20px, 5vw, 32px) sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText('准备潜入深渊', canvas.width / 2, canvas.height / 2 - 10);
+            ctx.fillText('准备潜入深渊', baseWidth / 2, baseHeight / 2 - 10);
             
             ctx.fillStyle = '#ffffff'; ctx.font = 'clamp(12px, 3vw, 16px) sans-serif';
-            ctx.fillText('轻按 屏幕/空格键 下潜，松开上浮', canvas.width / 2, canvas.height / 2 + 30);
-            
-            // 新增：新手引导提示
+            ctx.fillText('轻按 屏幕/空格键 下潜，松开上浮', baseWidth / 2, baseHeight / 2 + 30);
             ctx.fillStyle = '#00ffff'; ctx.font = 'clamp(10px, 2.5vw, 14px) sans-serif';
-            ctx.fillText('🦈 吃小鱼积攒怒气 → 满怒触发冲刺（无敌+破障）', canvas.width / 2, canvas.height / 2 + 65);
+            ctx.fillText('🦈 吃小鱼积攒怒气 → 满怒触发冲刺（无敌+破障）', baseWidth / 2, baseHeight / 2 + 65);
             
         } else if (engine.state === 'PAUSED') {
-            ctx.fillStyle = 'rgba(5, 5, 15, 0.7)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(5, 5, 15, 0.7)'; ctx.fillRect(0, 0, baseWidth, baseHeight);
             ctx.fillStyle = '#00ffff'; ctx.font = 'bold clamp(24px, 6vw, 36px) sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText('PAUSED', canvas.width / 2, canvas.height / 2);
+            ctx.fillText('PAUSED', baseWidth / 2, baseHeight / 2);
             ctx.fillStyle = '#ffffff'; ctx.font = 'clamp(12px, 3vw, 16px) sans-serif';
-            ctx.fillText('点击继续游戏', canvas.width / 2, canvas.height / 2 + 40);
+            ctx.fillText('点击继续游戏', baseWidth / 2, baseHeight / 2 + 40);
             
         } else if (engine.state === 'GAMEOVER') {
-            ctx.fillStyle = 'rgba(5, 5, 15, 0.85)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(5, 5, 15, 0.85)'; ctx.fillRect(0, 0, baseWidth, baseHeight);
             ctx.fillStyle = '#ff3333'; ctx.font = 'bold clamp(24px, 6vw, 36px) sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText('ABYSS CRASHED', canvas.width / 2, canvas.height / 2 - 40);
+            ctx.fillText('ABYSS CRASHED', baseWidth / 2, baseHeight / 2 - 40);
             
             if (engine.isNewRecord) {
                 ctx.fillStyle = '#ffd700'; ctx.font = 'bold clamp(16px, 4vw, 24px) sans-serif';
-                ctx.fillText(`🎉 新纪录产生: ${engine.score} 🎉`, canvas.width / 2, canvas.height / 2 + 10);
+                ctx.fillText(`🎉 新纪录产生: ${engine.score} 🎉`, baseWidth / 2, baseHeight / 2 + 10);
             } else {
                 ctx.fillStyle = '#ffffff'; ctx.font = 'clamp(14px, 3.5vw, 20px) sans-serif';
-                ctx.fillText(`最终得分: ${engine.score}`, canvas.width / 2, canvas.height / 2 + 10);
+                ctx.fillText(`最终得分: ${engine.score}`, baseWidth / 2, baseHeight / 2 + 10);
             }
             ctx.fillStyle = '#ffffff'; ctx.font = 'clamp(12px, 3vw, 16px) sans-serif';
-            ctx.fillText('点击屏幕 或 按【空格键】重返深渊', canvas.width / 2, canvas.height / 2 + 90);
+            ctx.fillText('点击屏幕 或 按【空格键】重返深渊', baseWidth / 2, baseHeight / 2 + 90);
         }
     }
 }
@@ -322,8 +288,12 @@ class GameEngine {
         this.obstacles = []; this.fishes = []; this.currentZones = []; this.jellyfishes = []; this.planks = [];
         this.score = 0; this.frameCount = 0; this.isNewRecord = false;
         
+        // 使用 renderer.baseWidth/baseHeight 替代 canvas.width/canvas.height
+        let cvsW = this.renderer.baseWidth;
+        let cvsH = this.renderer.baseHeight;
+        
         for(let i=0; i<25; i++) {
-            this.planks.push({ x: Math.random() * this.renderer.canvas.width, y: Math.random() * this.renderer.canvas.height, size: Math.random() * 2 + 1, speed: Math.random() * 0.5 + 0.2, alpha: Math.random() * 0.5 + 0.2 });
+            this.planks.push({ x: Math.random() * cvsW, y: Math.random() * cvsH, size: Math.random() * 2 + 1, speed: Math.random() * 0.5 + 0.2, alpha: Math.random() * 0.5 + 0.2 });
         }
         
         this.ui.clearBloodScreen();
@@ -335,12 +305,8 @@ class GameEngine {
     bindEvents() {
         const handleInputDown = () => {
             this.audio.init();
-            if (this.state === 'GAMEOVER') {
-                this.state = 'READY'; this.initEntities(); return;
-            }
-            if (this.state === 'PAUSED') {
-                this.resume(); return;
-            }
+            if (this.state === 'GAMEOVER') { this.state = 'READY'; this.initEntities(); return; }
+            if (this.state === 'PAUSED') { this.resume(); return; }
             if (this.state === 'READY') {
                 this.state = 'PLAYING';
                 this.ui.setPauseBtnVisible(true); 
@@ -368,9 +334,7 @@ class GameEngine {
             this.state = 'PAUSED';
             this.ui.updatePauseBtnIcon(true);
             this.renderer.draw(this); 
-        } else if (this.state === 'PAUSED') {
-            this.resume();
-        }
+        } else if (this.state === 'PAUSED') { this.resume(); }
     }
 
     resume() {
@@ -391,7 +355,6 @@ class GameEngine {
             this.isNewRecord = true;
         }
 
-        // === 修复 1：游戏结束时立即同步最新最高分 UI ===
         this.ui.update(this.score, this.shark, this.highScore);
 
         let shake = 14;
@@ -410,8 +373,8 @@ class GameEngine {
 
     updateLogic() {
         this.frameCount++;
-        let cvsW = this.renderer.canvas.width;
-        let cvsH = this.renderer.canvas.height;
+        let cvsW = this.renderer.baseWidth;
+        let cvsH = this.renderer.baseHeight;
         
         let dynamicBaseSpeed = Math.min(CONFIG.MAX_BASE_SPEED, CONFIG.INITIAL_SPEED + this.score * CONFIG.SPEED_GROWTH);
 
