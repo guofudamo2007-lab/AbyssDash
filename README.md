@@ -3,9 +3,9 @@
 > 一款基于 HTML5 原生 Canvas 的反重力深海跑酷游戏。
 > **单文件、零依赖、纯原生、开箱即玩。**
 
-### 🎮 在线试玩 (Live Demo)
-* 🌐 **官方主站 (GitHub Pages)：** https://guofudamo2007-lab.github.io/AbyssDash/
-* 🚀 **备用节点 (Netlify)：** https://cheerful-bienenstitch-28078d.netlify.app/
+[![GitHub Pages](https://img.shields.io/badge/🎮主站试玩-GitHub_Pages-00ffff?style=for-the-badge)](https://guofudamo2007-lab.github.io/AbyssDash/)
+[![Netlify](https://img.shields.io/badge/🚀备用节点-Netlify-33ffaa?style=for-the-badge)](https://cheerful-bienenstitch-28078d.netlify.app/)
+
 ## 🌊 核心特色玩法
 
 * **反直觉物理操作：** 摒弃传统的“按键跳跃”，采用“按住下潜，松开上浮”的深海浮力模拟，带来极具新鲜感的下潜体验。
@@ -18,11 +18,11 @@
 
 | 工程痛点 | 产生的现象 | 解决方案与架构 |
 | :--- | :--- | :--- |
+| **高分屏画质发虚** | 在 Mac Retina 屏幕或高配手机上，Canvas 边缘出现明显锯齿和模糊。 | **逻辑与物理分辨率解耦：** 引入 `devicePixelRatio` 动态计算屏幕像素比，利用 `ctx.scale` 重新映射绘制系，实现像素级锐利。 |
 | **刷新率依赖** | 144Hz/240Hz 屏幕下游戏运行速度是 60Hz 的数倍，导致高刷屏玩家必定暴毙。 | **工业级时间步长 (Fixed Time Step)：** 引入时间累加器（Accumulator），强制逻辑帧锁定 120Hz 更新，彻底剥离物理逻辑与渲染帧率。 |
 | **数值崩坏** | 后期障碍物密不透风，且叠加洋流加速后画面完全失控。 | **平滑动态难度 (Dynamic Scaling)：** 将基础速度（线性增长）与障碍生成频率（对数衰减）解耦，并引入**绝对速度硬上限 (Hard Cap)**。 |
 | **状态机混乱** | 暂停后重开、死亡后复活容易出现 UI 残留或重力异常。 | **面向对象重构与 FSM：** 重构为严格的 Class 架构（Renderer/AudioManager/GameEngine），实现规范的生命周期状态机控制。 |
 | **移动端误触** | 手机端频繁触发“双击放大”、“下拉刷新”及分辨率错位。 | **全端自适应控制：** 物理宽高与 Canvas CSS 分离。彻底拦截 `touchstart`、`touch-action: none` 阻断浏览器默认手势。 |
-| **高分屏画质发虚** | 在 Mac Retina 屏幕或高配手机上，Canvas 边缘出现明显锯齿和模糊。 | **逻辑与物理分辨率解耦：** 引入 `devicePixelRatio` 动态计算屏幕像素比，利用 `ctx.scale` 重新映射绘制系，实现像素级锐利。 |
 
 ## 💻 技术栈
 
@@ -51,8 +51,3 @@
   *依赖：v3.0 的 GameEngine 类隔离*
 * `v3.0`：底层代码 OOP（面向对象）完全重构。引入 Class 架构与生命周期状态机。
   *基础：此前为过程式代码，无法支撑后续优化*
-## 🚧 已知问题与方向
-
-* 长期运行后数组膨胀（对象池待引入）
-* 无障碍支持（屏幕阅读器适配）
-* 多语言本地化
