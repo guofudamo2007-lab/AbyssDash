@@ -3,9 +3,9 @@
 > 一款基于 HTML5 原生 Canvas 的反重力深海跑酷游戏。
 > **单文件、零依赖、纯原生、开箱即玩。**
 
-[![GitHub Pages](https://img.shields.io/badge/🎮主站试玩-GitHub_Pages-00ffff?style=for-the-badge)](https://guofudamo2007-lab.github.io/AbyssDash/)
-[![Netlify](https://img.shields.io/badge/🚀备用节点-Netlify-33ffaa?style=for-the-badge)](https://cheerful-bienenstitch-28078d.netlify.app/)
-
+### 🎮 在线试玩 (Live Demo)
+* 🌐 **官方主站 (GitHub Pages)：** https://guofudamo2007-lab.github.io/AbyssDash/
+* 🚀 **备用节点 (Netlify)：** https://cheerful-bienenstitch-28078d.netlify.app/
 ## 🌊 核心特色玩法
 
 * **反直觉物理操作：** 摒弃传统的“按键跳跃”，采用“按住下潜，松开上浮”的深海浮力模拟，带来极具新鲜感的下潜体验。
