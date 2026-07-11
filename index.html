@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -7,7 +7,6 @@
     <style>
         body { margin: 0; overflow: hidden; background-color: #050510; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; }
         #game-container { position: relative; box-shadow: 0 0 30px rgba(0, 255, 255, 0.3); border-radius: 8px; overflow: hidden; max-width: 100vw; max-height: 100vh; }
-        /* 移除 canvas 的背景色渐变，改由 JS 绘制，避免缩放时 CSS 背景与绘制内容不匹配 */
         canvas { display: block; max-width: 100%; height: auto; object-fit: contain; }
         
         #ui-layer { position: absolute; top: 20px; left: 20px; right: 20px; z-index: 999; pointer-events: none; display: flex; justify-content: space-between; align-items: flex-start; }
@@ -49,7 +48,6 @@ const CONFIG = {
     MAX_BASE_SPEED: 5.5,  
     SPEED_GROWTH: 0.002,  
     SPEED_HARD_CAP: 12.0, 
-
     BUOYANCY: 0.15,     
     DIVE_FORCE: 0.3,    
     MAX_VELOCITY: 4.0,
@@ -75,6 +73,8 @@ class AudioManager {
             case 'crash': osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(40, now + 0.3); gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3); osc.start(now); osc.stop(now + 0.3); break;
             case 'smash': osc.type = 'square'; osc.frequency.setValueAtTime(100, now); osc.frequency.exponentialRampToValueAtTime(30, now + 0.15); gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15); osc.start(now); osc.stop(now + 0.15); break;
             case 'shock': osc.type = 'sawtooth'; osc.frequency.setValueAtTime(800, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2); gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.2); osc.start(now); osc.stop(now + 0.2); break;
+            case 'powerup': osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.linearRampToValueAtTime(1200, now + 0.3); gain.gain.setValueAtTime(0.4, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.3); osc.start(now); osc.stop(now + 0.3); break;
+            case 'explosion': osc.type = 'square'; osc.frequency.setValueAtTime(100, now); osc.frequency.exponentialRampToValueAtTime(20, now + 0.5); gain.gain.setValueAtTime(0.6, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5); osc.start(now); osc.stop(now + 0.5); break;
         }
     }
 }
@@ -111,30 +111,22 @@ class UIManager {
     clearBloodScreen() { this.container.classList.remove('blood-screen'); }
 }
 
-/** =========================================================================
- * 渲染系统 (Renderer) - V3.5 高清 DPI 适配核心
- * ========================================================================= */
 class Renderer {
     constructor(canvasId) {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
         
-        // 核心：分离物理宽高与逻辑宽高
         this.baseWidth = 850;
         this.baseHeight = 450;
         
-        // 限制最大 dpr 为 2，平衡清晰度与性能
         const dpr = Math.min(window.devicePixelRatio || 1, 2); 
         
-        // 设置画布物理像素分辨率 (高倍数)
         this.canvas.width = this.baseWidth * dpr;
         this.canvas.height = this.baseHeight * dpr;
         
-        // 设置 CSS 逻辑尺寸 (屏幕显示尺寸)
         this.canvas.style.width = this.baseWidth + 'px';
         this.canvas.style.height = this.baseHeight + 'px';
         
-        // 缩放上下文，使得后续所有绘制指令仍基于 baseWidth/baseHeight
         this.ctx.scale(dpr, dpr);
     }
     
@@ -142,10 +134,8 @@ class Renderer {
         const { ctx, baseWidth, baseHeight } = this;
         const shark = engine.shark;
         
-        // 注意：由于 scale 已经被应用，这里的 clearRect 依然使用 base 宽高
         ctx.clearRect(0, 0, baseWidth, baseHeight);
 
-        // 绘制底层背景（原先在 CSS 里，现在移到 JS 确保自适应）
         let bgGradient = ctx.createLinearGradient(0, 0, 0, baseHeight);
         bgGradient.addColorStop(0, '#101f42');
         bgGradient.addColorStop(0.5, '#0a1128');
@@ -192,6 +182,33 @@ class Renderer {
             }
         });
         ctx.shadowBlur = 0; 
+        
+        engine.powerups.forEach(p => {
+            ctx.fillStyle = p.type === 'shield' ? '#00ffff' : '#ff00ff';
+            ctx.shadowBlur = 15; ctx.shadowColor = ctx.fillStyle;
+            ctx.beginPath();
+            if (p.type === 'shield') {
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill(); ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2; ctx.stroke();
+            } else {
+                ctx.moveTo(p.x, p.y - p.radius); ctx.lineTo(p.x + p.radius, p.y);
+                ctx.lineTo(p.x, p.y + p.radius); ctx.lineTo(p.x - p.radius, p.y);
+                ctx.fill();
+            }
+        });
+        ctx.shadowBlur = 0;
+
+        engine.mines.forEach(m => {
+            ctx.fillStyle = '#222222'; ctx.strokeStyle = '#555555'; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+            for(let i=0; i<8; i++) {
+                let angle = i * Math.PI / 4 + engine.frameCount * 0.05;
+                ctx.beginPath(); ctx.moveTo(m.x, m.y);
+                ctx.lineTo(m.x + Math.cos(angle)*(m.radius+5), m.y + Math.sin(angle)*(m.radius+5)); ctx.stroke();
+            }
+            ctx.fillStyle = (engine.frameCount % 20 < 10) ? '#ff0000' : '#550000';
+            ctx.beginPath(); ctx.arc(m.x, m.y, m.radius * 0.4, 0, Math.PI * 2); ctx.fill();
+        });
 
         ctx.fillStyle = '#09081a'; ctx.strokeStyle = '#1a183a'; ctx.lineWidth = 3;
         engine.obstacles.forEach(obs => {
@@ -208,12 +225,23 @@ class Renderer {
             ctx.strokeStyle = '#ff00ff'; ctx.lineWidth = 2; ctx.beginPath();
             ctx.arc(shark.width/2 + (Math.random()*4-2), Math.random()*4-2, shark.radius + 6, 0, Math.PI*2); ctx.stroke();
         }
+        
         if (shark.isDashing) {
             ctx.strokeStyle = 'rgba(255, 0, 0, 0.4)'; ctx.lineWidth = 4; ctx.shadowBlur = 25; ctx.shadowColor = 'red';
             ctx.beginPath(); ctx.arc(shark.width/2, 0, shark.radius * 1.8 + Math.sin(engine.frameCount*0.3)*4, 0, Math.PI*2); ctx.stroke();
         } else if (shark.inCurrent) {
             ctx.strokeStyle = 'rgba(0, 255, 255, 0.6)'; ctx.lineWidth = 3; ctx.shadowBlur = 20; ctx.shadowColor = '#00ffff';
             ctx.beginPath(); ctx.arc(shark.width/2, 0, shark.radius * 1.6, 0, Math.PI*2); ctx.stroke();
+        }
+
+        if (shark.shield) {
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)'; ctx.lineWidth = 3; ctx.shadowBlur = 15; ctx.shadowColor = '#00ffff';
+            ctx.beginPath(); ctx.arc(shark.width/2, 0, shark.radius * 2, 0, Math.PI*2); ctx.stroke();
+        }
+        if (shark.magnetTimer > 0) {
+            ctx.strokeStyle = 'rgba(255, 0, 255, 0.5)'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]); ctx.lineDashOffset = -engine.frameCount * 0.5;
+            ctx.beginPath(); ctx.arc(shark.width/2, 0, shark.radius * 2.2, 0, Math.PI*2); ctx.stroke();
+            ctx.setLineDash([]);
         }
 
         ctx.fillStyle = shark.isDashing ? '#3a0005' : (shark.isParalyzed ? '#2a002a' : '#03030a');
@@ -232,12 +260,17 @@ class Renderer {
         if (engine.state === 'READY') {
             ctx.fillStyle = 'rgba(5, 5, 15, 0.6)'; ctx.fillRect(0, 0, baseWidth, baseHeight);
             ctx.fillStyle = '#00ffff'; ctx.font = 'bold clamp(20px, 5vw, 32px) sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText('准备潜入深渊', baseWidth / 2, baseHeight / 2 - 10);
+            ctx.fillText('准备潜入深渊', baseWidth / 2, baseHeight / 2 - 20);
             
             ctx.fillStyle = '#ffffff'; ctx.font = 'clamp(12px, 3vw, 16px) sans-serif';
-            ctx.fillText('轻按 屏幕/空格键 下潜，松开上浮', baseWidth / 2, baseHeight / 2 + 30);
+            ctx.fillText('轻按 屏幕/空格键 下潜，松开上浮', baseWidth / 2, baseHeight / 2 + 20);
             ctx.fillStyle = '#00ffff'; ctx.font = 'clamp(10px, 2.5vw, 14px) sans-serif';
-            ctx.fillText('🦈 吃小鱼积攒怒气 → 满怒触发冲刺（无敌+破障）', baseWidth / 2, baseHeight / 2 + 65);
+            ctx.fillText('🦈 吃小鱼积攒怒气 → 满怒触发冲刺（无敌+破障）', baseWidth / 2, baseHeight / 2 + 50);
+            
+            ctx.fillStyle = '#ffaa00';
+            ctx.fillText('🎁 收集道具：护盾(抵消一次伤害) / 磁铁(自动吸附小鱼)', baseWidth / 2, baseHeight / 2 + 75);
+            ctx.fillStyle = '#ff4444';
+            ctx.fillText('⚠️ 警告：分数超过300后将遭遇深海追踪水雷！', baseWidth / 2, baseHeight / 2 + 100);
             
         } else if (engine.state === 'PAUSED') {
             ctx.fillStyle = 'rgba(5, 5, 15, 0.7)'; ctx.fillRect(0, 0, baseWidth, baseHeight);
@@ -284,11 +317,10 @@ class GameEngine {
     }
 
     initEntities() {
-        this.shark = { x: 120, y: 225, width: 50, height: 24, radius: 14, velocity: 0, huntPoints: 0, isDashing: false, dashTimer: 0, inCurrent: false, isParalyzed: false, paralyzeTimer: 0 };
-        this.obstacles = []; this.fishes = []; this.currentZones = []; this.jellyfishes = []; this.planks = [];
+        this.shark = { x: 120, y: 225, width: 50, height: 24, radius: 14, velocity: 0, huntPoints: 0, isDashing: false, dashTimer: 0, inCurrent: false, isParalyzed: false, paralyzeTimer: 0, shield: false, magnetTimer: 0 };
+        this.obstacles = []; this.fishes = []; this.currentZones = []; this.jellyfishes = []; this.planks = []; this.powerups = []; this.mines = [];
         this.score = 0; this.frameCount = 0; this.isNewRecord = false;
         
-        // 使用 renderer.baseWidth/baseHeight 替代 canvas.width/canvas.height
         let cvsW = this.renderer.baseWidth;
         let cvsH = this.renderer.baseHeight;
         
@@ -423,6 +455,9 @@ class GameEngine {
         if (this.frameCount % 70 === 0) this.fishes.push({ x: cvsW, y: Math.random() * (cvsH - 120) + 60, radius: 4, active: true });
         if (this.frameCount % 180 === 0 && this.score > 200) this.jellyfishes.push({ x: cvsW, y: Math.random() * (cvsH - 180) + 90, radius: 16, offset: Math.random() * Math.PI * 2 });
         if (this.frameCount > 300 && this.frameCount % 480 === 0 && Math.random() > 0.3) this.currentZones.push({ x: cvsW, y: Math.random() * (cvsH - 160) + 40, w: 1800, h: 90 });
+        
+        if (this.frameCount % 500 === 0 && this.score > 150) this.powerups.push({ x: cvsW, y: Math.random() * (cvsH - 100) + 50, radius: 12, type: Math.random() > 0.5 ? 'shield' : 'magnet' });
+        if (this.frameCount % 350 === 0 && this.score > 300) this.mines.push({ x: cvsW, y: Math.random() * (cvsH - 100) + 50, radius: 14, speed: Math.random() * 1.5 + 0.5 });
 
         for(let i = this.currentZones.length - 1; i >= 0; i--) {
             this.currentZones[i].x -= dynamicBaseSpeed * 1.5; 
@@ -437,6 +472,39 @@ class GameEngine {
 
         if (this.shark.inCurrent && this.frameCount % 10 === 0) this.score += 2;
 
+        if (this.shark.magnetTimer > 0) this.shark.magnetTimer--;
+
+        for (let i = this.powerups.length - 1; i >= 0; i--) {
+            let p = this.powerups[i]; p.x -= currentSpeed * 0.9;
+            if (Math.hypot(sharkCX - p.x, sharkCY - p.y) < this.shark.radius + p.radius) {
+                this.audio.play('powerup');
+                if (p.type === 'shield') this.shark.shield = true;
+                else this.shark.magnetTimer = 360; 
+                this.score += 15;
+                this.powerups.splice(i, 1);
+            } else if (p.x + p.radius < 0) {
+                this.powerups.splice(i, 1);
+            }
+        }
+
+        for (let i = this.mines.length - 1; i >= 0; i--) {
+            let m = this.mines[i]; 
+            m.x -= currentSpeed * 1.1; 
+            if (m.y < sharkCY) m.y += m.speed; else if (m.y > sharkCY) m.y -= m.speed;
+
+            if (this.checkCollision(sharkCX, sharkCY, this.shark.radius, m.x - m.radius, m.y - m.radius, m.radius*2, m.radius*2)) {
+                if (isInvincible) {
+                    this.audio.play('explosion'); this.score += 40; this.mines.splice(i, 1);
+                } else if (this.shark.shield) {
+                    this.audio.play('explosion'); this.shark.shield = false; this.mines.splice(i, 1);
+                } else {
+                    this.triggerGameOver(); return;
+                }
+            } else if (m.x + m.radius < 0) {
+                this.mines.splice(i, 1);
+            }
+        }
+
         for (let i = this.jellyfishes.length - 1; i >= 0; i--) {
             let jelly = this.jellyfishes[i];
             jelly.x -= currentSpeed * 0.7; jelly.y += Math.sin(this.frameCount * 0.05 + jelly.offset) * 1.5; 
@@ -444,6 +512,7 @@ class GameEngine {
             if (dist < this.shark.radius + jelly.radius) {
                 this.jellyfishes.splice(i, 1); 
                 if (isInvincible) { this.audio.play('smash'); this.score += 20; } 
+                else if (this.shark.shield) { this.audio.play('smash'); this.shark.shield = false; }
                 else { this.audio.play('shock'); this.shark.isParalyzed = true; this.shark.paralyzeTimer = 90; }
             } else if (jelly.x + jelly.radius < 0) { this.jellyfishes.splice(i, 1); }
         }
@@ -452,6 +521,7 @@ class GameEngine {
             let obs = this.obstacles[i]; obs.x -= currentSpeed;
             if (this.checkCollision(sharkCX, sharkCY, this.shark.radius, obs.x, obs.y, obs.width, obs.height)) {
                 if (isInvincible) { this.obstacles.splice(i, 1); this.audio.play('smash'); this.score += (this.shark.inCurrent ? 30 : 15); continue; } 
+                else if (this.shark.shield) { this.obstacles.splice(i, 1); this.audio.play('smash'); this.shark.shield = false; continue; }
                 else { this.triggerGameOver(); return; }
             }
             if (!obs.passed && obs.x + obs.width < this.shark.x) { obs.passed = true; this.score += (this.shark.inCurrent ? 20 : 10); }
@@ -460,7 +530,17 @@ class GameEngine {
 
         let mouthX = this.shark.x + this.shark.width - 5; let mouthY = this.shark.y;
         for (let i = this.fishes.length - 1; i >= 0; i--) {
-            let fish = this.fishes[i]; fish.x -= currentSpeed * 0.85;
+            let fish = this.fishes[i]; 
+            
+            if (this.shark.magnetTimer > 0) {
+                let distToShark = Math.hypot(sharkCX - fish.x, sharkCY - fish.y);
+                if (distToShark < 250) {
+                    fish.x -= (fish.x - mouthX) * 0.08;
+                    fish.y -= (fish.y - mouthY) * 0.08;
+                }
+            }
+            
+            fish.x -= currentSpeed * 0.85;
             if (fish.active && Math.hypot(fish.x - mouthX, fish.y - mouthY) < 25) {
                 fish.active = false; this.audio.play('eat');
                 if (!this.shark.isDashing) {
