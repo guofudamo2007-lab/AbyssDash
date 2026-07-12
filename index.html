@@ -1,30 +1,34 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>深渊冲刺 (Abyss Dash) - Retina HD</title>
+    <title>深渊冲刺 (Abyss Dash) - Ultra HD</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; background-color: #050510; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; }
-        #game-container { position: relative; box-shadow: 0 0 30px rgba(0, 255, 255, 0.3); border-radius: 8px; overflow: hidden; max-width: 100vw; max-height: 100vh; }
+        body { margin: 0; overflow: hidden; background-color: #020308; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; font-family: 'Rajdhani', sans-serif; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; }
+        #game-container { position: relative; box-shadow: 0 0 80px rgba(0, 255, 255, 0.1); border-radius: 12px; overflow: hidden; max-width: 100vw; max-height: 100vh; border: 1px solid rgba(0, 255, 255, 0.15); }
         canvas { display: block; max-width: 100%; height: auto; object-fit: contain; }
         
         #ui-layer { position: absolute; top: 20px; left: 20px; right: 20px; z-index: 999; pointer-events: none; display: flex; justify-content: space-between; align-items: flex-start; }
-        #left-ui { display: flex; flex-direction: column; }
-        #score-box { font-size: clamp(16px, 4vw, 24px); font-weight: bold; text-shadow: 0 0 10px rgba(0,255,255,0.5); display: flex; align-items: baseline; }
-        #multiplier { color: #ffd700; font-size: clamp(14px, 3.5vw, 20px); margin-left: 10px; text-shadow: 0 0 15px #ffaa00; opacity: 0; transition: opacity 0.2s; }
-        #multiplier.active { opacity: 1; animation: pulse 0.5s infinite alternate; }
-        #best-score-box { font-size: clamp(12px, 3vw, 16px); color: #ffd700; margin-top: 5px; text-shadow: 0 0 5px #ffaa00; font-weight: bold; }
+        #left-ui { display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(2, 5, 15, 0.5) 0%, rgba(2, 5, 15, 0.1) 100%); padding: 10px 18px; border-radius: 12px; border: 1px solid rgba(0,255,255,0.15); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: opacity 0.2s ease-out; }
+        #score-box { font-family: 'Orbitron', sans-serif; font-size: clamp(20px, 4.5vw, 32px); font-weight: 900; text-shadow: 0 0 15px rgba(0,255,255,0.9); display: flex; align-items: baseline; color: #fff; letter-spacing: 1px; }
+        #multiplier { color: #ff2a5f; font-size: clamp(14px, 3.5vw, 18px); margin-left: 12px; text-shadow: 0 0 15px #ff0055; opacity: 0; transition: opacity 0.2s; font-weight: 700; }
+        #multiplier.active { opacity: 1; animation: pulse 0.4s infinite alternate; }
+        #best-score-box { font-family: 'Orbitron', sans-serif; font-size: clamp(12px, 3vw, 15px); color: #00ffff; margin-top: 4px; text-shadow: 0 0 8px rgba(0,255,255,0.5); font-weight: 500; opacity: 0.9; letter-spacing: 0.5px; }
         
-        #hunt-bar-container { width: clamp(100px, 30vw, 180px); height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin-top: 10px; border: 1px solid rgba(0,255,255,0.2); overflow: hidden; }
-        #hunt-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00ffff, #0088ff); box-shadow: 0 0 10px #00ffff; transition: width 0.1s; }
+        #hunt-bar-container { width: clamp(120px, 30vw, 220px); height: 12px; background: rgba(0,0,0,0.6); border-radius: 6px; margin-top: 14px; border: 1px solid rgba(0,255,255,0.3); overflow: hidden; position: relative; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+        #hunt-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00eeff, #0055ff); box-shadow: 0 0 15px #00ffff; transition: width 0.15s ease-out, background 0.3s; position: relative; }
+        #hunt-bar::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%); }
         
-        #pause-btn { pointer-events: auto; font-size: clamp(20px, 5vw, 28px); cursor: pointer; background: rgba(0, 20, 40, 0.7); border: 2px solid rgba(0, 255, 255, 0.5); border-radius: 8px; width: 44px; height: 44px; display: none; justify-content: center; align-items: center; box-shadow: 0 0 10px rgba(0, 255, 255, 0.2); transition: transform 0.1s, opacity 0.3s; }
-        #pause-btn:active { transform: scale(0.9); }
+        #pause-btn { pointer-events: auto; font-size: clamp(20px, 5vw, 24px); cursor: pointer; background: rgba(5, 15, 30, 0.7); border: 2px solid rgba(0, 255, 255, 0.4); border-radius: 12px; width: 48px; height: 48px; display: none; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(0, 255, 255, 0.2); transition: all 0.2s; backdrop-filter: blur(5px); color: #0ff; }
+        #pause-btn:hover { background: rgba(0, 255, 255, 0.3); transform: scale(1.05); }
+        #pause-btn:active { transform: scale(0.95); }
 
-        .blood-screen { animation: flashRed 0.6s ease-out forwards; }
-        @keyframes pulse { from { transform: scale(1); } to { transform: scale(1.2); } }
-        @keyframes flashRed { 0% { box-shadow: inset 0 0 100px rgba(255, 0, 0, 1); } 40% { box-shadow: inset 0 0 80px rgba(255, 0, 0, 0.8); } 100% { box-shadow: inset 0 0 150px rgba(255, 0, 0, 0.4); } }
+        .blood-screen { animation: flashRed 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
+        @keyframes pulse { from { transform: scale(1) rotate(-1deg); } to { transform: scale(1.15) rotate(1deg); } }
+        @keyframes flashRed { 0% { box-shadow: inset 0 0 250px rgba(255, 0, 0, 1); } 30% { box-shadow: inset 0 0 120px rgba(255, 0, 0, 0.8); } 100% { box-shadow: inset 0 0 300px rgba(255, 0, 0, 0); } }
     </style>
 </head>
 <body>
@@ -32,9 +36,9 @@
     <div id="game-container">
         <div id="ui-layer">
             <div id="left-ui">
-                <div id="score-box">DEPTH SCORE: <span id="score" style="margin-left: 5px;">0</span><span id="multiplier">x2 RUSH!</span></div>
+                <div id="score-box">DEPTH SCORE: <span id="score" style="margin-left: 8px;">0</span><span id="multiplier">x2 RUSH!</span></div>
                 <div id="best-score-box">BEST DEPTH: <span id="high-score">0</span></div>
-                <div style="font-size: 12px; margin-top: 10px; color: #8ab;">HUNTING LEVEL:</div>
+                <div style="font-size: 13px; margin-top: 12px; color: #8ab; font-weight: bold; letter-spacing: 1px;">HUNTING LEVEL:</div>
                 <div id="hunt-bar-container"><div id="hunt-bar"></div></div>
             </div>
             <div id="pause-btn">⏸</div>
@@ -44,22 +48,45 @@
     
 <script>
 const CONFIG = {
-    INITIAL_SPEED: 2.3,   
-    MAX_BASE_SPEED: 5.5,  
-    SPEED_GROWTH: 0.002,  
-    SPEED_HARD_CAP: 12.0, 
-    BUOYANCY: 0.15,     
-    DIVE_FORCE: 0.3,    
-    MAX_VELOCITY: 4.0,
+    INITIAL_SPEED: 2.5,   
+    MAX_BASE_SPEED: 6.0,  
+    SPEED_GROWTH: 0.0025,  
+    SPEED_HARD_CAP: 14.0, 
+    BUOYANCY: 0.16,     
+    DIVE_FORCE: 0.35,    
+    MAX_VELOCITY: 4.5,
     LOGIC_FPS: 120, 
     FRAME_TIME: 1000 / 120
 };
 
 class AudioManager {
-    constructor() { this.ctx = null; }
+    constructor() { this.ctx = null; this.ambientOsc = null; }
     init() {
         if (!this.ctx) this.ctx = new (window.AudioContext || window.webkitAudioContext)();
         if (this.ctx.state === 'suspended') this.ctx.resume();
+    }
+    playAmbient() {
+        if (!this.ctx || this.ambientOsc) return;
+        this.ambientOsc = this.ctx.createOscillator();
+        this.ambientGain = this.ctx.createGain();
+        this.ambientOsc.type = 'sine';
+        this.ambientOsc.frequency.setValueAtTime(50, this.ctx.currentTime);
+        this.ambientGain.gain.setValueAtTime(0.05, this.ctx.currentTime);
+        this.ambientOsc.connect(this.ambientGain);
+        this.ambientGain.connect(this.ctx.destination);
+        this.ambientOsc.start();
+    }
+    stopAmbient() {
+        if (this.ambientOsc) {
+            this.ambientGain.gain.linearRampToValueAtTime(0, this.ctx.currentTime + 0.5);
+            setTimeout(() => {
+                if (this.ambientOsc) {
+                    this.ambientOsc.stop();
+                    this.ambientOsc.disconnect();
+                    this.ambientOsc = null;
+                }
+            }, 500);
+        }
     }
     play(type) {
         if (!this.ctx) return;
@@ -68,13 +95,13 @@ class AudioManager {
         let now = this.ctx.currentTime;
 
         switch (type) {
-            case 'eat': osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.exponentialRampToValueAtTime(1000, now + 0.1); gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1); osc.start(now); osc.stop(now + 0.1); break;
-            case 'dash': osc.type = 'triangle'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(800, now + 0.4); gain.gain.setValueAtTime(0.4, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.4); osc.start(now); osc.stop(now + 0.4); break;
-            case 'crash': osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(40, now + 0.3); gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3); osc.start(now); osc.stop(now + 0.3); break;
-            case 'smash': osc.type = 'square'; osc.frequency.setValueAtTime(100, now); osc.frequency.exponentialRampToValueAtTime(30, now + 0.15); gain.gain.setValueAtTime(0.4, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15); osc.start(now); osc.stop(now + 0.15); break;
-            case 'shock': osc.type = 'sawtooth'; osc.frequency.setValueAtTime(800, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2); gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.2); osc.start(now); osc.stop(now + 0.2); break;
-            case 'powerup': osc.type = 'sine'; osc.frequency.setValueAtTime(400, now); osc.frequency.linearRampToValueAtTime(1200, now + 0.3); gain.gain.setValueAtTime(0.4, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.3); osc.start(now); osc.stop(now + 0.3); break;
-            case 'explosion': osc.type = 'square'; osc.frequency.setValueAtTime(100, now); osc.frequency.exponentialRampToValueAtTime(20, now + 0.5); gain.gain.setValueAtTime(0.6, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5); osc.start(now); osc.stop(now + 0.5); break;
+            case 'eat': osc.type = 'sine'; osc.frequency.setValueAtTime(600, now); osc.frequency.exponentialRampToValueAtTime(1200, now + 0.1); gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1); osc.start(now); osc.stop(now + 0.1); break;
+            case 'dash': osc.type = 'triangle'; osc.frequency.setValueAtTime(200, now); osc.frequency.exponentialRampToValueAtTime(1000, now + 0.4); gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.4); osc.start(now); osc.stop(now + 0.4); break;
+            case 'crash': osc.type = 'sawtooth'; osc.frequency.setValueAtTime(100, now); osc.frequency.exponentialRampToValueAtTime(30, now + 0.4); gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.4); osc.start(now); osc.stop(now + 0.4); break;
+            case 'smash': osc.type = 'square'; osc.frequency.setValueAtTime(120, now); osc.frequency.exponentialRampToValueAtTime(40, now + 0.15); gain.gain.setValueAtTime(0.3, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15); osc.start(now); osc.stop(now + 0.15); break;
+            case 'shock': osc.type = 'sawtooth'; osc.frequency.setValueAtTime(900, now); osc.frequency.linearRampToValueAtTime(150, now + 0.2); gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.2); osc.start(now); osc.stop(now + 0.2); break;
+            case 'powerup': osc.type = 'sine'; osc.frequency.setValueAtTime(500, now); osc.frequency.linearRampToValueAtTime(1500, now + 0.3); gain.gain.setValueAtTime(0.3, now); gain.gain.linearRampToValueAtTime(0.01, now + 0.3); osc.start(now); osc.stop(now + 0.3); break;
+            case 'explosion': osc.type = 'square'; osc.frequency.setValueAtTime(80, now); osc.frequency.exponentialRampToValueAtTime(20, now + 0.6); gain.gain.setValueAtTime(0.6, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.6); osc.start(now); osc.stop(now + 0.6); break;
         }
     }
 }
@@ -100,14 +127,23 @@ class UIManager {
         if (shark.isDashing) {
             this.huntBar.style.width = (shark.dashTimer / 120 * 100) + '%';
             this.huntBar.style.background = 'linear-gradient(90deg, #ff0055, #ff0000)';
-            this.huntBar.style.boxShadow = '0 0 15px #ff0000';
+            this.huntBar.style.boxShadow = '0 0 20px #ff0000';
         } else {
             this.huntBar.style.width = Math.min(shark.huntPoints, 100) + '%';
             this.huntBar.style.background = 'linear-gradient(90deg, #00ffff, #0088ff)';
-            this.huntBar.style.boxShadow = '0 0 10px #00ffff';
+            this.huntBar.style.boxShadow = '0 0 15px #00ffff';
+        }
+
+        const leftUI = document.getElementById('left-ui');
+        if (leftUI) {
+            if (shark.x < 320 && shark.y < 140) {
+                leftUI.style.opacity = '0.25';
+            } else {
+                leftUI.style.opacity = '1';
+            }
         }
     }
-    triggerBloodScreen() { this.container.classList.add('blood-screen'); }
+    triggerBloodScreen() { this.container.classList.remove('blood-screen'); void this.container.offsetWidth; this.container.classList.add('blood-screen'); }
     clearBloodScreen() { this.container.classList.remove('blood-screen'); }
 }
 
@@ -116,8 +152,8 @@ class Renderer {
         this.canvas = document.getElementById(canvasId);
         this.ctx = this.canvas.getContext('2d');
         
-        this.baseWidth = 850;
-        this.baseHeight = 450;
+        this.baseWidth = 900;
+        this.baseHeight = 500;
         
         const dpr = Math.min(window.devicePixelRatio || 1, 2); 
         
@@ -136,56 +172,90 @@ class Renderer {
         
         ctx.clearRect(0, 0, baseWidth, baseHeight);
 
+        // Background Gradient
         let bgGradient = ctx.createLinearGradient(0, 0, 0, baseHeight);
-        bgGradient.addColorStop(0, '#101f42');
-        bgGradient.addColorStop(0.5, '#0a1128');
-        bgGradient.addColorStop(1, '#030511');
+        bgGradient.addColorStop(0, '#0a1535');
+        bgGradient.addColorStop(0.6, '#060a1c');
+        bgGradient.addColorStop(1, '#020308');
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, baseWidth, baseHeight);
 
+        // Parallax Mountains
+        ctx.fillStyle = '#040714';
+        engine.bgMountains.forEach(m => {
+            ctx.beginPath();
+            ctx.moveTo(m.x, baseHeight);
+            ctx.lineTo(m.x + m.width/2, baseHeight - m.height);
+            ctx.lineTo(m.x + m.width, baseHeight);
+            ctx.fill();
+        });
+
+        // Ambient Light rays
         let gradient = ctx.createLinearGradient(baseWidth/2, 0, baseWidth/2, baseHeight);
-        gradient.addColorStop(0, 'rgba(0, 255, 255, 0.08)'); gradient.addColorStop(0.3, 'rgba(0, 100, 255, 0.03)'); gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        gradient.addColorStop(0, 'rgba(0, 255, 255, 0.08)'); gradient.addColorStop(0.4, 'rgba(0, 150, 255, 0.03)'); gradient.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = gradient; ctx.beginPath();
-        ctx.moveTo(150 + Math.sin(engine.frameCount*0.02)*40, 0); ctx.lineTo(280 + Math.sin(engine.frameCount*0.02)*40, 0);
-        ctx.lineTo(450 + Math.sin(engine.frameCount*0.015)*60, baseHeight); ctx.lineTo(200 + Math.sin(engine.frameCount*0.015)*60, baseHeight);
+        ctx.moveTo(150 + Math.sin(engine.frameCount*0.02)*40, 0); ctx.lineTo(300 + Math.sin(engine.frameCount*0.02)*40, 0);
+        ctx.lineTo(500 + Math.sin(engine.frameCount*0.015)*60, baseHeight); ctx.lineTo(150 + Math.sin(engine.frameCount*0.015)*60, baseHeight);
         ctx.fill();
 
+        // Water Currents
         engine.currentZones.forEach(cz => {
             let streamGrad = ctx.createLinearGradient(0, cz.y, 0, cz.y + cz.h);
             streamGrad.addColorStop(0, 'rgba(0, 255, 255, 0)'); streamGrad.addColorStop(0.5, 'rgba(0, 255, 255, 0.25)'); streamGrad.addColorStop(1, 'rgba(0, 255, 255, 0)');
             ctx.fillStyle = streamGrad; ctx.fillRect(cz.x, cz.y, cz.w, cz.h);
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-            for(let j=0; j<4; j++) { let lineX = cz.x + ((engine.frameCount*8 + j*400) % cz.w); ctx.fillRect(lineX, cz.y + 15 + j*18, 60, 2); }
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+            for(let j=0; j<4; j++) { let lineX = cz.x + ((engine.frameCount*10 + j*450) % cz.w); ctx.fillRect(lineX, cz.y + 15 + j*20, 70, 2); }
         });
 
+        // Planks / Debris
         engine.planks.forEach(p => { ctx.fillStyle = `rgba(150, 255, 255, ${p.alpha})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); });
+        
+        // Bubbles
+        engine.bubbles.forEach(b => {
+            ctx.strokeStyle = `rgba(100, 255, 255, ${b.alpha})`;
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(b.x, b.y, b.radius, 0, Math.PI*2);
+            ctx.stroke();
+        });
+
+        // Speed Lines during dash
         if (shark.isDashing || shark.inCurrent) {
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            for(let i=0; i<12; i++) { ctx.fillRect(Math.random() * baseWidth, Math.random() * baseHeight, Math.random() * 150 + 50, 1.5); }
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+            for(let i=0; i<15; i++) { ctx.fillRect(Math.random() * baseWidth, Math.random() * baseHeight, Math.random() * 200 + 50, 1.5); }
         }
 
-        ctx.shadowBlur = 15; ctx.shadowColor = '#ff00ff';
+        // Jellyfishes
+        ctx.shadowBlur = 20; ctx.shadowColor = '#ff00ff';
         engine.jellyfishes.forEach(jelly => {
-            ctx.fillStyle = 'rgba(255, 100, 255, 0.7)'; ctx.beginPath(); ctx.arc(jelly.x, jelly.y, jelly.radius, Math.PI, 0); ctx.fill();
-            ctx.strokeStyle = 'rgba(255, 100, 255, 0.6)'; ctx.lineWidth = 2;
+            ctx.fillStyle = 'rgba(255, 100, 255, 0.8)'; ctx.beginPath(); ctx.arc(jelly.x, jelly.y, jelly.radius, Math.PI, 0); ctx.fill();
+            ctx.strokeStyle = 'rgba(255, 100, 255, 0.7)'; ctx.lineWidth = 2.5;
             for(let t = -1; t <= 1; t++) {
                 ctx.beginPath(); ctx.moveTo(jelly.x + t * 8, jelly.y);
-                ctx.lineTo(jelly.x + t * 8 + Math.sin(engine.frameCount*0.1 + jelly.offset)*4, jelly.y + 15); ctx.lineTo(jelly.x + t * 8, jelly.y + 30); ctx.stroke();
+                ctx.lineTo(jelly.x + t * 8 + Math.sin(engine.frameCount*0.1 + jelly.offset)*5, jelly.y + 18); ctx.lineTo(jelly.x + t * 8, jelly.y + 35); ctx.stroke();
             }
         });
         ctx.shadowBlur = 0;
 
+        // Fishes
         engine.fishes.forEach(fish => {
             if (fish.active) {
-                ctx.fillStyle = '#00ffff'; ctx.shadowBlur = 12; ctx.shadowColor = '#00ffff';
+                ctx.shadowBlur = 15; ctx.shadowColor = '#00ffff';
+                ctx.fillStyle = '#00ffff'; 
+                // Body
                 ctx.beginPath(); ctx.arc(fish.x, fish.y, fish.radius, 0, Math.PI * 2); ctx.fill();
+                // Tail
+                ctx.beginPath(); ctx.moveTo(fish.x - fish.radius + 1, fish.y); ctx.lineTo(fish.x - fish.radius - 8, fish.y - 5); ctx.lineTo(fish.x - fish.radius - 8, fish.y + 5); ctx.fill();
+                // Eye
+                ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(fish.x + 2, fish.y - 1, 1, 0, Math.PI*2); ctx.fill();
             }
         });
         ctx.shadowBlur = 0; 
         
+        // Powerups
         engine.powerups.forEach(p => {
             ctx.fillStyle = p.type === 'shield' ? '#00ffff' : '#ff00ff';
-            ctx.shadowBlur = 15; ctx.shadowColor = ctx.fillStyle;
+            ctx.shadowBlur = 20; ctx.shadowColor = ctx.fillStyle;
             ctx.beginPath();
             if (p.type === 'shield') {
                 ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
@@ -198,101 +268,160 @@ class Renderer {
         });
         ctx.shadowBlur = 0;
 
+        // Mines
         engine.mines.forEach(m => {
-            ctx.fillStyle = '#222222'; ctx.strokeStyle = '#555555'; ctx.lineWidth = 2;
+            ctx.fillStyle = '#222'; ctx.strokeStyle = '#666'; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
             for(let i=0; i<8; i++) {
                 let angle = i * Math.PI / 4 + engine.frameCount * 0.05;
                 ctx.beginPath(); ctx.moveTo(m.x, m.y);
-                ctx.lineTo(m.x + Math.cos(angle)*(m.radius+5), m.y + Math.sin(angle)*(m.radius+5)); ctx.stroke();
+                ctx.lineTo(m.x + Math.cos(angle)*(m.radius+6), m.y + Math.sin(angle)*(m.radius+6)); ctx.stroke();
             }
+            ctx.shadowBlur = 10; ctx.shadowColor = 'red';
             ctx.fillStyle = (engine.frameCount % 20 < 10) ? '#ff0000' : '#550000';
             ctx.beginPath(); ctx.arc(m.x, m.y, m.radius * 0.4, 0, Math.PI * 2); ctx.fill();
+            ctx.shadowBlur = 0;
         });
 
-        ctx.fillStyle = '#09081a'; ctx.strokeStyle = '#1a183a'; ctx.lineWidth = 3;
+        // Obstacles
+        ctx.fillStyle = '#09081a'; ctx.strokeStyle = '#222144'; ctx.lineWidth = 3;
         engine.obstacles.forEach(obs => {
             ctx.fillRect(obs.x, obs.y, obs.width, obs.height); ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
-            ctx.fillStyle = '#12112d';
+            ctx.fillStyle = '#151433';
             if(obs.type === 'bottom') ctx.fillRect(obs.x + 5, obs.y + 10, obs.width - 10, 10);
             else ctx.fillRect(obs.x + 5, obs.y + obs.height - 20, obs.width - 10, 10);
             ctx.fillStyle = '#09081a';
         });
 
+        // Particles
+        engine.particles.forEach(p => {
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.alpha;
+            ctx.beginPath(); ctx.arc(p.x, p.y, p.radius, 0, Math.PI*2); ctx.fill();
+            ctx.globalAlpha = 1.0;
+        });
+
+        // Floating Texts
+        ctx.font = "bold 16px 'Orbitron', sans-serif";
+        ctx.textAlign = 'center';
+        engine.floatingTexts.forEach(ft => {
+            ctx.fillStyle = ft.color;
+            ctx.globalAlpha = ft.alpha;
+            ctx.shadowBlur = 10; ctx.shadowColor = ft.color;
+            ctx.fillText(ft.text, ft.x, ft.y);
+            ctx.globalAlpha = 1.0;
+            ctx.shadowBlur = 0;
+        });
+
+        // Shark
         ctx.save(); ctx.translate(shark.x, shark.y);
+        
+        let tailAngle = Math.sin(engine.frameCount * (shark.isDashing ? 0.6 : 0.2)) * 6;
+        
         if (shark.isDashing || shark.inCurrent) ctx.scale(1.2, 0.9); 
+        
         if (shark.isParalyzed) {
             ctx.strokeStyle = '#ff00ff'; ctx.lineWidth = 2; ctx.beginPath();
             ctx.arc(shark.width/2 + (Math.random()*4-2), Math.random()*4-2, shark.radius + 6, 0, Math.PI*2); ctx.stroke();
         }
         
         if (shark.isDashing) {
-            ctx.strokeStyle = 'rgba(255, 0, 0, 0.4)'; ctx.lineWidth = 4; ctx.shadowBlur = 25; ctx.shadowColor = 'red';
-            ctx.beginPath(); ctx.arc(shark.width/2, 0, shark.radius * 1.8 + Math.sin(engine.frameCount*0.3)*4, 0, Math.PI*2); ctx.stroke();
+            ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)'; ctx.lineWidth = 4; ctx.shadowBlur = 30; ctx.shadowColor = 'red';
+            ctx.beginPath(); ctx.arc(shark.width/2, 0, shark.radius * 1.8 + Math.sin(engine.frameCount*0.4)*5, 0, Math.PI*2); ctx.stroke();
         } else if (shark.inCurrent) {
-            ctx.strokeStyle = 'rgba(0, 255, 255, 0.6)'; ctx.lineWidth = 3; ctx.shadowBlur = 20; ctx.shadowColor = '#00ffff';
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.7)'; ctx.lineWidth = 3; ctx.shadowBlur = 25; ctx.shadowColor = '#00ffff';
             ctx.beginPath(); ctx.arc(shark.width/2, 0, shark.radius * 1.6, 0, Math.PI*2); ctx.stroke();
         }
 
         if (shark.shield) {
-            ctx.strokeStyle = 'rgba(0, 255, 255, 0.8)'; ctx.lineWidth = 3; ctx.shadowBlur = 15; ctx.shadowColor = '#00ffff';
+            ctx.strokeStyle = 'rgba(0, 255, 255, 0.9)'; ctx.lineWidth = 3; ctx.shadowBlur = 20; ctx.shadowColor = '#00ffff';
             ctx.beginPath(); ctx.arc(shark.width/2, 0, shark.radius * 2, 0, Math.PI*2); ctx.stroke();
         }
         if (shark.magnetTimer > 0) {
-            ctx.strokeStyle = 'rgba(255, 0, 255, 0.5)'; ctx.lineWidth = 2; ctx.setLineDash([4, 4]); ctx.lineDashOffset = -engine.frameCount * 0.5;
-            ctx.beginPath(); ctx.arc(shark.width/2, 0, shark.radius * 2.2, 0, Math.PI*2); ctx.stroke();
+            ctx.strokeStyle = 'rgba(255, 0, 255, 0.6)'; ctx.lineWidth = 2.5; ctx.setLineDash([5, 5]); ctx.lineDashOffset = -engine.frameCount * 0.8;
+            ctx.beginPath(); ctx.arc(shark.width/2, 0, shark.radius * 2.3, 0, Math.PI*2); ctx.stroke();
             ctx.setLineDash([]);
         }
 
-        ctx.fillStyle = shark.isDashing ? '#3a0005' : (shark.isParalyzed ? '#2a002a' : '#03030a');
-        if(shark.isDashing) { ctx.shadowBlur = 15; ctx.shadowColor = 'red'; } else if (shark.inCurrent) { ctx.shadowBlur = 10; ctx.shadowColor = '#00ffff'; }
+        ctx.fillStyle = shark.isDashing ? '#4a0005' : (shark.isParalyzed ? '#2a002a' : '#040511');
+        if(shark.isDashing) { ctx.shadowBlur = 20; ctx.shadowColor = 'red'; } else if (shark.inCurrent) { ctx.shadowBlur = 15; ctx.shadowColor = '#00ffff'; }
         
-        ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(shark.width * 0.3, -shark.height * 0.7, shark.width * 0.7, -shark.height * 0.5); 
-        ctx.lineTo(shark.width, 0); ctx.quadraticCurveTo(shark.width * 0.6, shark.height * 0.6, 0, 0); ctx.fill();
+        // Draw body with animated tail
+        ctx.beginPath(); 
+        ctx.moveTo(0, tailAngle); // Tail tip
+        ctx.quadraticCurveTo(shark.width * 0.3, -shark.height * 0.8, shark.width * 0.7, -shark.height * 0.5); 
+        ctx.lineTo(shark.width, 0); // Nose
+        ctx.quadraticCurveTo(shark.width * 0.6, shark.height * 0.7, 0, tailAngle); // Back to tail
+        ctx.fill();
 
+        // Gills
+        ctx.strokeStyle = '#223'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(shark.width * 0.4, -4); ctx.lineTo(shark.width * 0.4 - 3, 4); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(shark.width * 0.45, -5); ctx.lineTo(shark.width * 0.45 - 3, 5); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(shark.width * 0.5, -4); ctx.lineTo(shark.width * 0.5 - 3, 4); ctx.stroke();
+
+        // Mouth
         ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.moveTo(shark.width - 6, -1);
-        ctx.lineTo(shark.width - 12, -4); ctx.lineTo(shark.width - 10, 2); ctx.lineTo(shark.width - 15, 3); ctx.fill();
+        ctx.lineTo(shark.width - 13, -5); ctx.lineTo(shark.width - 10, 2); ctx.lineTo(shark.width - 16, 4); ctx.fill();
 
-        ctx.fillStyle = shark.isDashing ? '#ff0000' : (shark.inCurrent ? '#ffffff' : (shark.isParalyzed ? '#ff00ff' : '#33ffaa'));
-        ctx.beginPath(); ctx.arc(shark.width - 14, -3, 2.5, 0, Math.PI * 2); ctx.fill();
+        // Eye
+        ctx.fillStyle = shark.isDashing ? '#ff0000' : (shark.inCurrent ? '#ffffff' : (shark.isParalyzed ? '#ff00ff' : '#00ffff'));
+        ctx.beginPath(); ctx.arc(shark.width - 15, -4, 2.5, 0, Math.PI * 2); ctx.fill();
         ctx.restore(); ctx.shadowBlur = 0;
 
+        // Foreground Seaweed
+        ctx.fillStyle = '#010205';
+        for(let i=0; i<4; i++) {
+            let sx = ((i * 250 - engine.frameCount * 0.5) % (baseWidth + 250) + (baseWidth + 250)) % (baseWidth + 250) - 100;
+            ctx.beginPath(); ctx.moveTo(sx, baseHeight);
+            ctx.quadraticCurveTo(sx + Math.sin(engine.frameCount*0.02 + i)*30, baseHeight - 80, sx + 10 + Math.sin(engine.frameCount*0.02 + i)*40, baseHeight - 150);
+            ctx.quadraticCurveTo(sx + 30 + Math.sin(engine.frameCount*0.02 + i)*30, baseHeight - 80, sx + 40, baseHeight);
+            ctx.fill();
+        }
+
+        // Screens
         if (engine.state === 'READY') {
-            ctx.fillStyle = 'rgba(5, 5, 15, 0.6)'; ctx.fillRect(0, 0, baseWidth, baseHeight);
-            ctx.fillStyle = '#00ffff'; ctx.font = 'bold clamp(20px, 5vw, 32px) sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText('准备潜入深渊', baseWidth / 2, baseHeight / 2 - 20);
+            ctx.fillStyle = 'rgba(2, 3, 8, 0.7)'; ctx.fillRect(0, 0, baseWidth, baseHeight);
+            ctx.fillStyle = '#00ffff'; ctx.font = "900 clamp(24px, 6vw, 42px) 'Orbitron', sans-serif"; ctx.textAlign = 'center';
+            ctx.shadowBlur = 20; ctx.shadowColor = '#00ffff';
+            ctx.fillText('ABYSS DASH', baseWidth / 2, baseHeight / 2 - 35);
+            ctx.shadowBlur = 0;
             
-            ctx.fillStyle = '#ffffff'; ctx.font = 'clamp(12px, 3vw, 16px) sans-serif';
-            ctx.fillText('轻按 屏幕/空格键 下潜，松开上浮', baseWidth / 2, baseHeight / 2 + 20);
-            ctx.fillStyle = '#00ffff'; ctx.font = 'clamp(10px, 2.5vw, 14px) sans-serif';
-            ctx.fillText('🦈 吃小鱼积攒怒气 → 满怒触发冲刺（无敌+破障）', baseWidth / 2, baseHeight / 2 + 50);
+            ctx.fillStyle = '#ffffff'; ctx.font = "bold clamp(14px, 3vw, 18px) 'Rajdhani', sans-serif";
+            ctx.fillText('轻按 屏幕 / 空格键 下潜，松开上浮', baseWidth / 2, baseHeight / 2 + 25);
+            ctx.fillStyle = '#00ffff'; ctx.font = "clamp(12px, 2.5vw, 16px) 'Rajdhani', sans-serif";
+            ctx.fillText('🦈 吃小鱼积攒怒气 → 满怒触发冲刺（无敌+破障）', baseWidth / 2, baseHeight / 2 + 55);
             
-            ctx.fillStyle = '#ffaa00';
-            ctx.fillText('🎁 收集道具：护盾(抵消一次伤害) / 磁铁(自动吸附小鱼)', baseWidth / 2, baseHeight / 2 + 75);
+            ctx.fillStyle = '#ffcc00';
+            ctx.fillText('🎁 收集道具：护盾(抵消一次伤害) / 磁铁(自动吸附小鱼)', baseWidth / 2, baseHeight / 2 + 85);
             ctx.fillStyle = '#ff4444';
-            ctx.fillText('⚠️ 警告：分数超过300后将遭遇深海追踪水雷！', baseWidth / 2, baseHeight / 2 + 100);
+            ctx.fillText('⚠️ 警告：深海区域将遭遇追踪水雷与瘫痪水母！', baseWidth / 2, baseHeight / 2 + 115);
             
         } else if (engine.state === 'PAUSED') {
-            ctx.fillStyle = 'rgba(5, 5, 15, 0.7)'; ctx.fillRect(0, 0, baseWidth, baseHeight);
-            ctx.fillStyle = '#00ffff'; ctx.font = 'bold clamp(24px, 6vw, 36px) sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText('PAUSED', baseWidth / 2, baseHeight / 2);
-            ctx.fillStyle = '#ffffff'; ctx.font = 'clamp(12px, 3vw, 16px) sans-serif';
-            ctx.fillText('点击继续游戏', baseWidth / 2, baseHeight / 2 + 40);
+            ctx.fillStyle = 'rgba(2, 3, 8, 0.8)'; ctx.fillRect(0, 0, baseWidth, baseHeight);
+            ctx.fillStyle = '#00ffff'; ctx.font = "900 clamp(28px, 6vw, 48px) 'Orbitron', sans-serif"; ctx.textAlign = 'center';
+            ctx.shadowBlur = 20; ctx.shadowColor = '#00ffff';
+            ctx.fillText('SYSTEM PAUSED', baseWidth / 2, baseHeight / 2);
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#ffffff'; ctx.font = "clamp(14px, 3vw, 18px) 'Rajdhani', sans-serif";
+            ctx.fillText('点击继续潜入', baseWidth / 2, baseHeight / 2 + 45);
             
         } else if (engine.state === 'GAMEOVER') {
-            ctx.fillStyle = 'rgba(5, 5, 15, 0.85)'; ctx.fillRect(0, 0, baseWidth, baseHeight);
-            ctx.fillStyle = '#ff3333'; ctx.font = 'bold clamp(24px, 6vw, 36px) sans-serif'; ctx.textAlign = 'center';
-            ctx.fillText('ABYSS CRASHED', baseWidth / 2, baseHeight / 2 - 40);
+            ctx.fillStyle = 'rgba(15, 0, 0, 0.85)'; ctx.fillRect(0, 0, baseWidth, baseHeight);
+            ctx.fillStyle = '#ff2244'; ctx.font = "900 clamp(28px, 6vw, 48px) 'Orbitron', sans-serif"; ctx.textAlign = 'center';
+            ctx.shadowBlur = 25; ctx.shadowColor = 'red';
+            ctx.fillText('ABYSS CRASHED', baseWidth / 2, baseHeight / 2 - 45);
+            ctx.shadowBlur = 0;
             
             if (engine.isNewRecord) {
-                ctx.fillStyle = '#ffd700'; ctx.font = 'bold clamp(16px, 4vw, 24px) sans-serif';
-                ctx.fillText(`🎉 新纪录产生: ${engine.score} 🎉`, baseWidth / 2, baseHeight / 2 + 10);
+                ctx.fillStyle = '#ffd700'; ctx.font = "bold clamp(18px, 4vw, 26px) 'Rajdhani', sans-serif";
+                ctx.fillText(`🎉 NEW RECORD: ${engine.score} 🎉`, baseWidth / 2, baseHeight / 2 + 15);
             } else {
-                ctx.fillStyle = '#ffffff'; ctx.font = 'clamp(14px, 3.5vw, 20px) sans-serif';
-                ctx.fillText(`最终得分: ${engine.score}`, baseWidth / 2, baseHeight / 2 + 10);
+                ctx.fillStyle = '#ffffff'; ctx.font = "clamp(16px, 3.5vw, 22px) 'Orbitron', sans-serif";
+                ctx.fillText(`FINAL DEPTH: ${engine.score}`, baseWidth / 2, baseHeight / 2 + 15);
             }
-            ctx.fillStyle = '#ffffff'; ctx.font = 'clamp(12px, 3vw, 16px) sans-serif';
-            ctx.fillText('点击屏幕 或 按【空格键】重返深渊', baseWidth / 2, baseHeight / 2 + 90);
+            ctx.fillStyle = '#aaaaaa'; ctx.font = "clamp(12px, 3vw, 16px) 'Rajdhani', sans-serif";
+            ctx.fillText('点击屏幕 或 按【空格键】重返深渊', baseWidth / 2, baseHeight / 2 + 80);
         }
     }
 }
@@ -309,6 +438,7 @@ class GameEngine {
         
         this.lastTime = 0;
         this.accumulator = 0;
+        this.cameraShake = 0;
 
         this.initEntities();
         this.bindEvents();
@@ -317,15 +447,23 @@ class GameEngine {
     }
 
     initEntities() {
-        this.shark = { x: 120, y: 225, width: 50, height: 24, radius: 14, velocity: 0, huntPoints: 0, isDashing: false, dashTimer: 0, inCurrent: false, isParalyzed: false, paralyzeTimer: 0, shield: false, magnetTimer: 0 };
+        this.shark = { x: 140, y: 250, width: 55, height: 26, radius: 15, velocity: 0, huntPoints: 0, isDashing: false, dashTimer: 0, inCurrent: false, isParalyzed: false, paralyzeTimer: 0, shield: false, magnetTimer: 0 };
         this.obstacles = []; this.fishes = []; this.currentZones = []; this.jellyfishes = []; this.planks = []; this.powerups = []; this.mines = [];
+        this.particles = []; this.floatingTexts = []; this.bubbles = []; this.bgMountains = [];
         this.score = 0; this.frameCount = 0; this.isNewRecord = false;
+        this.cameraShake = 0;
+        if (this.renderer && this.renderer.canvas) {
+            this.renderer.canvas.style.transform = 'translate(0, 0)';
+        }
         
         let cvsW = this.renderer.baseWidth;
         let cvsH = this.renderer.baseHeight;
         
-        for(let i=0; i<25; i++) {
-            this.planks.push({ x: Math.random() * cvsW, y: Math.random() * cvsH, size: Math.random() * 2 + 1, speed: Math.random() * 0.5 + 0.2, alpha: Math.random() * 0.5 + 0.2 });
+        for(let i=0; i<30; i++) {
+            this.planks.push({ x: Math.random() * cvsW, y: Math.random() * cvsH, size: Math.random() * 2 + 1, speed: Math.random() * 0.6 + 0.2, alpha: Math.random() * 0.5 + 0.2 });
+        }
+        for(let i=0; i<6; i++) {
+            this.bgMountains.push({ x: i * 250, width: 250 + Math.random()*200, height: 120 + Math.random()*150 });
         }
         
         this.ui.clearBloodScreen();
@@ -344,6 +482,7 @@ class GameEngine {
                 this.ui.setPauseBtnVisible(true); 
                 this.lastTime = performance.now();
                 this.accumulator = 0;
+                this.audio.playAmbient();
             }
             this.isPressing = true;
         };
@@ -365,6 +504,7 @@ class GameEngine {
         if (this.state === 'PLAYING') {
             this.state = 'PAUSED';
             this.ui.updatePauseBtnIcon(true);
+            this.audio.stopAmbient();
             this.renderer.draw(this); 
         } else if (this.state === 'PAUSED') { this.resume(); }
     }
@@ -372,14 +512,36 @@ class GameEngine {
     resume() {
         this.state = 'PLAYING';
         this.ui.updatePauseBtnIcon(false);
+        this.audio.playAmbient();
         this.lastTime = performance.now(); 
+    }
+
+    spawnParticles(x, y, color, count, speedScale = 1) {
+        for (let i = 0; i < count; i++) {
+            this.particles.push({
+                x, y,
+                vx: (Math.random() - 0.5) * 12 * speedScale,
+                vy: (Math.random() - 0.5) * 12 * speedScale,
+                alpha: 1.0,
+                decay: Math.random() * 0.04 + 0.02,
+                color,
+                radius: Math.random() * 3 + 1.5
+            });
+        }
+    }
+    
+    spawnText(x, y, text, color) {
+        this.floatingTexts.push({ x, y, text, color, alpha: 1.0, vy: -1.5 });
     }
 
     triggerGameOver() {
         this.state = 'GAMEOVER'; 
         this.ui.setPauseBtnVisible(false); 
+        this.audio.stopAmbient();
         this.audio.play('crash');
         this.ui.triggerBloodScreen();
+        this.cameraShake = 25;
+        this.spawnParticles(this.shark.x + this.shark.width/2, this.shark.y, '#ff0000', 50, 1.5);
         
         if (this.score > this.highScore && this.score > 0) {
             this.highScore = this.score;
@@ -388,13 +550,6 @@ class GameEngine {
         }
 
         this.ui.update(this.score, this.shark, this.highScore);
-
-        let shake = 14;
-        let shakeInterval = setInterval(() => {
-            this.renderer.canvas.style.transform = `translate(${Math.random()*shake - shake/2}px, ${Math.random()*shake - shake/2}px)`;
-            shake *= 0.9;
-            if(shake <= 0.5) { clearInterval(shakeInterval); this.renderer.canvas.style.transform = 'translate(0, 0)'; }
-        }, 30);
     }
 
     checkCollision(cx, cy, radius, rx, ry, rw, rh) {
@@ -445,48 +600,82 @@ class GameEngine {
 
         if (this.shark.y - this.shark.radius < 0 || this.shark.y + this.shark.radius > cvsH) { this.triggerGameOver(); return; }
 
-        let spawnInterval = Math.max(50, 120 - Math.floor(this.score / 20));
+        // Spawn logic
+        let spawnInterval = Math.max(40, 110 - Math.floor(this.score / 20));
         
-        if (this.frameCount % spawnInterval === 0 && this.frameCount > 200) {
+        if (this.frameCount % spawnInterval === 0 && this.frameCount > 180) {
             let type = (this.score > 100 && Math.random() > 0.5) ? 'top' : 'bottom';
-            let height = Math.random() * 80 + 40; 
-            this.obstacles.push({ x: cvsW, y: type === 'top' ? 0 : cvsH - height, width: 35, height: height, type: type, passed: false });
+            let height = Math.random() * 90 + 50; 
+            this.obstacles.push({ x: cvsW, y: type === 'top' ? 0 : cvsH - height, width: 40, height: height, type: type, passed: false });
         }
-        if (this.frameCount % 70 === 0) this.fishes.push({ x: cvsW, y: Math.random() * (cvsH - 120) + 60, radius: 4, active: true });
-        if (this.frameCount % 180 === 0 && this.score > 200) this.jellyfishes.push({ x: cvsW, y: Math.random() * (cvsH - 180) + 90, radius: 16, offset: Math.random() * Math.PI * 2 });
-        if (this.frameCount > 300 && this.frameCount % 480 === 0 && Math.random() > 0.3) this.currentZones.push({ x: cvsW, y: Math.random() * (cvsH - 160) + 40, w: 1800, h: 90 });
+        if (this.frameCount % 60 === 0) this.fishes.push({ x: cvsW, y: Math.random() * (cvsH - 120) + 60, radius: 5, active: true });
+        if (this.frameCount % 160 === 0 && this.score > 200) this.jellyfishes.push({ x: cvsW, y: Math.random() * (cvsH - 180) + 90, radius: 18, offset: Math.random() * Math.PI * 2 });
+        if (this.frameCount > 250 && this.frameCount % 450 === 0 && Math.random() > 0.3) this.currentZones.push({ x: cvsW, y: Math.random() * (cvsH - 160) + 40, w: 1800, h: 100 });
         
-        if (this.frameCount % 500 === 0 && this.score > 150) this.powerups.push({ x: cvsW, y: Math.random() * (cvsH - 100) + 50, radius: 12, type: Math.random() > 0.5 ? 'shield' : 'magnet' });
-        if (this.frameCount % 350 === 0 && this.score > 300) this.mines.push({ x: cvsW, y: Math.random() * (cvsH - 100) + 50, radius: 14, speed: Math.random() * 1.5 + 0.5 });
+        if (this.frameCount % 500 === 0 && this.score > 100) this.powerups.push({ x: cvsW, y: Math.random() * (cvsH - 100) + 50, radius: 14, type: Math.random() > 0.5 ? 'shield' : 'magnet' });
+        if (this.frameCount % 300 === 0 && this.score > 300) this.mines.push({ x: cvsW, y: Math.random() * (cvsH - 100) + 50, radius: 16, speed: Math.random() * 1.5 + 0.5 });
 
+        // Visual spawns
+        if (this.frameCount % 15 === 0) {
+            this.bubbles.push({ x: this.shark.x + 10, y: this.shark.y, radius: Math.random() * 2 + 1, vx: -currentSpeed * 0.8, vy: -Math.random() * 1.5 - 0.5, alpha: 0.6 });
+        }
+        if (this.shark.isDashing && this.frameCount % 2 === 0) {
+            this.spawnParticles(this.shark.x, this.shark.y, '#ff3333', 1, 0.5);
+        }
+
+        // Update Background
+        this.bgMountains.forEach(m => {
+            m.x -= currentSpeed * 0.15;
+            if (m.x + m.width < 0) { m.x = cvsW; m.height = 120 + Math.random()*150; }
+        });
+
+        // Update Zones & Planks
         for(let i = this.currentZones.length - 1; i >= 0; i--) {
-            this.currentZones[i].x -= dynamicBaseSpeed * 1.5; 
+            this.currentZones[i].x -= dynamicBaseSpeed * 1.6; 
             if (this.currentZones[i].x + this.currentZones[i].w < 0) this.currentZones.splice(i, 1);
         }
         this.planks.forEach(p => { p.x -= p.speed * speedMult * (dynamicBaseSpeed / CONFIG.INITIAL_SPEED); if(p.x < 0) p.x = cvsW; });
+
+        // Update Particles, Texts, Bubbles
+        for (let i = this.particles.length - 1; i >= 0; i--) {
+            let p = this.particles[i]; p.x += p.vx - currentSpeed * 0.5; p.y += p.vy; p.alpha -= p.decay;
+            if (p.alpha <= 0) this.particles.splice(i, 1);
+        }
+        for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+            let ft = this.floatingTexts[i]; ft.y += ft.vy; ft.x -= currentSpeed * 0.5; ft.alpha -= 0.02;
+            if (ft.alpha <= 0) this.floatingTexts.splice(i, 1);
+        }
+        for (let i = this.bubbles.length - 1; i >= 0; i--) {
+            let b = this.bubbles[i]; b.x += b.vx; b.y += b.vy;
+            if (b.y < 0 || b.x < 0) this.bubbles.splice(i, 1);
+        }
 
         if (this.shark.isDashing) {
             this.shark.dashTimer--;
             if (this.shark.dashTimer <= 0) { this.shark.isDashing = false; this.shark.huntPoints = 0; }
         }
 
-        if (this.shark.inCurrent && this.frameCount % 10 === 0) this.score += 2;
+        if (this.shark.inCurrent && this.frameCount % 10 === 0) { this.score += 2; if(this.frameCount % 30 === 0) this.spawnText(sharkCX, sharkCY - 20, "+6", "#00ffff"); }
 
         if (this.shark.magnetTimer > 0) this.shark.magnetTimer--;
 
+        // Powerups
         for (let i = this.powerups.length - 1; i >= 0; i--) {
             let p = this.powerups[i]; p.x -= currentSpeed * 0.9;
             if (Math.hypot(sharkCX - p.x, sharkCY - p.y) < this.shark.radius + p.radius) {
                 this.audio.play('powerup');
                 if (p.type === 'shield') this.shark.shield = true;
-                else this.shark.magnetTimer = 360; 
-                this.score += 15;
+                else this.shark.magnetTimer = 400; 
+                this.score += 25;
+                this.spawnText(p.x, p.y, "+25", p.type==='shield'?"#00ffff":"#ff00ff");
+                this.spawnParticles(p.x, p.y, p.type==='shield'?"#00ffff":"#ff00ff", 15);
                 this.powerups.splice(i, 1);
             } else if (p.x + p.radius < 0) {
                 this.powerups.splice(i, 1);
             }
         }
 
+        // Mines
         for (let i = this.mines.length - 1; i >= 0; i--) {
             let m = this.mines[i]; 
             m.x -= currentSpeed * 1.1; 
@@ -494,9 +683,16 @@ class GameEngine {
 
             if (this.checkCollision(sharkCX, sharkCY, this.shark.radius, m.x - m.radius, m.y - m.radius, m.radius*2, m.radius*2)) {
                 if (isInvincible) {
-                    this.audio.play('explosion'); this.score += 40; this.mines.splice(i, 1);
+                    this.audio.play('explosion'); this.score += 50; 
+                    this.spawnText(m.x, m.y, "+50", "#ff4444");
+                    this.spawnParticles(m.x, m.y, '#ff4444', 25, 1.2);
+                    this.cameraShake = 10;
+                    this.mines.splice(i, 1);
                 } else if (this.shark.shield) {
-                    this.audio.play('explosion'); this.shark.shield = false; this.mines.splice(i, 1);
+                    this.audio.play('explosion'); this.shark.shield = false;
+                    this.spawnParticles(m.x, m.y, '#00ffff', 30, 1.5);
+                    this.cameraShake = 15;
+                    this.mines.splice(i, 1);
                 } else {
                     this.triggerGameOver(); return;
                 }
@@ -505,47 +701,88 @@ class GameEngine {
             }
         }
 
+        // Jellyfishes
         for (let i = this.jellyfishes.length - 1; i >= 0; i--) {
             let jelly = this.jellyfishes[i];
-            jelly.x -= currentSpeed * 0.7; jelly.y += Math.sin(this.frameCount * 0.05 + jelly.offset) * 1.5; 
+            jelly.x -= currentSpeed * 0.7; jelly.y += Math.sin(this.frameCount * 0.05 + jelly.offset) * 2; 
             let dist = Math.hypot(sharkCX - jelly.x, sharkCY - jelly.y);
             if (dist < this.shark.radius + jelly.radius) {
-                this.jellyfishes.splice(i, 1); 
-                if (isInvincible) { this.audio.play('smash'); this.score += 20; } 
-                else if (this.shark.shield) { this.audio.play('smash'); this.shark.shield = false; }
-                else { this.audio.play('shock'); this.shark.isParalyzed = true; this.shark.paralyzeTimer = 90; }
+                if (isInvincible) { 
+                    this.audio.play('smash'); this.score += 30; 
+                    this.spawnText(jelly.x, jelly.y, "+30", "#ff00ff");
+                    this.spawnParticles(jelly.x, jelly.y, '#ff00ff', 15);
+                    this.jellyfishes.splice(i, 1); 
+                } 
+                else if (this.shark.shield) { 
+                    this.audio.play('smash'); this.shark.shield = false; 
+                    this.spawnParticles(jelly.x, jelly.y, '#00ffff', 20);
+                    this.jellyfishes.splice(i, 1);
+                }
+                else { 
+                    this.audio.play('shock'); this.shark.isParalyzed = true; this.shark.paralyzeTimer = 100;
+                    this.spawnParticles(jelly.x, jelly.y, '#ff00ff', 20, 1.5);
+                    this.cameraShake = 12;
+                    this.jellyfishes.splice(i, 1);
+                }
             } else if (jelly.x + jelly.radius < 0) { this.jellyfishes.splice(i, 1); }
         }
         
+        // Obstacles
         for (let i = this.obstacles.length - 1; i >= 0; i--) {
             let obs = this.obstacles[i]; obs.x -= currentSpeed;
             if (this.checkCollision(sharkCX, sharkCY, this.shark.radius, obs.x, obs.y, obs.width, obs.height)) {
-                if (isInvincible) { this.obstacles.splice(i, 1); this.audio.play('smash'); this.score += (this.shark.inCurrent ? 30 : 15); continue; } 
-                else if (this.shark.shield) { this.obstacles.splice(i, 1); this.audio.play('smash'); this.shark.shield = false; continue; }
+                if (isInvincible) { 
+                    this.audio.play('smash'); 
+                    let pts = this.shark.inCurrent ? 40 : 20; this.score += pts; 
+                    this.spawnText(obs.x, sharkCY, `+${pts}`, "#ffffff");
+                    this.spawnParticles(obs.x, sharkCY, '#aaa', 20, 1.2);
+                    this.cameraShake = 5;
+                    this.obstacles.splice(i, 1); 
+                    continue; 
+                } 
+                else if (this.shark.shield) { 
+                    this.audio.play('smash'); this.shark.shield = false;
+                    this.spawnParticles(obs.x, sharkCY, '#00ffff', 25, 1.5);
+                    this.cameraShake = 15;
+                    this.obstacles.splice(i, 1); 
+                    continue; 
+                }
                 else { this.triggerGameOver(); return; }
             }
-            if (!obs.passed && obs.x + obs.width < this.shark.x) { obs.passed = true; this.score += (this.shark.inCurrent ? 20 : 10); }
+            if (!obs.passed && obs.x + obs.width < this.shark.x) { 
+                obs.passed = true; 
+                let pts = this.shark.inCurrent ? 20 : 10;
+                this.score += pts; 
+                this.spawnText(obs.x + obs.width, obs.y + obs.height/2, `+${pts}`, "#00ffff");
+            }
             if (obs.x + obs.width < 0) this.obstacles.splice(i, 1);
         }
 
+        // Fishes
         let mouthX = this.shark.x + this.shark.width - 5; let mouthY = this.shark.y;
         for (let i = this.fishes.length - 1; i >= 0; i--) {
             let fish = this.fishes[i]; 
             
             if (this.shark.magnetTimer > 0) {
                 let distToShark = Math.hypot(sharkCX - fish.x, sharkCY - fish.y);
-                if (distToShark < 250) {
-                    fish.x -= (fish.x - mouthX) * 0.08;
-                    fish.y -= (fish.y - mouthY) * 0.08;
+                if (distToShark < 300) {
+                    fish.x -= (fish.x - mouthX) * 0.1;
+                    fish.y -= (fish.y - mouthY) * 0.1;
                 }
             }
             
             fish.x -= currentSpeed * 0.85;
-            if (fish.active && Math.hypot(fish.x - mouthX, fish.y - mouthY) < 25) {
+            if (fish.active && Math.hypot(fish.x - mouthX, fish.y - mouthY) < 30) {
                 fish.active = false; this.audio.play('eat');
+                this.spawnParticles(fish.x, fish.y, '#00ffff', 5, 0.5);
+                this.score += 5;
                 if (!this.shark.isDashing) {
-                    this.shark.huntPoints += 25; 
-                    if (this.shark.huntPoints >= 100) { this.shark.isDashing = true; this.shark.dashTimer = 120; this.audio.play('dash'); }
+                    this.shark.huntPoints += 20; 
+                    if (this.shark.huntPoints >= 100) { 
+                        this.shark.isDashing = true; this.shark.dashTimer = 150; this.audio.play('dash'); 
+                        this.spawnText(sharkCX, sharkCY - 30, "RUSH!", "#ff0000");
+                        this.cameraShake = 15;
+                    }
                 }
             }
             if (fish.x < 0) this.fishes.splice(i, 1);
@@ -556,6 +793,12 @@ class GameEngine {
 
     loop(currentTime) {
         requestAnimationFrame((time) => this.loop(time));
+
+        if (this.cameraShake > 0) {
+            this.renderer.canvas.style.transform = `translate(${Math.random()*this.cameraShake - this.cameraShake/2}px, ${Math.random()*this.cameraShake - this.cameraShake/2}px)`;
+            this.cameraShake *= 0.85;
+            if (this.cameraShake < 0.5) { this.cameraShake = 0; this.renderer.canvas.style.transform = 'translate(0, 0)'; }
+        }
 
         if (this.state === 'PLAYING') {
             if (!this.lastTime) this.lastTime = currentTime;
@@ -573,7 +816,13 @@ class GameEngine {
             }
 
             if (hasUpdated) this.renderer.draw(this);
-        } else if (this.state === 'READY') {
+        } else {
+            if (this.state === 'GAMEOVER') {
+                for (let i = this.particles.length - 1; i >= 0; i--) {
+                    let p = this.particles[i]; p.x += p.vx; p.y += p.vy; p.alpha -= p.decay;
+                    if (p.alpha <= 0) this.particles.splice(i, 1);
+                }
+            }
             this.renderer.draw(this);
         }
     }
