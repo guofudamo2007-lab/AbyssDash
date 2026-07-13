@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -29,9 +28,21 @@
         .blood-screen { animation: flashRed 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
         @keyframes pulse { from { transform: scale(1) rotate(-1deg); } to { transform: scale(1.15) rotate(1deg); } }
         @keyframes flashRed { 0% { box-shadow: inset 0 0 250px rgba(255, 0, 0, 1); } 30% { box-shadow: inset 0 0 120px rgba(255, 0, 0, 0.8); } 100% { box-shadow: inset 0 0 300px rgba(255, 0, 0, 0); } }
+        
+        #orientation-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #020308; z-index: 99999; color: white; justify-content: center; align-items: center; flex-direction: column; text-align: center; }
+        @media screen and (orientation: portrait) and (max-width: 900px) {
+            #orientation-overlay { display: flex; }
+            #game-container { display: none; }
+        }
     </style>
 </head>
 <body>
+
+    <div id="orientation-overlay">
+        <div style="font-size: 48px; margin-bottom: 20px;">📱🔄</div>
+        <div style="font-size: 24px; font-weight: 700; color: #00ffff; letter-spacing: 2px;">ROTATE DEVICE</div>
+        <div style="font-size: 16px; margin-top: 12px; color: #8ab;">Please play Abyss Dash in landscape mode.</div>
+    </div>
 
     <div id="game-container">
         <div id="ui-layer">
@@ -172,16 +183,33 @@ class Renderer {
         
         ctx.clearRect(0, 0, baseWidth, baseHeight);
 
+        let depth = Math.min(1, engine.score / 1500);
+
+        let r1 = Math.floor(10 * (1 - depth) + 1 * depth);
+        let g1 = Math.floor(21 * (1 - depth) + 2 * depth);
+        let b1 = Math.floor(53 * (1 - depth) + 10 * depth);
+
+        let r2 = Math.floor(6 * (1 - depth) + 0 * depth);
+        let g2 = Math.floor(10 * (1 - depth) + 1 * depth);
+        let b2 = Math.floor(28 * (1 - depth) + 5 * depth);
+
+        let r3 = Math.floor(2 * (1 - depth) + 0 * depth);
+        let g3 = Math.floor(3 * (1 - depth) + 0 * depth);
+        let b3 = Math.floor(8 * (1 - depth) + 2 * depth);
+
         // Background Gradient
         let bgGradient = ctx.createLinearGradient(0, 0, 0, baseHeight);
-        bgGradient.addColorStop(0, '#0a1535');
-        bgGradient.addColorStop(0.6, '#060a1c');
-        bgGradient.addColorStop(1, '#020308');
+        bgGradient.addColorStop(0, `rgb(${r1}, ${g1}, ${b1})`);
+        bgGradient.addColorStop(0.6, `rgb(${r2}, ${g2}, ${b2})`);
+        bgGradient.addColorStop(1, `rgb(${r3}, ${g3}, ${b3})`);
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, baseWidth, baseHeight);
 
         // Parallax Mountains
-        ctx.fillStyle = '#040714';
+        let mR = Math.floor(4 * (1 - depth) + 1 * depth);
+        let mG = Math.floor(7 * (1 - depth) + 1 * depth);
+        let mB = Math.floor(20 * (1 - depth) + 4 * depth);
+        ctx.fillStyle = `rgb(${mR}, ${mG}, ${mB})`;
         engine.bgMountains.forEach(m => {
             ctx.beginPath();
             ctx.moveTo(m.x, baseHeight);
@@ -191,8 +219,10 @@ class Renderer {
         });
 
         // Ambient Light rays
+        let rayOpacity1 = 0.08 * (1 - depth * 0.8);
+        let rayOpacity2 = 0.03 * (1 - depth * 0.8);
         let gradient = ctx.createLinearGradient(baseWidth/2, 0, baseWidth/2, baseHeight);
-        gradient.addColorStop(0, 'rgba(0, 255, 255, 0.08)'); gradient.addColorStop(0.4, 'rgba(0, 150, 255, 0.03)'); gradient.addColorStop(1, 'rgba(0,0,0,0)');
+        gradient.addColorStop(0, `rgba(0, 255, 255, ${rayOpacity1})`); gradient.addColorStop(0.4, `rgba(0, 150, 255, ${rayOpacity2})`); gradient.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = gradient; ctx.beginPath();
         ctx.moveTo(150 + Math.sin(engine.frameCount*0.02)*40, 0); ctx.lineTo(300 + Math.sin(engine.frameCount*0.02)*40, 0);
         ctx.lineTo(500 + Math.sin(engine.frameCount*0.015)*60, baseHeight); ctx.lineTo(150 + Math.sin(engine.frameCount*0.015)*60, baseHeight);
@@ -316,6 +346,10 @@ class Renderer {
         // Shark
         ctx.save(); ctx.translate(shark.x, shark.y);
         
+        let tilt = shark.velocity * 0.06;
+        if (shark.isDashing || shark.inCurrent) tilt = 0;
+        ctx.rotate(tilt);
+        
         let tailAngle = Math.sin(engine.frameCount * (shark.isDashing ? 0.6 : 0.2)) * 6;
         
         if (shark.isDashing || shark.inCurrent) ctx.scale(1.2, 0.9); 
@@ -370,13 +404,22 @@ class Renderer {
         ctx.restore(); ctx.shadowBlur = 0;
 
         // Foreground Seaweed
-        ctx.fillStyle = '#010205';
+        ctx.fillStyle = `rgb(${Math.floor(1 * (1-depth))}, ${Math.floor(2 * (1-depth))}, ${Math.floor(5 * (1-depth))})`;
         for(let i=0; i<4; i++) {
             let sx = ((i * 250 - engine.frameCount * 0.5) % (baseWidth + 250) + (baseWidth + 250)) % (baseWidth + 250) - 100;
             ctx.beginPath(); ctx.moveTo(sx, baseHeight);
             ctx.quadraticCurveTo(sx + Math.sin(engine.frameCount*0.02 + i)*30, baseHeight - 80, sx + 10 + Math.sin(engine.frameCount*0.02 + i)*40, baseHeight - 150);
             ctx.quadraticCurveTo(sx + 30 + Math.sin(engine.frameCount*0.02 + i)*30, baseHeight - 80, sx + 40, baseHeight);
             ctx.fill();
+        }
+
+        // Dynamic Vignette / Depth blur effect
+        if (depth > 0) {
+            let vignette = ctx.createRadialGradient(baseWidth/2, baseHeight/2, baseHeight * 0.4, baseWidth/2, baseHeight/2, baseWidth * 0.8);
+            vignette.addColorStop(0, 'rgba(0,0,0,0)');
+            vignette.addColorStop(1, `rgba(0,1,5,${0.65 * depth})`);
+            ctx.fillStyle = vignette;
+            ctx.fillRect(0, 0, baseWidth, baseHeight);
         }
 
         // Screens
@@ -685,8 +728,8 @@ class GameEngine {
                 if (isInvincible) {
                     this.audio.play('explosion'); this.score += 50; 
                     this.spawnText(m.x, m.y, "+50", "#ff4444");
-                    this.spawnParticles(m.x, m.y, '#ff4444', 25, 1.2);
-                    this.cameraShake = 10;
+                    this.spawnParticles(m.x, m.y, '#ff4444', 35, 1.5);
+                    this.cameraShake = 15;
                     this.mines.splice(i, 1);
                 } else if (this.shark.shield) {
                     this.audio.play('explosion'); this.shark.shield = false;
@@ -735,8 +778,8 @@ class GameEngine {
                     this.audio.play('smash'); 
                     let pts = this.shark.inCurrent ? 40 : 20; this.score += pts; 
                     this.spawnText(obs.x, sharkCY, `+${pts}`, "#ffffff");
-                    this.spawnParticles(obs.x, sharkCY, '#aaa', 20, 1.2);
-                    this.cameraShake = 5;
+                    this.spawnParticles(obs.x, sharkCY, '#aaa', 30, 1.4);
+                    this.cameraShake = 8;
                     this.obstacles.splice(i, 1); 
                     continue; 
                 } 
