@@ -6,22 +6,35 @@
     <title>深渊冲刺 (Abyss Dash) - Ultra HD</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; background-color: #020308; display: flex; justify-content: center; align-items: center; height: 100vh; color: white; font-family: 'Rajdhani', sans-serif; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; }
-        #game-container { position: relative; box-shadow: 0 0 80px rgba(0, 255, 255, 0.1); border-radius: 12px; overflow: hidden; max-width: 100vw; max-height: 100vh; border: 1px solid rgba(0, 255, 255, 0.15); }
-        canvas { display: block; max-width: 100%; height: auto; object-fit: contain; }
+        body { margin: 0; overflow: hidden; background-color: #020308; display: flex; justify-content: center; align-items: center; height: 100dvh; width: 100dvw; color: white; font-family: 'Rajdhani', sans-serif; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; }
         
-        #ui-layer { position: absolute; top: 20px; left: 20px; right: 20px; z-index: 999; pointer-events: none; display: flex; justify-content: space-between; align-items: flex-start; }
-        #left-ui { display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(2, 5, 15, 0.5) 0%, rgba(2, 5, 15, 0.1) 100%); padding: 10px 18px; border-radius: 12px; border: 1px solid rgba(0,255,255,0.15); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: opacity 0.2s ease-out; }
-        #score-box { font-family: 'Orbitron', sans-serif; font-size: clamp(20px, 4.5vw, 32px); font-weight: 900; text-shadow: 0 0 15px rgba(0,255,255,0.9); display: flex; align-items: baseline; color: #fff; letter-spacing: 1px; }
-        #multiplier { color: #ff2a5f; font-size: clamp(14px, 3.5vw, 18px); margin-left: 12px; text-shadow: 0 0 15px #ff0055; opacity: 0; transition: opacity 0.2s; font-weight: 700; }
+        #game-container { 
+            position: relative; 
+            width: 100dvw; 
+            height: calc(100dvw * 5 / 9);
+            max-height: 100dvh;
+            max-width: calc(100dvh * 9 / 5);
+            box-shadow: 0 0 80px rgba(0, 255, 255, 0.1); 
+            border-radius: 12px; 
+            overflow: hidden; 
+            border: 1px solid rgba(0, 255, 255, 0.15); 
+            container-type: size;
+        }
+        
+        canvas { display: block; width: 100% !important; height: 100% !important; object-fit: contain; }
+        
+        #ui-layer { position: absolute; top: 3cqh; left: 3cqw; right: 3cqw; z-index: 999; pointer-events: none; display: flex; justify-content: space-between; align-items: flex-start; }
+        #left-ui { display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(2, 5, 15, 0.5) 0%, rgba(2, 5, 15, 0.1) 100%); padding: 1.5cqw 2cqw; border-radius: 1cqw; border: 1px solid rgba(0,255,255,0.15); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: opacity 0.2s ease-out; }
+        #score-box { font-family: 'Orbitron', sans-serif; font-size: clamp(14px, 3cqw, 32px); font-weight: 900; text-shadow: 0 0 1.5cqw rgba(0,255,255,0.9); display: flex; align-items: baseline; color: #fff; letter-spacing: 1px; }
+        #multiplier { color: #ff2a5f; font-size: clamp(10px, 2cqw, 18px); margin-left: 1.5cqw; text-shadow: 0 0 1.5cqw #ff0055; opacity: 0; transition: opacity 0.2s; font-weight: 700; }
         #multiplier.active { opacity: 1; animation: pulse 0.4s infinite alternate; }
-        #best-score-box { font-family: 'Orbitron', sans-serif; font-size: clamp(12px, 3vw, 15px); color: #00ffff; margin-top: 4px; text-shadow: 0 0 8px rgba(0,255,255,0.5); font-weight: 500; opacity: 0.9; letter-spacing: 0.5px; }
+        #best-score-box { font-family: 'Orbitron', sans-serif; font-size: clamp(10px, 1.8cqw, 15px); color: #00ffff; margin-top: 0.5cqw; text-shadow: 0 0 0.8cqw rgba(0,255,255,0.5); font-weight: 500; opacity: 0.9; letter-spacing: 0.5px; }
         
-        #hunt-bar-container { width: clamp(120px, 30vw, 220px); height: 12px; background: rgba(0,0,0,0.6); border-radius: 6px; margin-top: 14px; border: 1px solid rgba(0,255,255,0.3); overflow: hidden; position: relative; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
-        #hunt-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00eeff, #0055ff); box-shadow: 0 0 15px #00ffff; transition: width 0.15s ease-out, background 0.3s; position: relative; }
+        #hunt-bar-container { width: clamp(80px, 20cqw, 220px); height: 1.2cqw; background: rgba(0,0,0,0.6); border-radius: 0.6cqw; margin-top: 1.5cqw; border: 1px solid rgba(0,255,255,0.3); overflow: hidden; position: relative; box-shadow: inset 0 0 1cqw rgba(0,0,0,0.8); }
+        #hunt-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00eeff, #0055ff); box-shadow: 0 0 1.5cqw #00ffff; transition: width 0.15s ease-out, background 0.3s; position: relative; }
         #hunt-bar::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%); }
         
-        #pause-btn { pointer-events: auto; font-size: clamp(20px, 5vw, 24px); cursor: pointer; background: rgba(5, 15, 30, 0.7); border: 2px solid rgba(0, 255, 255, 0.4); border-radius: 12px; width: 48px; height: 48px; display: none; justify-content: center; align-items: center; box-shadow: 0 0 15px rgba(0, 255, 255, 0.2); transition: all 0.2s; backdrop-filter: blur(5px); color: #0ff; }
+        #pause-btn { pointer-events: auto; font-size: clamp(16px, 3cqw, 24px); cursor: pointer; background: rgba(5, 15, 30, 0.7); border: 2px solid rgba(0, 255, 255, 0.4); border-radius: 1cqw; width: 6cqw; height: 6cqw; min-width: 32px; min-height: 32px; display: none; justify-content: center; align-items: center; box-shadow: 0 0 1.5cqw rgba(0, 255, 255, 0.2); transition: all 0.2s; backdrop-filter: blur(5px); color: #0ff; }
         #pause-btn:hover { background: rgba(0, 255, 255, 0.3); transform: scale(1.05); }
         #pause-btn:active { transform: scale(0.95); }
 
@@ -170,9 +183,6 @@ class Renderer {
         
         this.canvas.width = this.baseWidth * dpr;
         this.canvas.height = this.baseHeight * dpr;
-        
-        this.canvas.style.width = this.baseWidth + 'px';
-        this.canvas.style.height = this.baseHeight + 'px';
         
         this.ctx.scale(dpr, dpr);
     }
