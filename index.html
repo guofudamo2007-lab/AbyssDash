@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -58,9 +59,15 @@
     </div>
 
     <div id="game-container">
+        <div id="zone-display" style="position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%) scale(0); color: #00ffff; font-family: 'Orbitron', sans-serif; font-size: clamp(24px, 5cqw, 48px); font-weight: 900; text-shadow: 0 0 2cqw #00ffff; pointer-events: none; opacity: 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; text-align: center; letter-spacing: 4px;">
+            ENTERING<br><span id="zone-name" style="font-size: 1.2em; color: #fff; text-shadow: 0 0 1cqw #fff;">ZONE</span>
+        </div>
+        <div id="combo-display" style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); color: #ff00ff; font-family: 'Orbitron', sans-serif; font-size: clamp(32px, 8cqw, 64px); font-weight: 900; text-shadow: 0 0 2cqw #ff00ff; pointer-events: none; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; text-align: center;">
+            COMBO!<br><span style="font-size: 0.5em; color: #fff; text-shadow: 0 0 1cqw #fff;">2X SCORE</span>
+        </div>
         <div id="ui-layer">
             <div id="left-ui">
-                <div id="score-box">DEPTH SCORE: <span id="score" style="margin-left: 8px;">0</span><span id="multiplier">x2 RUSH!</span></div>
+                <div id="score-box">DEPTH SCORE: <span id="score" style="margin-left: 8px;">0</span> <span id="combo-badge" style="display:none; color: #ff00ff; font-size: 0.6em; margin-left: 8px; text-shadow: 0 0 1cqw #ff00ff; border: 1px solid #ff00ff; padding: 0 4px; border-radius: 4px; align-self: center;">x2</span><span id="multiplier">x2 RUSH!</span></div>
                 <div id="best-score-box">BEST DEPTH: <span id="high-score">0</span></div>
                 <div style="font-size: 13px; margin-top: 12px; color: #8ab; font-weight: bold; letter-spacing: 1px;">HUNTING LEVEL:</div>
                 <div id="hunt-bar-container"><div id="hunt-bar"></div></div>
@@ -138,12 +145,61 @@ class UIManager {
         this.multiplierEl = document.getElementById('multiplier');
         this.pauseBtn = document.getElementById('pause-btn');
         this.container = document.getElementById('game-container');
+        this.comboBadge = document.getElementById('combo-badge');
+        this.comboDisplay = document.getElementById('combo-display');
+        this.zoneDisplay = document.getElementById('zone-display');
+        this.zoneName = document.getElementById('zone-name');
     }
     setPauseBtnVisible(isVisible) { this.pauseBtn.style.display = isVisible ? 'flex' : 'none'; }
     updatePauseBtnIcon(isPaused) { this.pauseBtn.innerText = isPaused ? '▶️' : '⏸'; }
+    triggerZoneDisplay(zoneName) {
+        if (!this.zoneDisplay || !this.zoneName) return;
+        this.zoneName.innerText = zoneName;
+        this.zoneDisplay.style.transition = 'none';
+        this.zoneDisplay.style.transform = 'translate(-50%, -50%) scale(0.5)';
+        this.zoneDisplay.style.opacity = '0';
+        void this.zoneDisplay.offsetWidth;
+        this.zoneDisplay.style.transition = 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        this.zoneDisplay.style.transform = 'translate(-50%, -50%) scale(1)';
+        this.zoneDisplay.style.opacity = '1';
+        clearTimeout(this.zoneTimeout);
+        this.zoneTimeout = setTimeout(() => {
+            if (this.zoneDisplay) {
+                this.zoneDisplay.style.opacity = '0';
+                this.zoneDisplay.style.transform = 'translate(-50%, -50%) scale(1.5)';
+            }
+        }, 2500);
+    }
+    triggerComboDisplay() {
+        if (!this.comboDisplay) return;
+        this.comboDisplay.style.transition = 'none';
+        this.comboDisplay.style.transform = 'translate(-50%, -50%) scale(0)';
+        this.comboDisplay.style.opacity = '0';
+        void this.comboDisplay.offsetWidth;
+        this.comboDisplay.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+        this.comboDisplay.style.transform = 'translate(-50%, -50%) scale(1)';
+        this.comboDisplay.style.opacity = '1';
+        clearTimeout(this.comboTimeout);
+        this.comboTimeout = setTimeout(() => {
+            if (this.comboDisplay) {
+                this.comboDisplay.style.opacity = '0';
+                this.comboDisplay.style.transform = 'translate(-50%, -50%) scale(1.5)';
+            }
+        }, 1200);
+    }
     update(score, shark, highScore) {
         this.scoreEl.innerText = score;
         this.highScoreEl.innerText = highScore;
+        
+        if (shark.comboActive) {
+            this.comboBadge.style.display = 'inline-block';
+            this.scoreEl.style.color = '#ff00ff';
+            this.scoreEl.style.textShadow = '0 0 10px #ff00ff';
+        } else {
+            this.comboBadge.style.display = 'none';
+            this.scoreEl.style.color = '#fff';
+            this.scoreEl.style.textShadow = 'none';
+        }
 
         if (shark.inCurrent) this.multiplierEl.classList.add('active');
         else this.multiplierEl.classList.remove('active');
@@ -326,11 +382,18 @@ class Renderer {
         // Obstacles
         ctx.fillStyle = '#09081a'; ctx.strokeStyle = '#222144'; ctx.lineWidth = 3;
         engine.obstacles.forEach(obs => {
-            ctx.fillRect(obs.x, obs.y, obs.width, obs.height); ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
-            ctx.fillStyle = '#151433';
-            if(obs.type === 'bottom') ctx.fillRect(obs.x + 5, obs.y + 10, obs.width - 10, 10);
-            else ctx.fillRect(obs.x + 5, obs.y + obs.height - 20, obs.width - 10, 10);
-            ctx.fillStyle = '#09081a';
+            if (obs.type === 'debris') {
+                ctx.fillStyle = '#1a0d0d'; ctx.strokeStyle = '#331a1a';
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height); ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
+                ctx.beginPath(); ctx.moveTo(obs.x + 5, obs.y + 5); ctx.lineTo(obs.x + obs.width - 5, obs.y + obs.height - 5); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(obs.x + obs.width - 5, obs.y + 5); ctx.lineTo(obs.x + 5, obs.y + obs.height - 5); ctx.stroke();
+            } else {
+                ctx.fillStyle = '#09081a'; ctx.strokeStyle = '#222144';
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height); ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
+                ctx.fillStyle = '#151433';
+                if(obs.type === 'bottom') ctx.fillRect(obs.x + 5, obs.y + 10, obs.width - 10, 10);
+                else ctx.fillRect(obs.x + 5, obs.y + obs.height - 20, obs.width - 10, 10);
+            }
         });
 
         // Particles
@@ -500,10 +563,11 @@ class GameEngine {
     }
 
     initEntities() {
-        this.shark = { x: 140, y: 250, width: 55, height: 26, radius: 15, velocity: 0, huntPoints: 0, isDashing: false, dashTimer: 0, inCurrent: false, isParalyzed: false, paralyzeTimer: 0, shield: false, magnetTimer: 0 };
+        this.shark = { x: 140, y: 250, width: 55, height: 26, radius: 15, velocity: 0, huntPoints: 0, isDashing: false, dashTimer: 0, inCurrent: false, isParalyzed: false, paralyzeTimer: 0, shield: false, magnetTimer: 0, comboCount: 0, comboActive: false };
         this.obstacles = []; this.fishes = []; this.currentZones = []; this.jellyfishes = []; this.planks = []; this.powerups = []; this.mines = [];
         this.particles = []; this.floatingTexts = []; this.bubbles = []; this.bgMountains = [];
         this.score = 0; this.frameCount = 0; this.isNewRecord = false;
+        this.currentZoneName = '浅海 (SHALLOW SEA)';
         this.cameraShake = 0;
         if (this.renderer && this.renderer.canvas) {
             this.renderer.canvas.style.transform = 'translate(0, 0)';
@@ -652,6 +716,16 @@ class GameEngine {
         this.shark.y += this.shark.velocity;
 
         if (this.shark.y - this.shark.radius < 0 || this.shark.y + this.shark.radius > cvsH) { this.triggerGameOver(); return; }
+        
+        let oldZone = this.currentZoneName;
+        if (this.score < 300) this.currentZoneName = '浅海 (SHALLOW SEA)';
+        else if (this.score < 800) this.currentZoneName = '沉船区 (SHIPWRECK)';
+        else if (this.score < 1500) this.currentZoneName = '海沟 (TRENCH)';
+        else this.currentZoneName = '黑暗区 (DARK ZONE)';
+
+        if (oldZone !== this.currentZoneName && oldZone !== undefined && this.frameCount > 10) {
+            this.ui.triggerZoneDisplay(this.currentZoneName);
+        }
 
         // Spawn logic
         let spawnInterval = Math.max(40, 110 - Math.floor(this.score / 20));
@@ -661,12 +735,35 @@ class GameEngine {
             let height = Math.random() * 90 + 50; 
             this.obstacles.push({ x: cvsW, y: type === 'top' ? 0 : cvsH - height, width: 40, height: height, type: type, passed: false });
         }
-        if (this.frameCount % 60 === 0) this.fishes.push({ x: cvsW, y: Math.random() * (cvsH - 120) + 60, radius: 5, active: true });
-        if (this.frameCount % 160 === 0 && this.score > 200) this.jellyfishes.push({ x: cvsW, y: Math.random() * (cvsH - 180) + 90, radius: 18, offset: Math.random() * Math.PI * 2 });
-        if (this.frameCount > 250 && this.frameCount % 450 === 0 && Math.random() > 0.3) this.currentZones.push({ x: cvsW, y: Math.random() * (cvsH - 160) + 40, w: 1800, h: 100 });
+        
+        let fishInterval = 60;
+        let jellyInterval = 160;
+        let mineInterval = 300;
+        let currentZoneProb = 0.3;
+
+        if (this.currentZoneName === '沉船区 (SHIPWRECK)') {
+            fishInterval = 50;
+            if (this.frameCount % 200 === 0) {
+                this.obstacles.push({ x: cvsW, y: Math.random()*(cvsH - 120)+60, width: 35, height: 35, type: 'debris', passed: true });
+            }
+        } else if (this.currentZoneName === '海沟 (TRENCH)') {
+            fishInterval = 70;
+            mineInterval = 150; 
+            jellyInterval = 120;
+            currentZoneProb = 0.5;
+        } else if (this.currentZoneName === '黑暗区 (DARK ZONE)') {
+            fishInterval = 80;
+            mineInterval = 90;
+            jellyInterval = 80;
+            currentZoneProb = 0.6;
+        }
+
+        if (this.frameCount % fishInterval === 0) this.fishes.push({ x: cvsW, y: Math.random() * (cvsH - 120) + 60, radius: 5, active: true });
+        if (this.frameCount % jellyInterval === 0 && this.score > 200) this.jellyfishes.push({ x: cvsW, y: Math.random() * (cvsH - 180) + 90, radius: 18, offset: Math.random() * Math.PI * 2 });
+        if (this.frameCount > 250 && this.frameCount % 450 === 0 && Math.random() < currentZoneProb) this.currentZones.push({ x: cvsW, y: Math.random() * (cvsH - 160) + 40, w: 1800, h: 100 });
         
         if (this.frameCount % 500 === 0 && this.score > 100) this.powerups.push({ x: cvsW, y: Math.random() * (cvsH - 100) + 50, radius: 14, type: Math.random() > 0.5 ? 'shield' : 'magnet' });
-        if (this.frameCount % 300 === 0 && this.score > 300) this.mines.push({ x: cvsW, y: Math.random() * (cvsH - 100) + 50, radius: 16, speed: Math.random() * 1.5 + 0.5 });
+        if (this.frameCount % mineInterval === 0 && this.score > 300) this.mines.push({ x: cvsW, y: Math.random() * (cvsH - 100) + 50, radius: 16, speed: Math.random() * 1.5 + 0.5 });
 
         // Visual spawns
         if (this.frameCount % 15 === 0) {
@@ -705,7 +802,12 @@ class GameEngine {
 
         if (this.shark.isDashing) {
             this.shark.dashTimer--;
-            if (this.shark.dashTimer <= 0) { this.shark.isDashing = false; this.shark.huntPoints = 0; }
+            if (this.shark.dashTimer <= 0) { 
+                this.shark.isDashing = false; 
+                this.shark.huntPoints = 0; 
+                this.shark.comboCount = 0;
+                this.shark.comboActive = false;
+            }
         }
 
         if (this.shark.inCurrent && this.frameCount % 10 === 0) { this.score += 2; if(this.frameCount % 30 === 0) this.spawnText(sharkCX, sharkCY - 20, "+6", "#00ffff"); }
@@ -742,11 +844,13 @@ class GameEngine {
                     this.cameraShake = 15;
                     this.mines.splice(i, 1);
                 } else if (this.shark.shield) {
+                    this.shark.comboCount = 0; this.shark.comboActive = false;
                     this.audio.play('explosion'); this.shark.shield = false;
                     this.spawnParticles(m.x, m.y, '#00ffff', 30, 1.5);
                     this.cameraShake = 15;
                     this.mines.splice(i, 1);
                 } else {
+                    this.shark.comboCount = 0; this.shark.comboActive = false;
                     this.triggerGameOver(); return;
                 }
             } else if (m.x + m.radius < 0) {
@@ -767,11 +871,13 @@ class GameEngine {
                     this.jellyfishes.splice(i, 1); 
                 } 
                 else if (this.shark.shield) { 
+                    this.shark.comboCount = 0; this.shark.comboActive = false;
                     this.audio.play('smash'); this.shark.shield = false; 
                     this.spawnParticles(jelly.x, jelly.y, '#00ffff', 20);
                     this.jellyfishes.splice(i, 1);
                 }
                 else { 
+                    this.shark.comboCount = 0; this.shark.comboActive = false;
                     this.audio.play('shock'); this.shark.isParalyzed = true; this.shark.paralyzeTimer = 100;
                     this.spawnParticles(jelly.x, jelly.y, '#ff00ff', 20, 1.5);
                     this.cameraShake = 12;
@@ -794,13 +900,17 @@ class GameEngine {
                     continue; 
                 } 
                 else if (this.shark.shield) { 
+                    this.shark.comboCount = 0; this.shark.comboActive = false;
                     this.audio.play('smash'); this.shark.shield = false;
                     this.spawnParticles(obs.x, sharkCY, '#00ffff', 25, 1.5);
                     this.cameraShake = 15;
                     this.obstacles.splice(i, 1); 
                     continue; 
                 }
-                else { this.triggerGameOver(); return; }
+                else { 
+                    this.shark.comboCount = 0; this.shark.comboActive = false;
+                    this.triggerGameOver(); return; 
+                }
             }
             if (!obs.passed && obs.x + obs.width < this.shark.x) { 
                 obs.passed = true; 
@@ -828,7 +938,19 @@ class GameEngine {
             if (fish.active && Math.hypot(fish.x - mouthX, fish.y - mouthY) < 30) {
                 fish.active = false; this.audio.play('eat');
                 this.spawnParticles(fish.x, fish.y, '#00ffff', 5, 0.5);
-                this.score += 5;
+                
+                this.shark.comboCount++;
+                if (this.shark.comboCount === 3) {
+                    this.shark.comboActive = true;
+                    this.ui.triggerComboDisplay();
+                }
+                
+                let pts = this.shark.comboActive ? 10 : 5;
+                this.score += pts;
+                if (this.shark.comboActive) {
+                    this.spawnText(fish.x, fish.y - 15, `+${pts}`, "#ff00ff");
+                }
+                
                 if (!this.shark.isDashing) {
                     this.shark.huntPoints += 20; 
                     if (this.shark.huntPoints >= 100) { 
