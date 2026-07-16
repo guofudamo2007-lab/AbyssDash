@@ -1,52 +1,52 @@
-# 🦈 深渊冲刺 (Abyss Dash) - 架构跃迁版 v7.0
+# 🦈 深渊冲刺 (Abyss Dash) - 终极完全体 v8.0
 
 > 一款基于 HTML5 原生 Canvas 的反重力深海动力学跑酷游戏。
-> **单文件、零依赖、纯原生、现代系统级解耦架构、自带深海图鉴与皮肤系统。**
+> **单文件、零依赖、纯原生、现代系统级解耦架构、自带多重 Boss 战、成就系统与皮肤商城。**
 
 [![GitHub Pages](https://img.shields.io/badge/🎮主站试玩-GitHub_Pages-00ffff?style=for-the-badge)](https://guofudamo2007-lab.github.io/AbyssDash/)
 [![Netlify](https://img.shields.io/badge/🚀备用节点-Netlify-33ffaa?style=for-the-badge)](https://cheerful-bienenstitch-28078d.netlify.app/)
 
 ## 🌊 核心特色玩法
 
-* **多态外观系统 (Skin System)：** 内置 `SkinManager`，支持玩家自由切换代码原生绘制的赛博风【Neo Vector】与支持序列帧动画的【Cyber Shark】实体贴图。
-* **沉浸式枢纽与图鉴 (Interactive Hub)：** 拥有完整的赛博风格主菜单界面与《深海图鉴》系统。即使处于待机菜单，底层引擎依旧在演算背景深海生态的浮动粒子与游鱼。
-* **生态区域演进 (Biome System)：** 随着下潜深度的增加，无缝穿越【浅海】、【沉船区】、【海沟】与【黑暗区】四大生态。各区域拥有独立的危险系数与专属障碍物。
-* **极速连击倍率 (Combo Multiplier)：** 连续精准吞噬发光小鱼可激活 `COMBO! x2` 极速状态，得分效率翻倍！受到碰撞将瞬间打断连击。
-* **流体动力学操控：** 采用“按住下潜，松开上浮”的浮力模拟。角色随垂直运动速度引入 **Pitch 俯仰角自适应旋转矩阵**，操作反馈极具流体质感。
-* **次世代视觉反馈：** 满怒触发【猩红冲刺 RUSH】——激活超高速镜头动态线条、无敌霸体、全屏暗礁碎裂特效及独立物理相机震荡 (Camera Shake)。
+* **阶段性巨型 Boss 战 (Boss System)：** 随着下潜深度达到 300m、800m、1500m，深海远古霸主将被唤醒。玩家必须在中后期转攻为守，在闪避墨汁弹幕、高导鱼雷和超声波的同时，利用【猩红冲刺 RUSH】化身利刃，狠狠撞击巨怪！
+* **勋章成就中心 (Achievement Manager)：** 内置 8 项硬核挑战成就（如【和平主义者】不吃小鱼前进 500m、【绝对防御】无伤通关、以及三大 Boss 的斩杀之证）。成就解锁时伴随极其精美的顶部金色 Toast 动画弹窗。
+* **双模多态皮肤选单 (Skin Customization)：** 玩家可在主菜单自由切换矢量代码绘制的【Neo Vector】、普通像素风【Normal Shark】以及赛博朋克风【Cyber Shark】的高保真精灵序列帧贴图。
+* **多维控制台 (Config Settings)：** 主菜单⚙️面板支持背景环境低音、Boss 战战歌（Music）和代码手搓合成器音效（SFX）的滑动调节，并实时进行 LocalStorage 状态同步。
+* **极速连击倍率 (Combo Multiplier)：** 连续精准吞噬 3 条潜鱼即可激活 `COMBO! x2` 极速状态。受到任何实质伤害或瘫痪冲击将瞬间清空连击，极限拉满博弈心流。
 
 ## 🛠️ 技术亮点与工程实践
 
-本项目拒绝依赖任何第三方现代游戏引擎（如 Cocos/Egret），纯手写底层物理、逻辑状态、渲染管线与音频合成。在 v7.0 中，全面引入了现代游戏引擎的系统化设计思想，核心攻坚了以下工业级痛点：
+本项目拒绝依赖任何第三方游戏引擎（如 Cocos/Egret）或重量级前端框架，纯手写底层物理、碰撞、粒子与音频，在 v8.0 中完成了工程级代码结构进化：
 
 | 工程痛点 | 产生的现象 | 解决方案与架构 |
 | :--- | :--- | :--- |
-| **面条代码与高耦合** | 随着功能增加，主循环异常臃肿，逻辑、输入、渲染强耦合，极难维护。 | **系统级解耦架构 (System-Based Architecture)：** 彻底拆分主循环。将功能划分为 `EntityManager`(实体管理)、`CollisionSystem`(碰撞)、`ProgressionSystem`(进程) 与 `InputSystem`(输入)，实现了高内聚低耦合的现代架构。 |
-| **多态外观渲染扩展** | 传统的纯 Canvas 绘制逻辑写死在渲染管线中，无法支持外部贴图和动画。 | **双引擎渲染管线 (Dual-Pipeline Rendering)：** 引入皮肤配置树。渲染器自动兼容 `ctx.bezierCurveTo` 的矢量绘制与 `ctx.drawImage` 的精灵图 (Sprite) 序列帧裁剪动画，并巧妙运用 `ctx.filter` 为贴图赋予动态受击/冲刺滤镜。 |
-| **状态机生命周期死锁** | 游戏处于菜单或结算界面时，主循环停止导致背景冻结。 | **独立状态渲染解耦 (Decoupled State Machine)：** 剥离出 `updateMenuLogic` 与主 `updateLogic`。在 `MENU` 状态下，系统只演算背景游鱼，实现动态待机画面。 |
-| **DOM 动画重置失效** | 高频触发 Combo 连击或区域切换词时，CSS 过渡动画无法二次播放。 | **强制同步重排 (Forced Reflow)：** 在移除和添加动画类名之间，精准插入 `void element.offsetWidth` 触发浏览器强制重绘，实现 DOM 动画的无缝重置。 |
-| **视口跨端极光缩放** | 游戏在面对全面屏手机、iPad 等多尺寸设备时，UI 极易错位。 | **高级容器查询架构 (Container Query Units)：** 将最外层声明为 size 容器，UI 抛弃 px 和 vw，全量改用 `cqw` / `cqh` 相对单位，实现完美的长宽比动态保真。 |
+| **Boss 战斗交互逻辑** | Boss 战需要独立于无尽跑酷之外的运动逻辑（例如停止深度累加、Boss 坐标追踪、特定的受击判定）。 | **面向状态的 Boss 驱动器：** 引入独立的状态子机。非冲刺状态撞击 Boss 触发反弹或护盾破碎；冲刺状态下撞击自动扣除 Boss 血量，并附加小范围强力震屏与大质量喷溅粒子。 |
+| **高频弹幕碰撞性能瓶颈** | 后期同屏存在大量墨汁、鱼雷、水母、水雷、障碍物和小鱼，逐一进行 AABB 碰撞检测会导致帧率严重骤降。 | **系统级解耦架构 (System Architecture)：** 彻底拆分主循环，将底层细分为 `EntityManager`、`CollisionSystem` 和 `ProgressionSystem`，极大优化了 CPU 逻辑分支，在 120Hz 下保持绝对零卡顿。 |
+| **DOM 动画高频失效** | 顶部成就 Toast 或连击 Combo 提示在短时间内连续触发时，CSS 过渡动画无法二次播放。 | **强制同步重排 (Forced Reflow)：** 在移除和添加动画类名之间，精准插入 `void element.offsetWidth` 触发浏览器强制重绘，实现 DOM 动画的无缝重置。 |
+| **多设备视口保真度** | 跨端在面对全面屏手机、iPad 等多尺寸设备时，游戏 UI 元素和字体易发生变形。 | **高级容器查询架构 (Container Query Units)：** 将最外层声明为 size 容器，UI 抛弃 px 和 vw，全量改用 `cqw` / `cqh` 相对单位进行缩放，实现完美的长宽比动态自适应。 |
+| **多态皮肤滤镜兼容** | 当使用图片皮肤时，传统的 Canvas Canvas 涂色无法在不换图的前提下实现受击变红或麻痹变紫的效果。 | **渲染管线动态滤镜插值 (Canvas Filters)：** 在 `Renderer` 绘制精灵图时，根据状态实时插值 `sepia` (色相)、`hue-rotate` (色调旋转) 和 `saturate` (饱和度) 矩阵，实现 0 内存开销的高清状态变色。 |
 
 ## 💻 技术栈
 
 * **文本视觉：** 远程无缝挂载 Google Web Fonts 工业级赛博风格字体（Orbitron / Rajdhani）。
-* **渲染层：** HTML5 `<canvas>` 2D API 纯代码绘制特效（UI容器响应、双重矩阵相机震屏、序列帧精灵图裁剪、滤镜渲染、刚体俯仰角流体动捕）。
-* **音频引擎：** Web Audio API（基于代码手搓合成器底层，**无需外部声音文件，纯代码实时生成环境低频、方波爆炸声与正弦波拾取音**）。
+* **渲染层：** HTML5 `<canvas>` 2D API 纯代码绘制特效（UI 容器响应、双重矩阵相机震屏、序列帧精灵图裁剪、滤镜渲染、刚体俯仰角流体动捕）。
+* **音频引擎：** Web Audio API（基于代码手搓合成器底层，**无需外部声音文件，纯代码实时生成环境低频、方波爆炸声与正弦波功能音**） + 独立 Boss 战高燃音轨。
 
-## 📂 如何运行
+## 📂 如何运行与资源放置
 
 **方案一：在线体验 (双节点支持)**
 * 🌐 主站：[GitHub Pages 部署版](https://guofudamo2007-lab.github.io/AbyssDash/)
 * 🚀 备用：[Netlify 部署版](https://cheerful-bienenstitch-28078d.netlify.app/)
 
 **方案二：本地运行**
-1. 克隆本项目或直接下载 `index.html`。
-2. 无需 Node.js 或构建环境，直接双击用任意现代 PC/移动端浏览器打开 `index.html` 即可运行。
+1. 克隆本项目，并将皮肤贴图文件 `normal_shark.png`、`cyber_shark.png` 和背景乐 `Beneath_the_Crush.mp3` 放在 `index.html` 的**同级目录下**。
+2. 无需 Node.js，直接双击用任意现代 PC/移动端浏览器打开 `index.html` 即可运行。
 
 ## 🔄 迭代日志
 
-* `v7.0` (终极重构版)：**底层架构与外观大满贯版**。重构为系统级架构（Input, Collision, Progression, Entity解耦）；实装 `SkinManager` 支持序列帧精灵图贴图与 CSS 滤镜特效系统。
+* `v8.0` (当前重磅里程碑)：**Boss 战与成就大满贯版**。实装三大巨型 Boss 阶段与弹幕机制（章鱼/潜艇/暗影巨齿鲨）；新增 8 项成就勋章系统与置顶 Toast 解锁弹窗；加入游戏音量/音效⚙️滑动控制面板。
+* `v7.0`：重构为系统级解耦架构（Input, Collision, Progression, Entity 解耦）；实装 `SkinManager` 支持序列帧精灵图贴图与 CSS 滤镜特效系统。
 * `v6.0`：实装支持物理演算的动态主菜单、炫酷按钮涟漪响应与模块化的《深海图鉴》系统。
 * `v5.0`：引入四大深海区域动态切换系统与 3 连击 Combo 倍率积分机制；重构 DOM 动画强制重绘触发队列。
-* `v4.6`：自研基于容器查询单位（`cqw`/`cqh`）的全视口无损适配方案；实时深度色域变化与全屏暗角；全手搓鲨鱼物理俯仰角度控制。
-* `v4.0`：重磅推出【道具与危机系统】。手搓磁铁引力场与追踪水雷 AI。
+* `v3.5`：引入 `window.devicePixelRatio` 彻底自适应视网膜高分屏。
+* `v3.0`：底层代码 OOP（面向对象）完全重构。引入 Class 架构与生命周期引擎。
