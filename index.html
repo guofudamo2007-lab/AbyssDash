@@ -111,6 +111,9 @@
             .intro-title { font-size: 14px; margin-bottom: 4px; }
             .intro-line { font-size: 11px; margin-bottom: 2px; }
         }
+        
+        .icon-btn:hover { transform: scale(1.1); background: rgba(0,255,255,0.3) !important; box-shadow: 0 0 20px rgba(0,255,255,0.5) !important; }
+        #btn-achievements.icon-btn:hover { background: rgba(255,215,0,0.3) !important; box-shadow: 0 0 20px rgba(255,215,0,0.5) !important; }
     </style>
 </head>
 <body>
@@ -126,14 +129,17 @@
             <div id="menu-logo">ABYSS DASH</div>
             <div class="menu-btn" id="btn-start">START GAME</div>
             <div class="menu-btn" id="btn-skins">SKINS (皮肤)</div>
-            <div class="menu-btn" id="btn-achievements">ACHIEVEMENTS (成就)</div>
-            <div class="menu-btn" id="btn-settings">SETTINGS (设置)</div>
             <div class="menu-btn" id="btn-glossary">ENCYCLOPEDIA (图鉴)</div>
             <div class="intro-box">
                 <div class="intro-title">轻按 屏幕 / 空格键 下潜，松开上浮</div>
                 <div class="intro-line" style="color: #00ffff;">🦈 吃小鱼积攒怒气 → 满怒触发冲刺（无敌+破障）</div>
                 <div class="intro-line" style="color: #ffcc00;">🎁 收集道具：护盾(抵消一次伤害) / 磁铁(自动吸附小鱼)</div>
                 <div class="intro-line" style="color: #ff4444;">⚠️ 警告：深海区域将遭遇追踪水雷与瘫痪水母！</div>
+            </div>
+            
+            <div style="position: absolute; bottom: 3cqw; left: 3cqw; display: flex; gap: 15px; z-index: 1002;">
+                <div id="btn-settings" class="icon-btn" title="Settings" style="font-size: clamp(20px, 4cqw, 32px); width: clamp(40px, 8cqw, 60px); height: clamp(40px, 8cqw, 60px); background: rgba(0,255,255,0.1); border: 2px solid rgba(0,255,255,0.3); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 10px rgba(0,255,255,0.2);">⚙️</div>
+                <div id="btn-achievements" class="icon-btn" title="Achievements" style="font-size: clamp(20px, 4cqw, 32px); width: clamp(40px, 8cqw, 60px); height: clamp(40px, 8cqw, 60px); background: rgba(255,215,0,0.1); border: 2px solid rgba(255,215,0,0.3); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 10px rgba(255,215,0,0.2);">🏆</div>
             </div>
         </div>
         
@@ -1713,6 +1719,7 @@ class GameEngine {
         }
         this.runStats = { fishesEaten: 0, damageTaken: 0, shieldsBroken: 0 };
         this.bossSystem.active = false;
+        this.bossSystem.bossData = null;
         this.bossSystem.defeatedBosses = [];
         this.bossSystem.projectiles = [];
         this.ui.clearBloodScreen();
