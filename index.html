@@ -24,7 +24,7 @@
         canvas { display: block; width: 100% !important; height: 100% !important; object-fit: contain; }
         
         #ui-layer { position: absolute; top: 3cqh; left: 3cqw; right: 3cqw; z-index: 999; pointer-events: none; display: flex; justify-content: space-between; align-items: flex-start; }
-        #left-ui { display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(2, 5, 15, 0.5) 0%, rgba(2, 5, 15, 0.1) 100%); padding: 1.5cqw 2cqw; border-radius: 1cqw; border: 1px solid rgba(0,255,255,0.15); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); transition: opacity 0.2s ease-out; }
+        #left-ui { display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(2, 10, 25, 0.6) 0%, rgba(0, 0, 10, 0.4) 100%); padding: 1.5cqw 2.5cqw; border-radius: 0 0 16px 0; border: 1px solid rgba(0,255,255,0.15); border-left: 4px solid #00ffff; box-shadow: 5px 5px 20px rgba(0,0,0,0.5), inset 2px 0 10px rgba(0,255,255,0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: opacity 0.2s ease-out; }
         #score-box { font-family: 'Orbitron', sans-serif; font-size: clamp(14px, 3cqw, 32px); font-weight: 900; text-shadow: 0 0 1.5cqw rgba(0,255,255,0.9); display: flex; align-items: baseline; color: #fff; letter-spacing: 1px; }
         #multiplier { color: #ff2a5f; font-size: clamp(10px, 2cqw, 18px); margin-left: 1.5cqw; text-shadow: 0 0 1.5cqw #ff0055; opacity: 0; transition: opacity 0.2s; font-weight: 700; }
         #multiplier.active { opacity: 1; animation: pulse 0.4s infinite alternate; }
@@ -64,23 +64,30 @@
         @keyframes glowLogo { from { text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; } to { text-shadow: 0 0 20px #00ffff, 0 0 40px #0088ff, 0 0 60px #0055ff; } }
         
         .menu-btn {
-            font-family: 'Rajdhani', sans-serif; font-size: clamp(16px, 4cqw, 24px); font-weight: 700;
-            color: white; padding: 1.2cqw 4cqw; margin: 0.8cqh; width: clamp(200px, 40cqw, 300px); text-align: center;
-            background: linear-gradient(90deg, rgba(0, 255, 255, 0.05) 0%, rgba(0, 85, 255, 0.05) 100%);
-            border: 1px solid rgba(0, 255, 255, 0.2); border-radius: 4px; cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative; overflow: hidden;
-            box-shadow: 0 0 10px rgba(0,255,255,0.1) inset;
+            font-family: 'Rajdhani', sans-serif; font-size: clamp(16px, 4cqw, 24px); font-weight: 700; letter-spacing: 2px;
+            color: #e0ffff; padding: 1.5cqw 4cqw; margin: 1cqh; width: clamp(200px, 40cqw, 320px); text-align: center;
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(2, 10, 30, 0.6) 100%);
+            border-left: 3px solid #00ffff; border-right: 3px solid #ff00ff; border-top: 1px solid rgba(0,255,255,0.2); border-bottom: 1px solid rgba(0,255,255,0.2);
+            cursor: pointer; position: relative; overflow: hidden;
+            clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: inset 0 0 15px rgba(0,255,255,0.1);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
         }
         .menu-btn::before {
-            content: ''; position: absolute; top: 0; left: -100%; width: 100%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.3), transparent);
-            transition: left 0.4s;
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.6), transparent);
+            transform: skewX(-25deg); transition: left 0.5s ease-out;
         }
         .menu-btn:not(.disabled):hover {
-            transform: scale(1.05) translateY(-2px); background: linear-gradient(90deg, rgba(0, 255, 255, 0.2) 0%, rgba(0, 85, 255, 0.2) 100%);
-            box-shadow: 0 5px 15px rgba(0, 255, 255, 0.3), 0 0 20px rgba(0,255,255,0.2) inset; text-shadow: 0 0 8px #fff; border-color: #00ffff;
+            transform: scale(1.05) translateY(-2px); 
+            background: linear-gradient(135deg, rgba(0, 255, 255, 0.25) 0%, rgba(255, 0, 255, 0.15) 100%);
+            color: #fff; text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+            border-left: 4px solid #00ffff; border-right: 4px solid #ff00ff;
+            box-shadow: 0 10px 20px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0,255,255,0.3);
         }
-        .menu-btn:not(.disabled):hover::before { left: 100%; }
+        .menu-btn:not(.disabled):hover::before { left: 150%; }
+        .menu-btn:not(.disabled):active { transform: scale(0.95); box-shadow: inset 0 0 30px rgba(0,255,255,0.5); }
         .menu-btn.disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); border-color: rgba(255,255,255,0.1); }
         .menu-btn.disabled:hover { transform: none; background: rgba(0,0,0,0.5); }
         
@@ -93,16 +100,42 @@
             animation: rippleAnim 1.2s cubic-bezier(0.2, 0.8, 0.4, 1) forwards;
         }
         @keyframes rippleAnim {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; border-width: 20px; }
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 1; border-width: 20px; box-shadow: 0 0 20px #0ff, inset 0 0 20px #0ff; }
             100% { transform: translate(-50%, -50%) scale(300); opacity: 0; border-width: 1px; }
         }
 
         .intro-box {
-            margin-top: 4cqh; color: #fff; font-family: 'Rajdhani', sans-serif; text-align: center; max-width: 90%;
-            background: rgba(0,0,0,0.5); padding: 2cqw; border-radius: 8px; border: 1px solid rgba(0,255,255,0.2); box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            margin-top: 5cqh; color: #fff; font-family: 'Rajdhani', sans-serif; text-align: left; max-width: 90%;
+            background: linear-gradient(135deg, rgba(2, 10, 25, 0.7), rgba(0, 0, 10, 0.9)); 
+            padding: 2.5cqw 3.5cqw; border-radius: 0 12px 12px 0; 
+            border: 1px solid rgba(0,255,255,0.15); border-left: 5px solid #00ffff;
+            box-shadow: 10px 10px 30px rgba(0,0,0,0.8), inset 5px 0 15px rgba(0,255,255,0.1);
+            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            position: relative; overflow: hidden;
         }
-        .intro-title { font-size: clamp(14px, 2.5vw, 18px); font-weight: bold; margin-bottom: 1.5cqh; }
-        .intro-line { font-size: clamp(12px, 2vw, 16px); margin-bottom: 1cqh; }
+        .intro-box::after {
+            content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+            background: radial-gradient(circle at center, rgba(0,255,255,0.05) 0%, transparent 70%);
+            animation: pulseGlow 4s infinite alternate; pointer-events: none;
+        }
+        @keyframes pulseGlow { 0% { opacity: 0.5; } 100% { opacity: 1; transform: scale(1.1); } }
+        .intro-title { font-size: clamp(16px, 3vw, 22px); font-weight: 900; margin-bottom: 1.5cqh; color: #00ffff; text-transform: uppercase; letter-spacing: 1px; display: flex; align-items: center; gap: 10px; }
+        .intro-title::before { content: '>'; color: #ff00ff; font-weight: 900; }
+        .intro-line { font-size: clamp(14px, 2.2vw, 18px); margin-bottom: 1cqh; line-height: 1.5; color: #e0f0ff; }
+
+        .modal-panel {
+            background: linear-gradient(135deg, rgba(2, 10, 25, 0.85), rgba(0, 0, 10, 0.95));
+            border: 1px solid rgba(0, 255, 255, 0.3); border-top: 2px solid #00ffff; border-bottom: 2px solid #ff00ff;
+            border-radius: 12px 0 12px 0; padding: 3cqw; display: flex; flex-direction: column;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,255,255,0.1);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            position: relative; overflow: hidden; font-family: 'Rajdhani', sans-serif;
+        }
+        .modal-panel::before {
+            content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,255,0.03) 2px, rgba(0,255,255,0.03) 4px);
+            pointer-events: none;
+        }
 
         @media (max-height: 600px) {
             #menu-logo { font-size: clamp(28px, 10vh, 45px); margin-bottom: 2vh; }
@@ -126,7 +159,7 @@
 
     <div id="game-container">
         <div id="main-menu">
-            <div id="menu-logo">ABYSS DASH</div>
+            <div id="menu-logo">ABYSS DASH <span id="easter-egg-shark" style="display:inline-block; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;">🦈</span></div>
             <div class="menu-btn" id="btn-start">START GAME</div>
             <div class="menu-btn" id="btn-skins">SKINS (皮肤)</div>
             <div class="menu-btn" id="btn-glossary">ENCYCLOPEDIA (图鉴)</div>
@@ -137,10 +170,10 @@
                 <div class="intro-line" style="color: #ff4444;">⚠️ 警告：深海区域将遭遇追踪水雷与瘫痪水母！</div>
             </div>
             
-            <div style="position: absolute; bottom: 3cqw; left: 3cqw; display: flex; gap: 15px; z-index: 1002;">
-                <div id="btn-settings" class="icon-btn" title="Settings" style="font-size: clamp(20px, 4cqw, 32px); width: clamp(40px, 8cqw, 60px); height: clamp(40px, 8cqw, 60px); background: rgba(0,255,255,0.1); border: 2px solid rgba(0,255,255,0.3); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 10px rgba(0,255,255,0.2);">⚙️</div>
-                <div id="btn-achievements" class="icon-btn" title="Achievements" style="font-size: clamp(20px, 4cqw, 32px); width: clamp(40px, 8cqw, 60px); height: clamp(40px, 8cqw, 60px); background: rgba(255,215,0,0.1); border: 2px solid rgba(255,215,0,0.3); border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 0 10px rgba(255,215,0,0.2);">🏆</div>
-            </div>
+            <div style="position: absolute; bottom: 2cqw; left: 2cqw; display: flex; gap: 15px; z-index: 1000;">
+            <div id="btn-settings" class="icon-btn" style="width: 50px; height: 50px; background: linear-gradient(135deg, rgba(2,10,25,0.8), rgba(0,0,10,0.9)); border: 1px solid rgba(0,255,255,0.3); border-left: 2px solid #0ff; border-radius: 12px 4px 12px 4px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #0ff; font-size: 24px; pointer-events: auto; box-shadow: 2px 2px 10px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,255,255,0.1); backdrop-filter: blur(10px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">⚙️</div>
+            <div id="btn-achievements" class="icon-btn" style="width: 50px; height: 50px; background: linear-gradient(135deg, rgba(20,10,5,0.8), rgba(10,5,0,0.9)); border: 1px solid rgba(255,215,0,0.3); border-left: 2px solid #ffd700; border-radius: 12px 4px 12px 4px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #ffd700; font-size: 24px; pointer-events: auto; box-shadow: 2px 2px 10px rgba(0,0,0,0.8), inset 0 0 10px rgba(255,215,0,0.1); backdrop-filter: blur(10px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">🏆</div>
+        </div>
         </div>
         
         <!-- Achievement Toast -->
@@ -153,8 +186,8 @@
         </div>
 
         <div id="achievements-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
-            <div style="background: rgba(2, 3, 8, 0.9); border: 2px solid #ffd700; border-radius: 12px; width: 85%; max-width: 800px; max-height: 85%; padding: 3cqw; display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(255,215,0,0.2); position: relative; overflow: hidden;">
-                <h2 style="font-family: 'Orbitron', sans-serif; color: #ffd700; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 20px 0; text-align: center; text-shadow: 0 0 10px #ffd700;">ACHIEVEMENTS</h2>
+            <div class="modal-panel" style="width: 85%; max-width: 800px; max-height: 85%; border-top: 2px solid #ffd700; border-bottom: 2px solid #ffaa00;">
+                <h2 style="font-family: 'Orbitron', sans-serif; color: #ffd700; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 15px 0; text-align: center; text-shadow: 0 0 10px #ffd700; letter-spacing: 2px;">ACHIEVEMENTS</h2>
                 <div id="achievements-list" style="overflow-y: auto; flex-grow: 1; padding-right: 10px; font-family: 'Rajdhani', sans-serif;">
                 </div>
                 <div class="menu-btn" id="btn-close-achievements" style="margin: 15px auto 0; width: 60%; max-width: 200px;">CLOSE</div>
@@ -170,8 +203,8 @@
                 .gl-item { display: flex; align-items: center; background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; }
                 .gl-icon { width: 50px; height: 50px; flex-shrink: 0; margin-right: 15px; display: flex; justify-content: center; align-items: center; border-radius: 50%; font-size: 24px; }
             </style>
-            <div style="background: rgba(2, 3, 8, 0.9); border: 2px solid #00ffff; border-radius: 12px; width: 90%; max-width: 800px; height: 85%; max-height: 800px; padding: 3cqw; display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(0,255,255,0.2); position: relative; overflow: hidden;">
-                <h2 style="font-family: 'Orbitron', sans-serif; color: #00ffff; font-size: clamp(20px, 5cqw, 36px); margin: 0 0 15px 0; text-align: center; text-shadow: 0 0 10px #00ffff;">ABYSS ENCYCLOPEDIA</h2>
+            <div class="modal-panel" style="width: 90%; max-width: 800px; height: 85%; max-height: 800px;">
+                <h2 style="font-family: 'Orbitron', sans-serif; color: #00ffff; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 15px 0; text-align: center; text-shadow: 0 0 10px #00ffff; letter-spacing: 2px;">ENCYCLOPEDIA</h2>
                 
                 <div style="display: flex; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
                     <div class="gl-tab active" onclick="switchGlTab('items')">道具 ITEMS</div>
@@ -282,7 +315,7 @@
                 function switchGlTab(tabId) {
                     document.querySelectorAll('.gl-tab').forEach(t => {
                         t.classList.remove('active');
-                        if (t.style.color === 'rgb(255, 0, 0)') t.style.textShadow = 'none'; // reset boss tab glow if needed
+                        if (t.style.color === 'rgb(255, 0, 0)') t.style.textShadow = 'none';
                     });
                     document.querySelectorAll('.gl-pane').forEach(p => p.classList.remove('active'));
                     
@@ -297,11 +330,10 @@
         </div>
 
         <div id="skins-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
-            <div style="background: rgba(2, 3, 8, 0.9); border: 2px solid #00ffff; border-radius: 12px; width: 85%; max-width: 800px; max-height: 85%; padding: 3cqw; display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(0,255,255,0.2); position: relative; overflow: hidden;">
-                <h2 style="font-family: 'Orbitron', sans-serif; color: #00ffff; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 20px 0; text-align: center; text-shadow: 0 0 10px #00ffff;">SELECT SKIN</h2>
+            <div class="modal-panel" style="width: 85%; max-width: 800px; max-height: 85%;">
+                <h2 style="font-family: 'Orbitron', sans-serif; color: #00ffff; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 15px 0; text-align: center; text-shadow: 0 0 10px #00ffff; letter-spacing: 2px;">SKIN SELECTOR</h2>
                 
                 <div id="skins-grid" style="overflow-y: auto; flex-grow: 1; padding-right: 10px; font-family: 'Rajdhani', sans-serif; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
-                    <!-- Skin items will be injected here via JS -->
                 </div>
                 
                 <div class="menu-btn" id="btn-close-skins" style="margin: 15px auto 0; width: 60%; max-width: 200px;">CLOSE</div>
@@ -309,8 +341,8 @@
         </div>
 
         <div id="settings-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
-            <div style="background: rgba(2, 3, 8, 0.9); border: 2px solid #00ffff; border-radius: 12px; width: 85%; max-width: 500px; padding: 3cqw; display: flex; flex-direction: column; box-shadow: 0 0 30px rgba(0,255,255,0.2); position: relative; overflow: hidden; font-family: 'Rajdhani', sans-serif;">
-                <h2 style="font-family: 'Orbitron', sans-serif; color: #00ffff; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 20px 0; text-align: center; text-shadow: 0 0 10px #00ffff;">SETTINGS</h2>
+            <div class="modal-panel" style="width: 85%; max-width: 500px;">
+                <h2 style="font-family: 'Orbitron', sans-serif; color: #00ffff; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 20px 0; text-align: center; text-shadow: 0 0 10px #00ffff; letter-spacing: 2px;">SETTINGS</h2>
                 
                 <div style="width: 100%; display: flex; flex-direction: column; gap: 20px; align-items: center; justify-content: center; margin-bottom: 20px;">
                     <div style="width: 80%; max-width: 300px;">
@@ -320,6 +352,12 @@
                     <div style="width: 80%; max-width: 300px;">
                         <label style="color: #00ffff; font-size: 18px; margin-bottom: 5px; display: block; font-weight: bold;">SFX Volume: <span id="sfx-vol-val">100%</span></label>
                         <input type="range" id="sfx-vol" min="0" max="1" step="0.05" value="1" style="width: 100%; accent-color: #00ffff;">
+                    </div>
+                    <div id="cheat-mode-container" style="width: 80%; max-width: 300px; display: none; margin-top: 10px; padding-top: 15px; border-top: 1px solid rgba(0, 255, 255, 0.3);">
+                        <label style="color: #ff00ff; font-size: 18px; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; font-weight: bold; cursor: pointer; text-shadow: 0 0 5px #ff00ff;">
+                            <span>作弊模式 (无敌)</span>
+                            <input type="checkbox" id="cheat-invincible" style="width: 20px; height: 20px; accent-color: #ff00ff; cursor: pointer;">
+                        </label>
                     </div>
                 </div>
                 
@@ -385,15 +423,14 @@ class BossSystem {
         
         let cvsW = this.engine.renderer.baseWidth;
         let cvsH = this.engine.renderer.baseHeight;
-        // Boss rests at 60% of screen width (reachable with a single dash)
         let restX = cvsW * 0.62;
         
         if (threshold === 300) {
-            this.bossData = { type: 'octopus', threshold: 300, maxHp: 2, hp: 2, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 120, height: 120, state: 'entering', timer: 0, hitCooldown: 0 };
+            this.bossData = { type: 'octopus', threshold: 300, maxHp: 2, hp: 2, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 120, height: 120, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0 };
         } else if (threshold === 800) {
-            this.bossData = { type: 'submarine', threshold: 800, maxHp: 3, hp: 3, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 150, height: 80, state: 'entering', timer: 0, hitCooldown: 0 };
+            this.bossData = { type: 'submarine', threshold: 800, maxHp: 3, hp: 3, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 150, height: 80, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0 };
         } else if (threshold === 1500) {
-            this.bossData = { type: 'megalodon', threshold: 1500, maxHp: 4, hp: 4, x: cvsW + 300, y: cvsH / 2, targetY: cvsH / 2, restX: restX + 50, width: 250, height: 120, state: 'entering', timer: 0, hitCooldown: 0 };
+            this.bossData = { type: 'megalodon', threshold: 1500, maxHp: 4, hp: 4, x: cvsW + 300, y: cvsH / 2, targetY: cvsH / 2, restX: restX + 50, width: 250, height: 120, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0 };
         }
     }
 
@@ -407,6 +444,12 @@ class BossSystem {
         let sharkCY = shark.y;
         
         b.timer++;
+        b.fightTime++;
+        
+        if (b.fightTime > 3600) {
+            this.defeatBoss(true);
+            return;
+        }
         
         if (b.state === 'entering') {
             b.x -= 4;
@@ -415,7 +458,6 @@ class BossSystem {
             b.targetY = shark.y;
             b.y += (b.targetY - b.y) * 0.02;
             
-            // Boss stays at rest position, gently tracking Y
             b.x += (b.restX - b.x) * 0.04;
             
             
@@ -465,6 +507,7 @@ class BossSystem {
                     this.engine.cameraShake = 15;
                     this.projectiles.splice(i, 1);
                 } else {
+                    if (this.engine.isCheatInvincible) continue;
                     this.engine.runStats.damageTaken++;
                     this.engine.triggerGameOver(); return;
                 }
@@ -476,15 +519,13 @@ class BossSystem {
         if (shark.isDashing) {
             if (!b.hitCooldown && this.engine.checkCollision(sharkCX, sharkCY, shark.radius, b.x - b.width/2, b.y - b.height/2, b.width, b.height)) {
                 b.hp--;
-                b.hitCooldown = 60; // 1-second cooldown before boss can be hit again
+                b.hitCooldown = 60;
                 this.engine.cameraShake = 25;
                 this.engine.audio.play('explosion');
                 this.engine.entityManager.spawnParticles(b.x - b.width/2, b.y, '#ff0000', 50, 2);
-                // End dash and reset hunt points so the player has to earn the next dash
                 shark.isDashing = false;
                 shark.dashTimer = 0;
                 shark.huntPoints = 0;
-                // Small separation push - boss retreats, shark stays put
                 b.x += 60;
                 
                 if (b.hp <= 0) {
@@ -493,7 +534,6 @@ class BossSystem {
             }
         } else {
             if (shark.isDashing || shark.inCurrent || (b.hitCooldown && b.hitCooldown > 30)) {
-                // safe
             } else if (this.engine.checkCollision(sharkCX, sharkCY, shark.radius, b.x - b.width/2, b.y - b.height/2, b.width, b.height)) {
                 if (shark.shield) {
                     this.engine.runStats.shieldsBroken++;
@@ -501,9 +541,10 @@ class BossSystem {
                     shark.comboCount = 0; shark.comboActive = false;
                     this.engine.audio.play('explosion');
                     this.engine.entityManager.spawnParticles(sharkCX, sharkCY, '#00ffff', 25);
-                    b.x += 80; // push boss away on shield break
+                    b.x += 80;
                     this.engine.cameraShake = 20;
                 } else {
+                    if (this.engine.isCheatInvincible) return;
                     this.engine.runStats.damageTaken++;
                     this.engine.triggerGameOver(); return;
                 }
@@ -513,19 +554,23 @@ class BossSystem {
         if (b.hitCooldown > 0) b.hitCooldown--;
     }
     
-    defeatBoss() {
+    defeatBoss(isPacifist = false) {
         this.active = false;
         this.engine.audio.stopBossMusic();
         this.defeatedBosses.push(this.bossData.threshold);
         let bonus = 100 * this.bossData.maxHp;
+        if (isPacifist) bonus *= 2; 
         this.engine.score += bonus; 
         this.projectiles = [];
         this.engine.audio.play('powerup');
-        this.engine.entityManager.spawnText(this.bossData.x, this.bossData.y, `BOSS DEFEATED! +${bonus}`, "#ffd700");
-        this.engine.entityManager.spawnParticles(this.bossData.x, this.bossData.y, '#ffd700', 100, 3);
+        
+        let msg = isPacifist ? `PACIFIST WIN! +${bonus}` : `BOSS DEFEATED! +${bonus}`;
+        let color = isPacifist ? "#00ff00" : "#ffd700";
+        
+        this.engine.entityManager.spawnText(this.bossData.x, this.bossData.y, msg, color);
+        this.engine.entityManager.spawnParticles(this.bossData.x, this.bossData.y, color, 100, 3);
         this.engine.cameraShake = 40;
         
-        // Unlock the corresponding boss achievement
         const achievementMap = {
             'octopus':   'boss_octopus',
             'submarine': 'boss_submarine',
@@ -548,16 +593,17 @@ class BossSystem {
         ctx.translate(b.x, b.y);
         
         let isHit = (engine.shark.isDashing && this.engine.checkCollision(engine.shark.x + engine.shark.width/2, engine.shark.y, engine.shark.radius, b.x - b.width/2, b.y - b.height/2, b.width, b.height));
-        if (isHit) ctx.filter = 'brightness(2)';
+        if (isHit && b.type !== 'octopus') ctx.filter = 'brightness(2)';
         
         if (b.type === 'octopus') {
+            // Procedural drawing
             ctx.fillStyle = '#4a004a';
             ctx.beginPath(); ctx.arc(0, 0, b.width/2, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-20, -10, 18, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = '#f00'; ctx.beginPath(); ctx.arc(-25 + Math.sin(b.timer*0.1)*5, -10 + Math.cos(b.timer*0.1)*5, 6, 0, Math.PI*2); ctx.fill();
             ctx.strokeStyle = '#4a004a'; ctx.lineWidth = 18; ctx.lineCap = 'round';
             for(let i=0; i<5; i++) {
-                ctx.beginPath(); ctx.moveTo(0, 20); 
+                ctx.beginPath(); ctx.moveTo(0, 20);
                 ctx.quadraticCurveTo(-30 - i*15, 60 + Math.sin(b.timer*0.1 + i)*25, -50 + Math.sin(b.timer*0.15 + i)*40, 80 + i*15);
                 ctx.stroke();
             }
@@ -623,10 +669,7 @@ class BossSystem {
                 }
             }
         }
-        
-        ctx.fillStyle = '#111'; ctx.fillRect(-b.width/2, -b.height/2 - 30, b.width, 10);
-        ctx.fillStyle = '#f00'; ctx.fillRect(-b.width/2, -b.height/2 - 30, b.width * (b.hp / b.maxHp), 10);
-        ctx.strokeStyle = '#fff'; ctx.lineWidth = 1; ctx.strokeRect(-b.width/2, -b.height/2 - 30, b.width, 10);
+
         
         ctx.restore();
         
@@ -932,7 +975,7 @@ class AudioManager {
         if (isNaN(this.musicVol)) this.musicVol = 1.0;
         this.sfxVol = parseFloat(localStorage.getItem('abyssDashSfxVol'));
         if (isNaN(this.sfxVol)) this.sfxVol = 1.0;
-        this.bossMusic.volume = this.musicVol;
+        this.bossMusic.volume = this.musicVol * 0.4;
     }
     init() {
         if (!this.ctx) {
@@ -950,7 +993,7 @@ class AudioManager {
     setMusicVolume(v) {
         this.musicVol = v;
         if (this.masterMusicGain) this.masterMusicGain.gain.value = v;
-        if (!this.bossMusic.paused) this.bossMusic.volume = v;
+        if (!this.bossMusic.paused) this.bossMusic.volume = v * 0.4;
         localStorage.setItem('abyssDashMusicVol', v);
     }
     setSfxVolume(v) {
@@ -996,11 +1039,12 @@ class AudioManager {
         this.bossMusic.currentTime = 0;
         this.bossMusic.play().catch(e => console.log("Audio play prevented:", e));
         
+        let targetVol = this.musicVol * 0.4;
         this.bossMusicFadeInterval = setInterval(() => {
-            if (this.bossMusic.volume < this.musicVol - 0.05) {
+            if (this.bossMusic.volume < targetVol - 0.05) {
                 this.bossMusic.volume += 0.05;
             } else {
-                this.bossMusic.volume = this.musicVol;
+                this.bossMusic.volume = targetVol;
                 clearInterval(this.bossMusicFadeInterval);
             }
         }, 100);
@@ -1664,6 +1708,27 @@ class InputSystem {
             this.engine.audio.setSfxVolume(v);
             document.getElementById('sfx-vol-val').innerText = Math.round(v * 100) + '%';
         });
+        
+        document.getElementById('cheat-invincible').addEventListener('change', (e) => {
+            this.engine.isCheatInvincible = e.target.checked;
+        });
+        
+        let easterEggClickCount = 0;
+        document.getElementById('easter-egg-shark').addEventListener('click', (e) => {
+            easterEggClickCount++;
+            if (easterEggClickCount >= 5) {
+                // Dash transformation
+                e.target.style.transform = 'scale(1.8, 0.6) translateX(10px)';
+                e.target.style.filter = 'brightness(1.5) drop-shadow(0 0 10px #0ff)';
+                
+                // Show cheat toggle in settings
+                document.getElementById('cheat-mode-container').style.display = 'block';
+            } else {
+                // Bump effect
+                e.target.style.transform = 'scale(1.3) rotate(-15deg)';
+                setTimeout(() => { e.target.style.transform = 'scale(1) rotate(0deg)'; }, 150);
+            }
+        });
 
         document.getElementById('btn-close-settings').addEventListener('click', (e) => {
             e.stopPropagation();
@@ -1681,6 +1746,7 @@ class InputSystem {
 class GameEngine {
     constructor() {
         this.sharkSprite = null;
+        this.octopusSprite = null;
         this.audio = new AudioManager();
         this.ui = new UIManager();
         this.renderer = new Renderer('gameCanvas');
@@ -1744,10 +1810,13 @@ class GameEngine {
         this.audio.init();
         this.audio.playAmbient();
         this.lastTime = performance.now(); 
+        this.bossSystem = new BossSystem(this);
+        this.isCheatInvincible = false;
     }
 
 
     triggerGameOver() {
+        if (this.isCheatInvincible) return;
         this.state = 'GAMEOVER'; 
         this.ui.setPauseBtnVisible(false); 
         this.audio.stopAmbient();
@@ -1794,7 +1863,7 @@ class GameEngine {
 
         if (this.shark.inCurrent && !wasInCurrent && !this.shark.isDashing) this.audio.play('dash');
 
-        let isInvincible = this.shark.isDashing || this.shark.inCurrent;
+        let isInvincible = this.shark.isDashing || this.shark.inCurrent || this.isCheatInvincible;
         if (this.shark.isParalyzed) {
             this.shark.paralyzeTimer--;
             if (this.shark.paralyzeTimer <= 0 || isInvincible) this.shark.isParalyzed = false; 
@@ -1847,7 +1916,13 @@ class GameEngine {
             this.shark.x += (140 - this.shark.x) * 0.05;
         }
 
-        if (this.shark.y - this.shark.radius < 0 || this.shark.y + this.shark.radius > cvsH) { this.triggerGameOver(); return; }
+        if (this.shark.y - this.shark.radius < 0) {
+            if (this.isCheatInvincible) { this.shark.y = this.shark.radius; this.shark.velocity = 0; }
+            else { this.triggerGameOver(); return; }
+        } else if (this.shark.y + this.shark.radius > cvsH) {
+            if (this.isCheatInvincible) { this.shark.y = cvsH - this.shark.radius; this.shark.velocity = 0; }
+            else { this.triggerGameOver(); return; }
+        }
         
         // Handled by ProgressionSystem
 
