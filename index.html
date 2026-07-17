@@ -972,7 +972,29 @@ class SkinManager {
                 sprite.style.cssText = `width: 100px; height: 100px; flex-shrink: 0; background-image: url('${skin.src}'); background-size: 400px 200px; animation: swimSprite 0.6s steps(4) infinite; pointer-events: none; transform: scaleX(-1);`;
                 imgContainer.appendChild(sprite);
             } else {
-                imgContainer.innerHTML = '✨'; 
+                const cvs = document.createElement('canvas');
+                cvs.width = 80; cvs.height = 80;
+                cvs.style.cssText = 'pointer-events: none;';
+                const ctx = cvs.getContext('2d');
+                ctx.translate(10, 40);
+                const w = 60, h = 20;
+                
+                ctx.fillStyle = '#040511';
+                ctx.shadowBlur = 15; ctx.shadowColor = '#00ffff';
+                ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(w * 0.3, -h * 0.8, w * 0.7, -h * 0.5); ctx.lineTo(w, 0); ctx.quadraticCurveTo(w * 0.6, h * 0.7, 0, 0); ctx.fill();
+                ctx.shadowBlur = 0;
+                
+                ctx.strokeStyle = '#223'; ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(w * 0.4, -4); ctx.lineTo(w * 0.4 - 3, 4); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(w * 0.45, -5); ctx.lineTo(w * 0.45 - 3, 5); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(w * 0.5, -4); ctx.lineTo(w * 0.5 - 3, 4); ctx.stroke();
+                
+                ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.moveTo(w - 6, -1);
+                ctx.lineTo(w - 13, -5); ctx.lineTo(w - 10, 2); ctx.lineTo(w - 16, 4); ctx.fill();
+                
+                ctx.fillStyle = '#00ffff'; ctx.beginPath(); ctx.arc(w - 15, -4, 2.5, 0, Math.PI * 2); ctx.fill();
+                
+                imgContainer.appendChild(cvs);
             }
 
             const name = document.createElement('div');
