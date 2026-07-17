@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>深渊冲刺 (Abyss Dash) - Ultra HD</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; background-color: #020308; display: flex; justify-content: center; align-items: center; height: 100dvh; width: 100dvw; color: white; font-family: 'Rajdhani', sans-serif; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; }
+        body { margin: 0; overflow: hidden; background-color: #01060e; display: flex; justify-content: center; align-items: center; height: 100dvh; width: 100dvw; color: white; font-family: 'Inter', sans-serif; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; }
         
         #game-container { 
             position: relative; 
@@ -24,23 +24,24 @@
         canvas { display: block; width: 100% !important; height: 100% !important; object-fit: contain; }
         
         #ui-layer { position: absolute; top: 3cqh; left: 3cqw; right: 3cqw; z-index: 999; pointer-events: none; display: flex; justify-content: space-between; align-items: flex-start; }
-        #left-ui { display: flex; flex-direction: column; background: linear-gradient(135deg, rgba(2, 10, 25, 0.6) 0%, rgba(0, 0, 10, 0.4) 100%); padding: 1.5cqw 2.5cqw; border-radius: 0 0 16px 0; border: 1px solid rgba(0,255,255,0.15); border-left: 4px solid #00ffff; box-shadow: 5px 5px 20px rgba(0,0,0,0.5), inset 2px 0 10px rgba(0,255,255,0.1); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: opacity 0.2s ease-out; }
+        #left-ui { display: flex; flex-direction: column; background: rgba(5, 15, 30, 0.4); padding: 1.5cqw 2.5cqw; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(0, 229, 255, 0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: opacity 0.2s ease-out; }
         #score-box { font-family: 'Orbitron', sans-serif; font-size: clamp(14px, 3cqw, 32px); font-weight: 900; text-shadow: 0 0 1.5cqw rgba(0,255,255,0.9); display: flex; align-items: baseline; color: #fff; letter-spacing: 1px; }
         #multiplier { color: #ff2a5f; font-size: clamp(10px, 2cqw, 18px); margin-left: 1.5cqw; text-shadow: 0 0 1.5cqw #ff0055; opacity: 0; transition: opacity 0.2s; font-weight: 700; }
         #multiplier.active { opacity: 1; animation: pulse 0.4s infinite alternate; }
         #best-score-box { font-family: 'Orbitron', sans-serif; font-size: clamp(10px, 1.8cqw, 15px); color: #00ffff; margin-top: 0.5cqw; text-shadow: 0 0 0.8cqw rgba(0,255,255,0.5); font-weight: 500; opacity: 0.9; letter-spacing: 0.5px; }
         
-        #hunt-bar-container { width: clamp(80px, 20cqw, 220px); height: 1.2cqw; background: rgba(0,0,0,0.6); border-radius: 0.6cqw; margin-top: 1.5cqw; border: 1px solid rgba(0,255,255,0.3); overflow: hidden; position: relative; box-shadow: inset 0 0 1cqw rgba(0,0,0,0.8); }
-        #hunt-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00eeff, #0055ff); box-shadow: 0 0 1.5cqw #00ffff; transition: width 0.15s ease-out, background 0.3s; position: relative; }
+        #hunt-bar-container { width: clamp(80px, 20cqw, 220px); height: 1.2cqw; background: rgba(0,0,0,0.4); border-radius: 1cqw; margin-top: 1.5cqw; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; position: relative; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
+        #hunt-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00e5ff, #00ffaa); box-shadow: 0 0 1.5cqw rgba(0, 229, 255, 0.6); transition: width 0.15s ease-out, background 0.3s; position: relative; border-radius: 1cqw; }
         #hunt-bar::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%); }
         
-        #pause-btn { pointer-events: auto; font-size: clamp(16px, 3cqw, 24px); cursor: pointer; background: rgba(5, 15, 30, 0.7); border: 2px solid rgba(0, 255, 255, 0.4); border-radius: 1cqw; width: 6cqw; height: 6cqw; min-width: 32px; min-height: 32px; display: none; justify-content: center; align-items: center; box-shadow: 0 0 1.5cqw rgba(0, 255, 255, 0.2); transition: all 0.2s; backdrop-filter: blur(5px); color: #0ff; }
-        #pause-btn:hover { background: rgba(0, 255, 255, 0.3); transform: scale(1.05); }
+        #pause-btn { pointer-events: auto; font-size: clamp(16px, 3cqw, 24px); cursor: pointer; background: rgba(5, 15, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 50%; width: 6cqw; height: 6cqw; min-width: 32px; min-height: 32px; display: none; justify-content: center; align-items: center; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(0, 229, 255, 0.1); transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: #00e5ff; }
+        #pause-btn:hover { background: rgba(0, 229, 255, 0.2); transform: scale(1.1); box-shadow: 0 10px 25px rgba(0, 229, 255, 0.3); }
         #pause-btn:active { transform: scale(0.95); }
 
         .blood-screen { animation: flashRed 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
         @keyframes pulse { from { transform: scale(1) rotate(-1deg); } to { transform: scale(1.15) rotate(1deg); } }
         @keyframes flashRed { 0% { box-shadow: inset 0 0 250px rgba(255, 0, 0, 1); } 30% { box-shadow: inset 0 0 120px rgba(255, 0, 0, 0.8); } 100% { box-shadow: inset 0 0 300px rgba(255, 0, 0, 0); } }
+        @keyframes swimSprite { 100% { background-position: -400px 0; } }
         
         #orientation-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #020308; z-index: 99999; color: white; justify-content: center; align-items: center; flex-direction: column; text-align: center; }
         @media screen and (orientation: portrait) and (max-width: 900px) {
@@ -50,46 +51,44 @@
         
         #main-menu {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(2, 3, 8, 0.4); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            background: radial-gradient(circle at center, rgba(0, 30, 50, 0.2) 0%, rgba(1, 6, 14, 0.6) 100%);
+            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1001;
-            transition: opacity 0.6s cubic-bezier(0.165, 0.84, 0.44, 1), transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+            transition: opacity 0.8s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
         #menu-logo {
             font-family: 'Orbitron', sans-serif; font-size: clamp(42px, 10cqw, 82px); font-weight: 900; 
-            color: #ffffff; text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff, 0 0 40px #0088ff;
-            margin-bottom: 5cqh; animation: floatLogo 3s ease-in-out infinite, glowLogo 2s infinite alternate;
-            letter-spacing: 2px;
+            color: #ffffff; text-shadow: 0 0 20px rgba(0, 229, 255, 0.6), 0 0 40px rgba(0, 255, 170, 0.4);
+            margin-bottom: 5cqh; animation: floatLogo 4s ease-in-out infinite;
+            letter-spacing: 4px;
         }
-        @keyframes floatLogo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1cqh); } }
-        @keyframes glowLogo { from { text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff; } to { text-shadow: 0 0 20px #00ffff, 0 0 40px #0088ff, 0 0 60px #0055ff; } }
+        @keyframes floatLogo { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-1.5cqh); } }
         
         .menu-btn {
-            font-family: 'Rajdhani', sans-serif; font-size: clamp(16px, 4cqw, 24px); font-weight: 700; letter-spacing: 2px;
-            color: #e0ffff; padding: 1.5cqw 4cqw; margin: 1cqh; width: clamp(200px, 40cqw, 320px); text-align: center;
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.1) 0%, rgba(2, 10, 30, 0.6) 100%);
-            border-left: 3px solid #00ffff; border-right: 3px solid #ff00ff; border-top: 1px solid rgba(0,255,255,0.2); border-bottom: 1px solid rgba(0,255,255,0.2);
+            font-family: 'Inter', sans-serif; font-size: clamp(16px, 3cqw, 22px); font-weight: 600; letter-spacing: 2px;
+            color: #ffffff; padding: 1.2cqw 4cqw; margin: 1cqh; width: clamp(200px, 35cqw, 280px); text-align: center;
+            background: rgba(10, 25, 45, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 40px;
             cursor: pointer; position: relative; overflow: hidden;
-            clip-path: polygon(10px 0, 100% 0, calc(100% - 10px) 100%, 0 100%);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: inset 0 0 15px rgba(0,255,255,0.1);
-            backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3), inset 0 0 20px rgba(0, 229, 255, 0.05);
+            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
         }
         .menu-btn::before {
             content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 255, 0.6), transparent);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
             transform: skewX(-25deg); transition: left 0.5s ease-out;
         }
         .menu-btn:not(.disabled):hover {
             transform: scale(1.05) translateY(-2px); 
-            background: linear-gradient(135deg, rgba(0, 255, 255, 0.25) 0%, rgba(255, 0, 255, 0.15) 100%);
-            color: #fff; text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
-            border-left: 4px solid #00ffff; border-right: 4px solid #ff00ff;
-            box-shadow: 0 10px 20px rgba(0, 255, 255, 0.3), inset 0 0 20px rgba(0,255,255,0.3);
+            background: rgba(0, 229, 255, 0.15);
+            border-color: rgba(0, 229, 255, 0.5);
+            box-shadow: 0 15px 35px rgba(0, 229, 255, 0.2), inset 0 0 25px rgba(0, 229, 255, 0.1);
         }
         .menu-btn:not(.disabled):hover::before { left: 150%; }
-        .menu-btn:not(.disabled):active { transform: scale(0.95); box-shadow: inset 0 0 30px rgba(0,255,255,0.5); }
-        .menu-btn.disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(1); border-color: rgba(255,255,255,0.1); }
-        .menu-btn.disabled:hover { transform: none; background: rgba(0,0,0,0.5); }
+        .menu-btn:not(.disabled):active { transform: scale(0.98); box-shadow: inset 0 0 15px rgba(0, 229, 255, 0.2); }
+        .menu-btn.disabled { opacity: 0.3; cursor: not-allowed; border-color: rgba(255,255,255,0.05); }
+        .menu-btn.disabled:hover { transform: none; background: rgba(10, 25, 45, 0.3); }
         
         #ripple-effect {
             position: absolute; top: 50%; left: 50%; width: 10px; height: 10px;
@@ -105,12 +104,12 @@
         }
 
         .intro-box {
-            margin-top: 5cqh; color: #fff; font-family: 'Rajdhani', sans-serif; text-align: left; max-width: 90%;
-            background: linear-gradient(135deg, rgba(2, 10, 25, 0.7), rgba(0, 0, 10, 0.9)); 
-            padding: 2.5cqw 3.5cqw; border-radius: 0 12px 12px 0; 
-            border: 1px solid rgba(0,255,255,0.15); border-left: 5px solid #00ffff;
-            box-shadow: 10px 10px 30px rgba(0,0,0,0.8), inset 5px 0 15px rgba(0,255,255,0.1);
-            backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            margin-top: 5cqh; color: #fff; font-family: 'Inter', sans-serif; text-align: left; max-width: 90%;
+            background: rgba(5, 15, 30, 0.4); 
+            padding: 2.5cqw 3.5cqw; border-radius: 24px; 
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,229,255,0.05);
+            backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
             position: relative; overflow: hidden;
         }
         .intro-box::after {
@@ -124,12 +123,12 @@
         .intro-line { font-size: clamp(14px, 2.2vw, 18px); margin-bottom: 1cqh; line-height: 1.5; color: #e0f0ff; }
 
         .modal-panel {
-            background: linear-gradient(135deg, rgba(2, 10, 25, 0.85), rgba(0, 0, 10, 0.95));
-            border: 1px solid rgba(0, 255, 255, 0.3); border-top: 2px solid #00ffff; border-bottom: 2px solid #ff00ff;
-            border-radius: 12px 0 12px 0; padding: 3cqw; display: flex; flex-direction: column;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8), inset 0 0 20px rgba(0,255,255,0.1);
-            backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-            position: relative; overflow: hidden; font-family: 'Rajdhani', sans-serif;
+            background: rgba(5, 15, 30, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 30px; padding: 3cqw; display: flex; flex-direction: column;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 30px rgba(0, 229, 255, 0.05);
+            backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%);
+            position: relative; overflow: hidden; font-family: 'Inter', sans-serif;
         }
         .modal-panel::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -145,8 +144,8 @@
             .intro-line { font-size: 11px; margin-bottom: 2px; }
         }
         
-        .icon-btn:hover { transform: scale(1.1); background: rgba(0,255,255,0.3) !important; box-shadow: 0 0 20px rgba(0,255,255,0.5) !important; }
-        #btn-achievements.icon-btn:hover { background: rgba(255,215,0,0.3) !important; box-shadow: 0 0 20px rgba(255,215,0,0.5) !important; }
+        .icon-btn:hover { transform: scale(1.1); background: rgba(0, 229, 255, 0.2) !important; border-color: rgba(0, 229, 255, 0.5) !important; box-shadow: 0 10px 25px rgba(0, 229, 255, 0.3), inset 0 0 15px rgba(0, 229, 255, 0.2) !important; }
+        #btn-achievements.icon-btn:hover { background: rgba(0, 255, 170, 0.2) !important; border-color: rgba(0, 255, 170, 0.5) !important; box-shadow: 0 10px 25px rgba(0, 255, 170, 0.3), inset 0 0 15px rgba(0, 255, 170, 0.2) !important; color: #00ffaa !important; }
     </style>
 </head>
 <body>
@@ -171,13 +170,13 @@
             </div>
             
             <div style="position: absolute; bottom: 2cqw; left: 2cqw; display: flex; gap: 15px; z-index: 1000;">
-            <div id="btn-settings" class="icon-btn" style="width: 50px; height: 50px; background: linear-gradient(135deg, rgba(2,10,25,0.8), rgba(0,0,10,0.9)); border: 1px solid rgba(0,255,255,0.3); border-left: 2px solid #0ff; border-radius: 12px 4px 12px 4px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #0ff; font-size: 24px; pointer-events: auto; box-shadow: 2px 2px 10px rgba(0,0,0,0.8), inset 0 0 10px rgba(0,255,255,0.1); backdrop-filter: blur(10px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">⚙️</div>
-            <div id="btn-achievements" class="icon-btn" style="width: 50px; height: 50px; background: linear-gradient(135deg, rgba(20,10,5,0.8), rgba(10,5,0,0.9)); border: 1px solid rgba(255,215,0,0.3); border-left: 2px solid #ffd700; border-radius: 12px 4px 12px 4px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #ffd700; font-size: 24px; pointer-events: auto; box-shadow: 2px 2px 10px rgba(0,0,0,0.8), inset 0 0 10px rgba(255,215,0,0.1); backdrop-filter: blur(10px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">🏆</div>
+            <div id="btn-settings" class="icon-btn" style="width: 50px; height: 50px; background: rgba(5, 15, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 25px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #00e5ff; font-size: 24px; pointer-events: auto; box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset 0 0 10px rgba(0, 229, 255, 0.1); backdrop-filter: blur(20px); transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">⚙️</div>
+            <div id="btn-achievements" class="icon-btn" style="width: 50px; height: 50px; background: rgba(5, 15, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 25px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #00ffaa; font-size: 24px; pointer-events: auto; box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset 0 0 10px rgba(0, 255, 170, 0.1); backdrop-filter: blur(20px); transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">🏆</div>
         </div>
         </div>
         
         <!-- Achievement Toast -->
-        <div id="achievement-toast" style="position: absolute; top: -100px; left: 50%; transform: translateX(-50%); background: linear-gradient(90deg, rgba(255,215,0,0.9), rgba(255,165,0,0.9)); color: #000; padding: 10px 30px; border-radius: 30px; font-family: 'Rajdhani', sans-serif; font-weight: bold; font-size: 16px; box-shadow: 0 0 20px rgba(255,215,0,0.5); z-index: 9999; transition: top 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); display: flex; align-items: center; gap: 10px; pointer-events: none;">
+        <div id="achievement-toast" style="position: absolute; top: -100px; left: 50%; transform: translateX(-50%); background: rgba(5, 15, 30, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; padding: 12px 35px; border-radius: 40px; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(0, 255, 170, 0.1); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); z-index: 9999; transition: top 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; align-items: center; gap: 15px; pointer-events: none;">
             <span style="font-size: 24px;">🏆</span>
             <div>
                 <div style="font-size: 12px; opacity: 0.8;">成就解锁 Achievement Unlocked</div>
@@ -185,8 +184,8 @@
             </div>
         </div>
 
-        <div id="achievements-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
-            <div class="modal-panel" style="width: 85%; max-width: 800px; max-height: 85%; border-top: 2px solid #ffd700; border-bottom: 2px solid #ffaa00;">
+        <div id="achievements-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+            <div class="modal-panel" style="width: 85%; max-width: 800px; max-height: 85%;">
                 <h2 style="font-family: 'Orbitron', sans-serif; color: #ffd700; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 15px 0; text-align: center; text-shadow: 0 0 10px #ffd700; letter-spacing: 2px;">ACHIEVEMENTS</h2>
                 <div id="achievements-list" style="overflow-y: auto; flex-grow: 1; padding-right: 10px; font-family: 'Rajdhani', sans-serif;">
                 </div>
@@ -194,7 +193,7 @@
             </div>
         </div>
 
-        <div id="glossary-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+        <div id="glossary-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
             <style>
                 .gl-tab { flex: 1; text-align: center; padding: 8px 4px; cursor: pointer; color: #8ab; font-weight: bold; border-bottom: 2px solid transparent; transition: all 0.2s; font-size: clamp(12px, 3cqw, 18px); font-family: 'Orbitron', sans-serif; white-space: nowrap; }
                 .gl-tab.active { color: #00ffff; border-bottom: 2px solid #00ffff; text-shadow: 0 0 10px #00ffff; }
@@ -329,7 +328,7 @@
             </script>
         </div>
 
-        <div id="skins-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+        <div id="skins-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
             <div class="modal-panel" style="width: 85%; max-width: 800px; max-height: 85%;">
                 <h2 style="font-family: 'Orbitron', sans-serif; color: #00ffff; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 15px 0; text-align: center; text-shadow: 0 0 10px #00ffff; letter-spacing: 2px;">SKIN SELECTOR</h2>
                 
@@ -340,7 +339,7 @@
             </div>
         </div>
 
-        <div id="settings-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(8px);">
+        <div id="settings-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
             <div class="modal-panel" style="width: 85%; max-width: 500px;">
                 <h2 style="font-family: 'Orbitron', sans-serif; color: #00ffff; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 20px 0; text-align: center; text-shadow: 0 0 10px #00ffff; letter-spacing: 2px;">SETTINGS</h2>
                 
@@ -943,17 +942,17 @@ class SkinManager {
         this.availableSkins.forEach(skin => {
             const isSelected = this.currentSkin.id === skin.id;
             const item = document.createElement('div');
-            item.style.cssText = `background: rgba(255,255,255,0.05); border: 2px solid ${isSelected ? '#ff00ff' : 'rgba(0,255,255,0.2)'}; border-radius: 8px; padding: 10px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.2s; box-shadow: ${isSelected ? '0 0 15px rgba(255,0,255,0.5)' : 'none'}; position: relative;`;
+            item.style.cssText = `background: ${isSelected ? 'rgba(0, 255, 170, 0.1)' : 'rgba(5, 15, 30, 0.4)'}; border: 1px solid ${isSelected ? '#00ffaa' : 'rgba(255, 255, 255, 0.15)'}; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: ${isSelected ? '0 5px 15px rgba(0,255,170,0.3), inset 0 0 10px rgba(0,255,170,0.1)' : '0 5px 15px rgba(0,0,0,0.3)'}; backdrop-filter: blur(10px); position: relative;`;
             
             if (skin.default) {
                 const badge = document.createElement('div');
                 badge.innerText = 'DEFAULT';
-                badge.style.cssText = 'position: absolute; top: -8px; right: -8px; background: #00ffff; color: #000; font-size: 10px; font-weight: bold; padding: 2px 6px; border-radius: 4px; box-shadow: 0 0 5px #00ffff; pointer-events: none;';
+                badge.style.cssText = 'position: absolute; top: -10px; right: -10px; background: rgba(0, 229, 255, 0.2); border: 1px solid #00e5ff; color: #00e5ff; font-size: 10px; font-weight: bold; padding: 3px 8px; border-radius: 12px; box-shadow: 0 5px 10px rgba(0,229,255,0.2); backdrop-filter: blur(5px); pointer-events: none;';
                 item.appendChild(badge);
             }
 
-            item.onmouseover = () => { if(!isSelected) item.style.borderColor = '#00ffff'; };
-            item.onmouseout = () => { if(!isSelected) item.style.borderColor = 'rgba(0,255,255,0.2)'; };
+            item.onmouseover = () => { if(!isSelected) { item.style.borderColor = 'rgba(0, 229, 255, 0.5)'; item.style.background = 'rgba(0, 229, 255, 0.05)'; item.style.boxShadow = '0 5px 15px rgba(0,229,255,0.2)'; } };
+            item.onmouseout = () => { if(!isSelected) { item.style.borderColor = 'rgba(255, 255, 255, 0.15)'; item.style.background = 'rgba(5, 15, 30, 0.4)'; item.style.boxShadow = '0 5px 15px rgba(0,0,0,0.3)'; } };
             
             const handleSelect = (e) => {
                 e.preventDefault();
@@ -966,20 +965,18 @@ class SkinManager {
             item.addEventListener('mousedown', handleSelect);
 
             const imgContainer = document.createElement('div');
-            imgContainer.style.cssText = `width: 80px; height: 80px; margin-bottom: 10px; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 4px; background: rgba(0,0,0,0.3); font-size: 40px; pointer-events: none;`;
+            imgContainer.style.cssText = `width: 80px; height: 80px; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 12px; background: transparent; pointer-events: none;`;
             
             if (skin.type === 'image') {
-                const img = document.createElement('img');
-                img.src = skin.src;
-                img.style.cssText = `max-width: 100%; max-height: 100%; object-fit: contain; pointer-events: none;`;
-                img.onerror = () => { imgContainer.innerHTML = '🦈'; };
-                imgContainer.appendChild(img);
+                const sprite = document.createElement('div');
+                sprite.style.cssText = `width: 100px; height: 100px; flex-shrink: 0; background-image: url('${skin.src}'); background-size: 400px 200px; animation: swimSprite 0.6s steps(4) infinite; pointer-events: none; transform: scaleX(-1);`;
+                imgContainer.appendChild(sprite);
             } else {
                 imgContainer.innerHTML = '✨'; 
             }
 
             const name = document.createElement('div');
-            name.style.cssText = `color: ${isSelected ? '#ff00ff' : '#00ffff'}; font-weight: bold; font-size: 14px; text-align: center; pointer-events: none;`;
+            name.style.cssText = `color: ${isSelected ? '#00ffaa' : '#00e5ff'}; font-weight: 600; font-size: 14px; text-align: center; pointer-events: none; font-family: 'Inter', sans-serif;`;
             name.innerText = skin.name;
 
             item.appendChild(imgContainer);
