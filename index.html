@@ -397,6 +397,54 @@ const CONFIG = {
     FRAME_TIME: 1000 / 120
 };
 
+// Minimal 2D Simplex Noise for Fluid Dynamics
+class SimplexNoise {
+    constructor() {
+        this.grad3 = [[1,1,0],[-1,1,0],[1,-1,0],[-1,-1,0],[1,0,1],[-1,0,1],[1,0,-1],[-1,0,-1],[0,1,1],[0,-1,1],[0,1,-1],[0,-1,-1]];
+        this.p = new Uint8Array(256);
+        for (let i=0; i<256; i++) this.p[i] = Math.floor(Math.random()*256);
+        this.perm = new Uint8Array(512);
+        this.permMod12 = new Uint8Array(512);
+        for (let i=0; i<512; i++) {
+            this.perm[i] = this.p[i & 255];
+            this.permMod12[i] = (this.perm[i] % 12);
+        }
+    }
+    dot(g, x, y) { return g[0]*x + g[1]*y; }
+    noise2D(xin, yin) {
+        let n0, n1, n2; 
+        const F2 = 0.5*(Math.sqrt(3.0)-1.0);
+        const G2 = (3.0-Math.sqrt(3.0))/6.0;
+        let s = (xin+yin)*F2;
+        let i = Math.floor(xin+s);
+        let j = Math.floor(yin+s);
+        let t = (i+j)*G2;
+        let X0 = i-t;
+        let Y0 = j-t;
+        let x0 = xin-X0;
+        let y0 = yin-Y0;
+        let i1, j1;
+        if(x0>y0) {i1=1; j1=0;} else {i1=0; j1=1;}
+        let x1 = x0 - i1 + G2;
+        let y1 = y0 - j1 + G2;
+        let x2 = x0 - 1.0 + 2.0 * G2;
+        let y2 = y0 - 1.0 + 2.0 * G2;
+        let ii = i & 255;
+        let jj = j & 255;
+        let gi0 = this.permMod12[ii+this.perm[jj]];
+        let gi1 = this.permMod12[ii+i1+this.perm[jj+j1]];
+        let gi2 = this.permMod12[ii+1+this.perm[jj+1]];
+        let t0 = 0.5 - x0*x0-y0*y0;
+        if(t0<0) n0 = 0.0; else { t0 *= t0; n0 = t0 * t0 * this.dot(this.grad3[gi0], x0, y0); }
+        let t1 = 0.5 - x1*x1-y1*y1;
+        if(t1<0) n1 = 0.0; else { t1 *= t1; n1 = t1 * t1 * this.dot(this.grad3[gi1], x1, y1); }
+        let t2 = 0.5 - x2*x2-y2*y2;
+        if(t2<0) n2 = 0.0; else { t2 *= t2; n2 = t2 * t2 * this.dot(this.grad3[gi2], x2, y2); }
+        return 70.0 * (n0 + n1 + n2);
+    }
+}
+const simplex = new SimplexNoise();
+
 class BossSystem {
     constructor(engine) {
         this.engine = engine;
@@ -1289,10 +1337,10 @@ class Renderer {
                 ctx.fillStyle = '#00ffff'; 
                 // Body
                 ctx.beginPath(); ctx.arc(fish.x, fish.y, fish.radius, 0, Math.PI * 2); ctx.fill();
-                // Tail
-                ctx.beginPath(); ctx.moveTo(fish.x - fish.radius + 1, fish.y); ctx.lineTo(fish.x - fish.radius - 8, fish.y - 5); ctx.lineTo(fish.x - fish.radius - 8, fish.y + 5); ctx.fill();
-                // Eye
-                ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(fish.x + 2, fish.y - 1, 1, 0, Math.PI*2); ctx.fill();
+                // Tail (flipped to right side)
+                ctx.beginPath(); ctx.moveTo(fish.x + fish.radius - 1, fish.y); ctx.lineTo(fish.x + fish.radius + 8, fish.y - 5); ctx.lineTo(fish.x + fish.radius + 8, fish.y + 5); ctx.fill();
+                // Eye (flipped to left side)
+                ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(fish.x - 2, fish.y - 1, 1.5, 0, Math.PI*2); ctx.fill();
             }
         });
         ctx.shadowBlur = 0; 
@@ -1501,6 +1549,14 @@ class Renderer {
         }
 
         engine.bossSystem.draw(ctx, engine);
+        
+        // Post-Processing: Tint overlay
+        if (engine.state === 'PLAYING' && (shark.isDashing || shark.isParalyzed)) {
+            ctx.globalCompositeOperation = 'screen';
+            ctx.fillStyle = shark.isDashing ? 'rgba(255, 0, 0, 0.25)' : 'rgba(255, 0, 255, 0.25)';
+            ctx.fillRect(0, 0, baseWidth, baseHeight);
+            ctx.globalCompositeOperation = 'source-over';
+        }
 
         // Screens
         if (engine.state === 'PAUSED') {
@@ -1957,7 +2013,7 @@ class GameEngine {
             currentZoneProb = 0.6;
         }
 
-        if (this.frameCount % fishInterval === 0 && this.fishes.length < 30) this.fishes.push({ x: cvsW, y: Math.random() * (cvsH - 120) + 60, radius: 5, active: true });
+        if (this.frameCount % fishInterval === 0 && this.fishes.length < 30) this.fishes.push({ x: cvsW, y: Math.random() * (cvsH - 120) + 60, vx: -Math.random()*2-1, vy: (Math.random()-0.5)*2, radius: 5, active: true });
         if (this.frameCount % jellyInterval === 0 && this.score > 200 && this.jellyfishes.length < 10 && !this.bossSystem.active) this.jellyfishes.push({ x: cvsW, y: Math.random() * (cvsH - 180) + 90, radius: 18, offset: Math.random() * Math.PI * 2 });
         if (this.frameCount > 250 && this.frameCount % 450 === 0 && Math.random() < currentZoneProb && this.currentZones.length < 3 && !this.bossSystem.active) this.currentZones.push({ x: cvsW, y: Math.random() * (cvsH - 160) + 40, w: 1800, h: 100 });
         
@@ -1995,7 +2051,11 @@ class GameEngine {
             if (ft.alpha <= 0) this.floatingTexts.splice(i, 1);
         }
         for (let i = this.bubbles.length - 1; i >= 0; i--) {
-            let b = this.bubbles[i]; b.x += b.vx; b.y += b.vy;
+            let b = this.bubbles[i]; 
+            // Apply Simplex Noise for fluid dynamics
+            let n = simplex.noise2D(b.x * 0.01, b.y * 0.01 + this.frameCount * 0.01);
+            b.x += b.vx + n * 0.8;
+            b.y += b.vy;
             if (b.y < 0 || b.x < 0) this.bubbles.splice(i, 1);
         }
 
@@ -2147,7 +2207,51 @@ class GameEngine {
                 }
             }
             
-            fish.x -= currentSpeed * 0.85;
+            // Boids Flocking Logic
+            let sepX = 0, sepY = 0, alignX = 0, alignY = 0, cohX = 0, cohY = 0;
+            let neighborCount = 0;
+            for (let j = 0; j < this.fishes.length; j++) {
+                if (i === j) continue;
+                let other = this.fishes[j];
+                let dist = Math.hypot(fish.x - other.x, fish.y - other.y);
+                if (dist < 100) {
+                    alignX += other.vx; alignY += other.vy;
+                    cohX += other.x; cohY += other.y;
+                    neighborCount++;
+                    if (dist < 35) {
+                        sepX += (fish.x - other.x) / dist;
+                        sepY += (fish.y - other.y) / dist;
+                    }
+                }
+            }
+            if (neighborCount > 0) {
+                alignX = (alignX / neighborCount - fish.vx) * 0.05;
+                alignY = (alignY / neighborCount - fish.vy) * 0.05;
+                cohX = ((cohX / neighborCount) - fish.x) * 0.01;
+                cohY = ((cohY / neighborCount) - fish.y) * 0.01;
+            }
+            
+            // Evasion (Shark) - Removed to preserve gameplay (fishes should be easy to eat)
+            let evadeX = 0, evadeY = 0;
+            
+            fish.vx += sepX * 0.05 + alignX + cohX + evadeX;
+            fish.vy += sepY * 0.05 + alignY + cohY + evadeY;
+            
+            // Speed limit & drift
+            let speed = Math.hypot(fish.vx, fish.vy);
+            let maxSpeed = 2.0; // Keep them slow and easy to catch
+            if (speed > maxSpeed) {
+                fish.vx = (fish.vx / speed) * maxSpeed;
+                fish.vy = (fish.vy / speed) * maxSpeed;
+            }
+            fish.vx -= 0.02; // General leftward drift
+            
+            fish.x += fish.vx - currentSpeed * 0.7; // 0.7 factor applies ocean scroll
+            fish.y += fish.vy;
+            
+            // Y Bounds bounce
+            if (fish.y < 30) fish.vy += 0.5;
+            if (fish.y > cvsH - 30) fish.vy -= 0.5;
             if (fish.active && Math.hypot(fish.x - mouthX, fish.y - mouthY) < 30) {
                 this.runStats.fishesEaten++;
                 fish.active = false; this.audio.play('eat');
@@ -2191,12 +2295,48 @@ class GameEngine {
         let currentSpeed = 2;
         
         if (this.frameCount % 50 === 0 && this.fishes.length < 15) {
-            this.fishes.push({ x: cvsW, y: Math.random() * (cvsH - 120) + 60, radius: 5, active: true });
+            this.fishes.push({ x: cvsW, y: Math.random() * (cvsH - 120) + 60, vx: -Math.random()*2-1, vy: (Math.random()-0.5)*2, radius: 5, active: true });
         }
         
         for (let i = this.fishes.length - 1; i >= 0; i--) {
             let fish = this.fishes[i];
-            fish.x -= currentSpeed * 0.85;
+            
+            let sepX = 0, sepY = 0, alignX = 0, alignY = 0, cohX = 0, cohY = 0;
+            let neighborCount = 0;
+            for (let j = 0; j < this.fishes.length; j++) {
+                if (i === j) continue;
+                let other = this.fishes[j];
+                let dist = Math.hypot(fish.x - other.x, fish.y - other.y);
+                if (dist < 100) {
+                    alignX += other.vx; alignY += other.vy;
+                    cohX += other.x; cohY += other.y;
+                    neighborCount++;
+                    if (dist < 35) {
+                        sepX += (fish.x - other.x) / dist;
+                        sepY += (fish.y - other.y) / dist;
+                    }
+                }
+            }
+            if (neighborCount > 0) {
+                alignX = (alignX / neighborCount - fish.vx) * 0.05;
+                alignY = (alignY / neighborCount - fish.vy) * 0.05;
+                cohX = ((cohX / neighborCount) - fish.x) * 0.01;
+                cohY = ((cohY / neighborCount) - fish.y) * 0.01;
+            }
+            
+            fish.vx += sepX * 0.05 + alignX + cohX;
+            fish.vy += sepY * 0.05 + alignY + cohY;
+            
+            let speed = Math.hypot(fish.vx, fish.vy);
+            if (speed > 4) { fish.vx = (fish.vx / speed) * 4; fish.vy = (fish.vy / speed) * 4; }
+            fish.vx -= 0.02;
+            
+            fish.x += fish.vx - 2.5; 
+            fish.y += fish.vy;
+            
+            if (fish.y < 30) fish.vy += 0.5;
+            if (fish.y > cvsH - 30) fish.vy -= 0.5;
+
             if (fish.x < -20) this.fishes.splice(i, 1);
         }
         
@@ -2213,8 +2353,9 @@ class GameEngine {
         }
         for (let i = this.bubbles.length - 1; i >= 0; i--) {
             let b = this.bubbles[i];
-            b.y += b.vy;
-            b.x += Math.sin(this.frameCount * 0.05 + (b.wiggleX || 0)) * 0.5;
+            let n = simplex.noise2D(b.x * 0.005, b.y * 0.005 - this.frameCount * 0.005);
+            b.y += b.vy + n * 0.5;
+            b.x += Math.sin(this.frameCount * 0.05 + (b.wiggleX || 0)) * 0.5 + n * 1.5;
             if (b.y < -10) this.bubbles.splice(i, 1);
         }
         
