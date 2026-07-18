@@ -217,6 +217,7 @@
                     <div class="gl-tab active" onclick="switchGlTab('items')">道具 ITEMS</div>
                     <div class="gl-tab" onclick="switchGlTab('terrain')">地形 TERRAIN</div>
                     <div class="gl-tab" onclick="switchGlTab('enemies')">敌对 ENEMIES</div>
+                    <div class="gl-tab" style="color: #ff00ff;" onclick="switchGlTab('mutation')">基因 MUTATION</div>
                     <div class="gl-tab" style="color: #ff0000;" onclick="switchGlTab('boss')">领主 BOSS</div>
                 </div>
 
@@ -265,18 +266,64 @@
 
                 <!-- ENEMIES -->
                 <div id="gl-enemies" class="gl-pane">
-                    <div class="gl-item" style="border: 1px solid rgba(255,68,68,0.3);">
-                        <div class="gl-icon" style="background: rgba(255,0,0,0.5); box-shadow: 0 0 15px #ff0000;">💣</div>
+                    <div class="gl-item">
+                        <div class="gl-icon" style="background: rgba(255,68,68,0.2); box-shadow: 0 0 15px #ff4444;">💣</div>
                         <div>
-                            <div style="color: #ff4444; font-size: clamp(16px, 3cqw, 20px); font-weight: bold; margin-bottom: 4px;">追踪水雷 (Homing Mine)</div>
-                            <div style="color: #ccc; font-size: clamp(12px, 2cqw, 14px);">危险！感应到鲨鱼靠近时会主动追击。撞击致命。</div>
+                            <div style="color: #ff4444; font-size: clamp(16px, 3cqw, 20px); font-weight: bold; margin-bottom: 4px;">深海水雷 (Abyssal Mine)</div>
+                            <div style="color: #ccc; font-size: clamp(12px, 2cqw, 14px);">触碰即死！必须利用冲刺时的无敌状态撞碎它，高风险高回报 (+50分)。</div>
                         </div>
                     </div>
-                    <div class="gl-item" style="border: 1px solid rgba(255,0,255,0.3);">
+                    <div class="gl-item">
                         <div class="gl-icon" style="background: rgba(255,0,255,0.2); box-shadow: 0 0 15px #ff00ff;">🦑</div>
                         <div>
-                            <div style="color: #ff00ff; font-size: clamp(16px, 3cqw, 20px); font-weight: bold; margin-bottom: 4px;">瘫痪水母 (Shock Jellyfish)</div>
-                            <div style="color: #ccc; font-size: clamp(12px, 2cqw, 14px);">不致命，但触碰会导致鲨鱼短暂瘫痪，失去控制且下沉。</div>
+                            <div style="color: #ff00ff; font-size: clamp(16px, 3cqw, 20px); font-weight: bold; margin-bottom: 4px;">高压水母 (Shock Jelly)</div>
+                            <div style="color: #ccc; font-size: clamp(12px, 2cqw, 14px);">触碰不会致死，但会让你陷入严重瘫痪，丧失冲刺能力并下沉，极易成为后续水雷的活靶子。</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MUTATION -->
+                <div id="gl-mutation" class="gl-pane">
+                    <div class="gl-item">
+                        <div class="gl-icon" style="background: rgba(255,204,0,0.2); box-shadow: 0 0 15px #ffcc00;">⚡</div>
+                        <div>
+                            <div style="color: #ffcc00; font-size: clamp(16px, 3cqw, 20px); font-weight: bold; margin-bottom: 4px;">液压鳍 (Hydraulic Fins)</div>
+                            <div style="color: #ccc; font-size: clamp(12px, 2cqw, 14px);">提升捕食后获取冲刺怒气的效率。让你更频繁地触发无敌冲刺。</div>
+                        </div>
+                    </div>
+                    <div class="gl-item">
+                        <div class="gl-icon" style="background: rgba(0,255,255,0.2); box-shadow: 0 0 15px #00ffff;">🧲</div>
+                        <div>
+                            <div style="color: #00ffff; font-size: clamp(16px, 3cqw, 20px); font-weight: bold; margin-bottom: 4px;">生物电磁 (Bio-Magnetism)</div>
+                            <div style="color: #ccc; font-size: clamp(12px, 2cqw, 14px);">极大增强吸铁石的吸附半径，甚至在没有吸铁石时也能提供微弱的全局吸附力。</div>
+                        </div>
+                    </div>
+                    <div class="gl-item">
+                        <div class="gl-icon" style="background: rgba(0,255,255,0.2); box-shadow: 0 0 15px #00ffff;">🛡️</div>
+                        <div>
+                            <div style="color: #00ffff; font-size: clamp(16px, 3cqw, 20px); font-weight: bold; margin-bottom: 4px;">深渊外壳 (Abyssal Plating)</div>
+                            <div style="color: #ccc; font-size: clamp(12px, 2cqw, 14px);">赋予一层坚不可摧的护盾，可为你抵挡一次原本致命的伤害。</div>
+                        </div>
+                    </div>
+                    <div class="gl-item">
+                        <div class="gl-icon" style="background: rgba(255,255,255,0.2); box-shadow: 0 0 15px #ffffff;">💨</div>
+                        <div>
+                            <div style="color: #ffffff; font-size: clamp(16px, 3cqw, 20px); font-weight: bold; margin-bottom: 4px;">流线型躯体 (Streamlined Body)</div>
+                            <div style="color: #ccc; font-size: clamp(12px, 2cqw, 14px);">永久提升基础游动速度乘区，在面对紧迫的障碍物时拥有更强的机动性。</div>
+                        </div>
+                    </div>
+                    <div class="gl-item">
+                        <div class="gl-icon" style="background: rgba(255,204,0,0.2); box-shadow: 0 0 15px #ffcc00;">💎</div>
+                        <div>
+                            <div style="color: #ffcc00; font-size: clamp(16px, 3cqw, 20px); font-weight: bold; margin-bottom: 4px;">贪婪巨口 (Golden Maw)</div>
+                            <div style="color: #ccc; font-size: clamp(12px, 2cqw, 14px);">得分乘区成倍暴涨。吞噬发光鱼、撞碎礁石与水雷带来的分数将带来巨额收益。</div>
+                        </div>
+                    </div>
+                    <div class="gl-item">
+                        <div class="gl-icon" style="background: rgba(255,0,0,0.2); box-shadow: 0 0 15px #ff0000;">🦖</div>
+                        <div>
+                            <div style="color: #ff0000; font-size: clamp(16px, 3cqw, 20px); font-weight: bold; margin-bottom: 4px;">利维坦巨兽 (Leviathan Form)</div>
+                            <div style="color: #ccc; font-size: clamp(12px, 2cqw, 14px);">【终极基因】体型暴增 1.5 倍，无敌冲刺时间直接翻倍！化身深海霸主横扫一切。</div>
                         </div>
                     </div>
                 </div>
