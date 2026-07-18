@@ -1696,6 +1696,10 @@ class Renderer {
         if (engine.state !== 'MENU') {
             ctx.save(); ctx.translate(shark.x, shark.y);
             
+            if (engine.mutationSystem && engine.mutationSystem.modifiers.invincibleTimer > 0) {
+                ctx.globalAlpha = 0.5 + Math.sin(engine.frameCount * 0.15) * 0.5;
+            }
+            
             let tilt = shark.velocity * 0.06;
             if (shark.isDashing || shark.inCurrent) tilt = 0;
             ctx.rotate(tilt);
@@ -2276,9 +2280,23 @@ class GameEngine {
 
         if (this.shark.y - this.shark.radius < 0) {
             if (isInvincible) { this.shark.y = this.shark.radius; this.shark.velocity = 0; }
+            else if (this.mutationSystem && this.mutationSystem.modifiers.leviathan) {
+                // Leviathan Wall Bounce
+                this.shark.y = this.shark.radius; 
+                this.shark.velocity = Math.abs(this.shark.velocity) * 0.8 + 2; 
+                this.audio.play('smash');
+                this.cameraShake = 5;
+            }
             else { this.triggerGameOver(); return; }
         } else if (this.shark.y + this.shark.radius > cvsH) {
             if (isInvincible) { this.shark.y = cvsH - this.shark.radius; this.shark.velocity = 0; }
+            else if (this.mutationSystem && this.mutationSystem.modifiers.leviathan) {
+                // Leviathan Wall Bounce
+                this.shark.y = cvsH - this.shark.radius; 
+                this.shark.velocity = -Math.abs(this.shark.velocity) * 0.8 - 2; 
+                this.audio.play('smash');
+                this.cameraShake = 5;
+            }
             else { this.triggerGameOver(); return; }
         }
         
@@ -2323,11 +2341,21 @@ class GameEngine {
         if (this.frameCount % mineInterval === 0 && this.score > 300 && this.mines.length < 8 && !this.bossSystem.active) this.mines.push({ x: cvsW, y: Math.random() * (cvsH - 100) + 50, radius: 16, speed: Math.random() * 1.5 + 0.5 });
 
         // Visual spawns
-        if (this.frameCount % 15 === 0 && this.bubbles.length < 100) {
-            this.bubbles.push({ x: this.shark.x + 10, y: this.shark.y, radius: Math.random() * 2 + 1, vx: -currentSpeed * 0.8, vy: -Math.random() * 1.5 - 0.5, alpha: 0.6 });
+        if (this.shark.isDashing) {
+            let dashFrozen = this.mutationSystem && this.mutationSystem.modifiers.invincibleTimer > 0;
+            if (!dashFrozen) {
+                this.shark.dashTimer--;
+                if (this.shark.dashTimer <= 0) { 
+                    this.shark.isDashing = false; 
+                    this.shark.huntPoints = 0; 
+                    this.shark.comboCount = 0;
+                }
+            }
         }
         if (this.shark.isDashing && this.frameCount % 2 === 0) {
-            this.entityManager.spawnParticles(this.shark.x, this.shark.y, '#ff3333', 1, 0.5);
+            this.entityManager.spawnParticles(this.shark.x, this.shark.y, '#ff3333', 2, 0.5);
+            // Jet exhaust extra particles for visual coverage of the tail hitbox
+            this.entityManager.spawnParticles(this.shark.x - 40, this.shark.y, '#ff8800', 1, 0.2);
         }
 
         // Update Background
@@ -2359,16 +2387,6 @@ class GameEngine {
             b.x += b.vx + n * 0.8;
             b.y += b.vy;
             if (b.y < 0 || b.x < 0) this.bubbles.splice(i, 1);
-        }
-
-        if (this.shark.isDashing) {
-            this.shark.dashTimer--;
-            if (this.shark.dashTimer <= 0) { 
-                this.shark.isDashing = false; 
-                this.shark.huntPoints = 0; 
-                this.shark.comboCount = 0;
-                this.shark.comboActive = false;
-            }
         }
 
         if (this.shark.comboCount > 0) {
@@ -2407,12 +2425,18 @@ class GameEngine {
             m.x -= currentSpeed * 1.1; 
             if (m.y < sharkCY) m.y += m.speed; else if (m.y > sharkCY) m.y -= m.speed;
 
-            if (this.checkCollision(sharkCX, sharkCY, this.shark.radius, m.x - m.radius, m.y - m.radius, m.radius*2, m.radius*2)) {
-                if (isInvincible) {
+            let hitBody = this.checkCollision(sharkCX, sharkCY, this.shark.radius, m.x - m.radius, m.y - m.radius, m.radius*2, m.radius*2);
+            let hitTail = this.shark.isDashing && this.checkCollision(this.shark.x - 40, this.shark.y, 40, m.x - m.radius, m.y - m.radius, m.radius*2, m.radius*2);
+            if (hitBody || hitTail) {
+                if (isInvincible || hitTail) {
                     this.audio.play('explosion'); this.score += Math.floor(50 * (this.mutationSystem ? this.mutationSystem.modifiers.scoreMult : 1)); 
                     this.entityManager.spawnText(m.x, m.y, "+50", "#ff4444");
                     this.entityManager.spawnParticles(m.x, m.y, '#ff4444', 35, 1.5);
                     this.cameraShake = 15;
+                    if (this.mutationSystem) {
+                        let depthMult = 1 + (this.depth / 1000);
+                        this.mutationSystem.addDna(this.mutationSystem.baseDnaPerFish * 3 * depthMult);
+                    }
                     this.mines.splice(i, 1);
                 } else if (this.shark.shield) {
                     this.runStats.shieldsBroken++;
@@ -2436,11 +2460,17 @@ class GameEngine {
             let jelly = this.jellyfishes[i];
             jelly.x -= currentSpeed * 0.7; jelly.y += Math.sin(this.frameCount * 0.05 + jelly.offset) * 2; 
             let dist = Math.hypot(sharkCX - jelly.x, sharkCY - jelly.y);
-            if (dist < this.shark.radius + jelly.radius) {
-                if (isInvincible) { 
+            let hitBody = dist < this.shark.radius + jelly.radius;
+            let hitTail = this.shark.isDashing && this.checkCollision(this.shark.x - 40, this.shark.y, 40, jelly.x - jelly.radius, jelly.y - jelly.radius, jelly.radius*2, jelly.radius*2);
+            if (hitBody || hitTail) {
+                if (isInvincible || hitTail) { 
                     this.audio.play('smash'); this.score += Math.floor(30 * (this.mutationSystem ? this.mutationSystem.modifiers.scoreMult : 1)); 
                     this.entityManager.spawnText(jelly.x, jelly.y, "+30", "#ff00ff");
                     this.entityManager.spawnParticles(jelly.x, jelly.y, '#ff00ff', 15);
+                    if (this.mutationSystem) {
+                        let depthMult = 1 + (this.depth / 1000);
+                        this.mutationSystem.addDna(this.mutationSystem.baseDnaPerFish * 3 * depthMult);
+                    }
                     this.jellyfishes.splice(i, 1); 
                 } 
                 else if (this.shark.shield) { 
@@ -2464,13 +2494,19 @@ class GameEngine {
         // Obstacles
         for (let i = this.obstacles.length - 1; i >= 0; i--) {
             let obs = this.obstacles[i]; obs.x -= currentSpeed;
-            if (this.checkCollision(sharkCX, sharkCY, this.shark.radius, obs.x, obs.y, obs.width, obs.height)) {
-                if (isInvincible) { 
+            let hitBody = this.checkCollision(sharkCX, sharkCY, this.shark.radius, obs.x, obs.y, obs.width, obs.height);
+            let hitTail = this.shark.isDashing && this.checkCollision(this.shark.x - 40, this.shark.y, 40, obs.x, obs.y, obs.width, obs.height);
+            if (hitBody || hitTail) {
+                if (isInvincible || hitTail) { 
                     this.audio.play('smash'); 
                     let pts = this.shark.inCurrent ? 40 : 20; this.score += Math.floor(pts * (this.mutationSystem ? this.mutationSystem.modifiers.scoreMult : 1)); 
                     this.entityManager.spawnText(obs.x, sharkCY, `+${pts}`, "#ffffff");
                     this.entityManager.spawnParticles(obs.x, sharkCY, '#aaa', 30, 1.4);
                     this.cameraShake = 8;
+                    if (this.mutationSystem) {
+                        let depthMult = 1 + (this.depth / 1000);
+                        this.mutationSystem.addDna(this.mutationSystem.baseDnaPerFish * 3 * depthMult);
+                    }
                     this.obstacles.splice(i, 1); 
                     continue; 
                 } 
@@ -2507,6 +2543,9 @@ class GameEngine {
                 let magBonus = this.mutationSystem ? this.mutationSystem.modifiers.magnetRadiusBonus : 0;
                 let isMagnetActive = this.shark.magnetTimer > 0;
                 let activeDist = isMagnetActive ? (300 + magBonus) : (100 + magBonus);
+                if (this.mutationSystem && this.mutationSystem.modifiers.leviathan) {
+                    activeDist = isMagnetActive ? (300 + magBonus) : (200 + magBonus); // Baseline 200 for Leviathan
+                }
                 
                 let distToShark = Math.hypot(sharkCX - fish.x, sharkCY - fish.y);
                 if (distToShark < activeDist) {
@@ -2591,7 +2630,7 @@ class GameEngine {
                     this.shark.huntPoints += huntGain; 
                     if (this.shark.huntPoints >= 100) { 
                         this.shark.isDashing = true; 
-                        let dashTime = 150 * (this.mutationSystem && this.mutationSystem.modifiers.leviathan ? 2 : 1);
+                        let dashTime = this.mutationSystem && this.mutationSystem.modifiers.leviathan ? 300 : 150;
                         this.shark.dashTimer = dashTime; 
                         this.audio.play('dash'); 
                         this.entityManager.spawnText(sharkCX, sharkCY - 30, "RUSH!", "#ff0000");
