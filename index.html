@@ -160,6 +160,7 @@
         <div id="main-menu">
             <div id="menu-logo">ABYSS DASH <span id="easter-egg-shark" style="display:inline-block; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer;">🦈</span></div>
             <div class="menu-btn" id="btn-start">START GAME</div>
+            <div class="menu-btn" id="btn-contract" style="display: none; background: linear-gradient(135deg, #8b0000, #ff0000); box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);">ABYSSAL CONTRACT (深海契约)</div>
             <div class="menu-btn" id="btn-skins">SKINS (皮肤)</div>
             <div class="menu-btn" id="btn-glossary">ENCYCLOPEDIA (图鉴)</div>
             <div class="intro-box">
@@ -198,6 +199,39 @@
             <div style="font-size: clamp(14px, 2.5cqw, 18px); color: #e0f0ff; margin-bottom: 25px; font-weight: 500; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Choose your evolutionary path</div>
             <div id="upgrade-cards" style="display: flex; gap: 15px; width: 90%; max-width: 900px; justify-content: center; flex-wrap: wrap;">
                 <!-- Cards injected by JS -->
+            </div>
+        </div>
+
+        <div id="contract-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.7); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+            <div class="modal-panel" style="width: 85%; max-width: 500px; border-color: #ff4444; box-shadow: inset 0 0 50px rgba(255,0,0,0.1), 0 0 20px rgba(255,0,0,0.3);">
+                <h2 style="font-family: 'Orbitron', sans-serif; color: #ff4444; font-size: clamp(20px, 5cqw, 28px); margin: 0 0 5px 0; text-align: center; text-shadow: 0 0 10px #ff0000; letter-spacing: 2px;">ABYSSAL CONTRACT</h2>
+                <div style="text-align: center; color: #aaa; font-size: 14px; margin-bottom: 20px;">勾选深海畸变机制，换取极限挑战</div>
+                
+                <label style="display: flex; align-items: center; background: rgba(255,0,0,0.1); padding: 15px; border-radius: 8px; margin-bottom: 12px; cursor: pointer; border: 1px solid rgba(255,0,0,0.2);">
+                    <input type="checkbox" id="contract-hydro" style="width: 20px; height: 20px; margin-right: 15px; accent-color: #ff4444;">
+                    <div>
+                        <div style="color: #ff8888; font-weight: bold; font-size: 16px;">🌡️ 热液失控 (Hydrothermal Venting)</div>
+                        <div style="color: #ccc; font-size: 12px; margin-top: 4px;">海底热泉喷发。洋流区域会瞬间融化护盾，无护盾时强行扣除 100 怒气。</div>
+                    </div>
+                </label>
+                
+                <label style="display: flex; align-items: center; background: rgba(255,0,0,0.1); padding: 15px; border-radius: 8px; margin-bottom: 12px; cursor: pointer; border: 1px solid rgba(255,0,0,0.2);">
+                    <input type="checkbox" id="contract-magnet" style="width: 20px; height: 20px; margin-right: 15px; accent-color: #ff4444;">
+                    <div>
+                        <div style="color: #ff8888; font-weight: bold; font-size: 16px;">🧲 地磁逆转 (Magnetic Inversion)</div>
+                        <div style="color: #ccc; font-size: 12px; margin-top: 4px;">超深海磁场畸变。生物电磁的吸力变为斥力，极度考验微操。</div>
+                    </div>
+                </label>
+                
+                <label style="display: flex; align-items: center; background: rgba(255,0,0,0.1); padding: 15px; border-radius: 8px; margin-bottom: 20px; cursor: pointer; border: 1px solid rgba(255,0,0,0.2);">
+                    <input type="checkbox" id="contract-decay" style="width: 20px; height: 20px; margin-right: 15px; accent-color: #ff4444;">
+                    <div>
+                        <div style="color: #ff8888; font-weight: bold; font-size: 16px;">🧪 基因衰变 (Cellular Decay)</div>
+                        <div style="color: #ccc; font-size: 12px; margin-top: 4px;">深海辐射增强。每吃掉 20 条鱼不再提供经验，而是随机降低一项变异等级。</div>
+                    </div>
+                </label>
+                
+                <div class="menu-btn" id="btn-close-contract" style="margin: 0 auto; width: 80%; background: #222; border-color: #555; color: #fff;">CONFIRM (确认)</div>
             </div>
         </div>
 
@@ -522,16 +556,19 @@ class MutationSystem {
             speedBonus: 0,
             scoreMult: 1.0,
             leviathan: false,
-            invincibleTimer: 0
+            invincibleTimer: 0,
+            jellyfishGraft: false
         };
         
         this.upgradePool = [
-            { id: 'dash_cd', name: '液压鳍 (Hydraulic Fins)', desc: '冲刺冷却时间 -15%', icon: '⚡', level: 0, maxLevel: 5, apply: () => { this.modifiers.dashCdMult *= 0.85; } },
-            { id: 'magnet', name: '生物电磁 (Bio-Magnetism)', desc: '磁吸范围 +50%', icon: '🧲', level: 0, maxLevel: 3, apply: () => { this.modifiers.magnetRadiusBonus += 75; } },
-            { id: 'shield', name: '深渊外壳 (Abyssal Plating)', desc: '立刻获得一层免死护盾', icon: '🛡️', level: 0, maxLevel: 1, apply: () => { this.modifiers.shield = 1; this.engine.shark.shield = true; } },
-            { id: 'speed', name: '流线型躯体 (Streamlined Body)', desc: '基础游动速度 +10%', icon: '💨', level: 0, maxLevel: 5, apply: () => { this.modifiers.speedBonus += 0.1; } },
-            { id: 'score', name: '贪婪巨口 (Golden Maw)', desc: '吞噬分数 +50%', icon: '💎', level: 0, maxLevel: 5, apply: () => { this.modifiers.scoreMult += 0.5; } },
-            { id: 'leviathan', name: '利维坦巨兽 (Leviathan Form)', desc: '体型增大，冲刺翻倍，自带霸体', icon: '🦖', level: 0, maxLevel: 1, apply: () => { this.modifiers.leviathan = true; } }
+            { id: 'dash_cd', name: '液压鳍 (Hydraulic Fins)', desc: '冲刺冷却时间 -15%', icon: '⚡', level: 0, maxLevel: 5, apply: () => { this.modifiers.dashCdMult *= 0.85; }, remove: () => { this.modifiers.dashCdMult /= 0.85; } },
+            { id: 'magnet', name: '生物电磁 (Bio-Magnetism)', desc: '磁吸范围 +50%', icon: '🧲', level: 0, maxLevel: 3, apply: () => { this.modifiers.magnetRadiusBonus += 75; }, remove: () => { this.modifiers.magnetRadiusBonus -= 75; } },
+            { id: 'shield', name: '深渊外壳 (Abyssal Plating)', desc: '立刻获得一层免死护盾', icon: '🛡️', level: 0, maxLevel: 1, apply: () => { this.modifiers.shield = 1; this.engine.shark.shield = true; }, remove: () => { this.modifiers.shield = 0; } },
+            { id: 'speed', name: '流线型躯干 (Streamlined Body)', desc: '基础游动速度 +10%', icon: '💨', level: 0, maxLevel: 5, apply: () => { this.modifiers.speedBonus += 0.1; }, remove: () => { this.modifiers.speedBonus -= 0.1; } },
+            { id: 'score', name: '贪婪巨口 (Golden Maw)', desc: '吞噬分数 +50%', icon: '💎', level: 0, maxLevel: 5, apply: () => { this.modifiers.scoreMult += 0.5; }, remove: () => { this.modifiers.scoreMult -= 0.5; } },
+            { id: 'leviathan', name: '利维坦巨兽 (Leviathan)', desc: '体型膨胀，冲刺翻倍，但碰撞体积变大', icon: '🦖', level: 0, maxLevel: 1, apply: () => { this.modifiers.leviathan = true; }, remove: () => { this.modifiers.leviathan = false; } },
+            { id: 'cataract', name: '深海盲区 (Bioluminescent Cataract)', desc: '致盲5秒，熬过后分数/经验+200%', icon: '👁️', level: 0, maxLevel: 1, apply: () => { this.modifiers.scoreMult += 2.0; this.engine.shark.inkTimer = 300; this.engine.audio.play('explosion'); }, remove: () => { this.modifiers.scoreMult -= 2.0; } },
+            { id: 'jellyfish_graft', name: '水母共生 (Jellyfish Graft)', desc: '减速15%，撞击水母秒满怒气', icon: '🧬', level: 0, maxLevel: 1, apply: () => { this.modifiers.speedBonus -= 0.15; this.modifiers.jellyfishGraft = true; }, remove: () => { this.modifiers.speedBonus += 0.15; this.modifiers.jellyfishGraft = false; } }
         ];
         
         this.fallbackUpgrades = [
@@ -548,11 +585,24 @@ class MutationSystem {
         this.level = 1;
         this.dna = 0;
         this.nextLevelDna = 15;
-        this.modifiers = { dashCdMult: 1.0, magnetRadiusBonus: 0, shield: 0, speedBonus: 0, scoreMult: 1.0, leviathan: false, invincibleTimer: 0 };
+        this.modifiers = { dashCdMult: 1.0, magnetRadiusBonus: 0, shield: 0, speedBonus: 0, scoreMult: 1.0, leviathan: false, invincibleTimer: 0, jellyfishGraft: false };
         this.upgradePool.forEach(u => u.level = 0);
         this.updateHUD();
     }
     
+    downgradeRandom() {
+        let activeUpgrades = this.upgradePool.filter(u => u.level > 0);
+        if (activeUpgrades.length === 0) {
+            this.dna = 0; 
+            return;
+        }
+        let randIdx = Math.floor(Math.random() * activeUpgrades.length);
+        let upgradeToDowngrade = activeUpgrades[randIdx];
+        upgradeToDowngrade.level--;
+        if (upgradeToDowngrade.remove) upgradeToDowngrade.remove();
+        this.engine.audio.play('explosion');
+    }
+
     addDna(amount) {
         if (this.engine.state !== 'PLAYING') return;
         this.dna += amount;
@@ -574,7 +624,7 @@ class MutationSystem {
         this.nextLevelDna = Math.floor(15 * Math.pow(1.6, this.level - 1));
         
         this.engine.state = 'LEVELUP';
-        this.engine.audio.play('dash'); // Temporary sound for level up
+        this.engine.audio.play('dash'); 
         
         this.showDraftModal();
     }
@@ -648,7 +698,7 @@ class MutationSystem {
         const modal = document.getElementById('levelup-modal');
         modal.style.display = 'none';
         
-        this.modifiers.invincibleTimer = 90; // 1.5s at 60fps
+        this.modifiers.invincibleTimer = 90; 
         
         this.engine.lastTime = performance.now();
         this.engine.state = 'PLAYING';
@@ -874,7 +924,6 @@ class BossSystem {
         if (isHit && b.type !== 'octopus') ctx.filter = 'brightness(2)';
         
         if (b.type === 'octopus') {
-            // Procedural drawing
             ctx.fillStyle = '#4a004a';
             ctx.beginPath(); ctx.arc(0, 0, b.width/2, 0, Math.PI*2); ctx.fill();
             ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(-20, -10, 18, 0, Math.PI*2); ctx.fill();
@@ -893,7 +942,6 @@ class BossSystem {
             ctx.shadowBlur = 15; ctx.shadowColor = '#f00';
             ctx.fillStyle = '#f00'; ctx.beginPath(); ctx.arc(b.width/4 + Math.sin(b.timer*0.2)*5, 0, 6, 0, Math.PI*2); ctx.fill(); 
             ctx.shadowBlur = 0;
-            // Spikes
             ctx.fillStyle = '#999';
             for(let i=0; i<4; i++) {
                 ctx.beginPath(); ctx.moveTo(-b.width/2 + 20 + i*30, b.height/2); ctx.lineTo(-b.width/2 + 25 + i*30, b.height/2 + 15); ctx.lineTo(-b.width/2 + 30 + i*30, b.height/2); ctx.fill();
@@ -926,11 +974,10 @@ class BossSystem {
                 const drawHeight = (sh / sw) * drawWidth;
                 
                 ctx.save();
-                ctx.scale(-1, 1); // Flip horizontally to face left
-                ctx.filter = 'sepia(1) hue-rotate(-50deg) saturate(5) brightness(0.4)'; // Dark red evil glow
+                ctx.scale(-1, 1); 
+                ctx.filter = 'sepia(1) hue-rotate(-50deg) saturate(5) brightness(0.4)';
                 ctx.shadowBlur = 40; ctx.shadowColor = '#ff0000';
                 
-                // Adjust drawing offset so center aligns
                 ctx.drawImage(engine.sharkSprite, sx, sy, sw, sh, -drawWidth/2, -drawHeight/2, drawWidth, drawHeight);
                 ctx.restore();
             } else {
@@ -1123,17 +1170,16 @@ class SkinManager {
                 type: 'image',
                 src: 'normal_shark.png',
                 cols: 4, rows: 2,
-                animFrames: 2, // 恢复最初的只用2帧
+                animFrames: 2, 
                 cropLeft: 0.12, cropTop: 0.25, cropRight: 0.05, cropBottom: 0.35
             },
             { 
                 id: 'cyber_shark', 
                 name: 'Cyber Shark (机器鲨鱼)', 
                 type: 'image', 
-                type: 'image', 
                 src: 'cyber_shark.png',
                 cols: 4, rows: 2,
-                animFrames: 2, // 恢复最初的只用2帧
+                animFrames: 2, 
                 cropLeft: 0.12, cropTop: 0.25, cropRight: 0.05, cropBottom: 0.35
             }
         ];
@@ -1163,7 +1209,6 @@ class SkinManager {
         img.onerror = () => {
             console.error("Failed to load skin image: " + skinConfig.src);
             this.isLoaded = false;
-            // Fallback to code drawn shark on error
             this.currentSkin = this.availableSkins.find(s => s.type === 'code') || this.currentSkin;
         };
     }
@@ -1523,7 +1568,6 @@ class Renderer {
         let g3 = Math.floor(3 * (1 - depth) + 0 * depth);
         let b3 = Math.floor(8 * (1 - depth) + 2 * depth);
 
-        // Background Gradient
         let bgGradient = ctx.createLinearGradient(0, 0, 0, baseHeight);
         bgGradient.addColorStop(0, `rgb(${r1}, ${g1}, ${b1})`);
         bgGradient.addColorStop(0.6, `rgb(${r2}, ${g2}, ${b2})`);
@@ -1531,7 +1575,6 @@ class Renderer {
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, baseWidth, baseHeight);
 
-        // Parallax Mountains
         let mR = Math.floor(4 * (1 - depth) + 1 * depth);
         let mG = Math.floor(7 * (1 - depth) + 1 * depth);
         let mB = Math.floor(20 * (1 - depth) + 4 * depth);
@@ -1544,7 +1587,6 @@ class Renderer {
             ctx.fill();
         });
 
-        // Ambient Light rays
         let rayOpacity1 = 0.08 * (1 - depth * 0.8);
         let rayOpacity2 = 0.03 * (1 - depth * 0.8);
         let gradient = ctx.createLinearGradient(baseWidth/2, 0, baseWidth/2, baseHeight);
@@ -1554,9 +1596,7 @@ class Renderer {
         ctx.lineTo(500 + Math.sin(engine.frameCount*0.015)*60, baseHeight); ctx.lineTo(150 + Math.sin(engine.frameCount*0.015)*60, baseHeight);
         ctx.fill();
 
-        // Water Currents (Premium Rushing Stream Effect)
         engine.currentZones.forEach(cz => {
-            // Background glow of the current
             let streamGrad = ctx.createLinearGradient(0, cz.y, 0, cz.y + cz.h);
             streamGrad.addColorStop(0, 'rgba(0, 220, 255, 0)'); 
             streamGrad.addColorStop(0.2, 'rgba(0, 255, 255, 0.15)'); 
@@ -1569,9 +1609,8 @@ class Renderer {
             ctx.save();
             ctx.beginPath();
             ctx.rect(cz.x, cz.y, cz.w, cz.h);
-            ctx.clip(); // Constrain details within the zone
+            ctx.clip(); 
 
-            // Draw fluid sine waves
             ctx.lineWidth = 2;
             for(let w = 0; w < 3; w++) {
                 ctx.beginPath();
@@ -1584,7 +1623,6 @@ class Renderer {
                 ctx.stroke();
             }
 
-            // Draw high-speed glowing streaks
             ctx.lineCap = 'round';
             for(let j = 0; j < 8; j++) {
                 let speed = 25 + j*5;
@@ -1606,10 +1644,8 @@ class Renderer {
             ctx.restore();
         });
 
-        // Planks / Debris
         engine.planks.forEach(p => { ctx.fillStyle = `rgba(150, 255, 255, ${p.alpha})`; ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill(); });
         
-        // Bubbles
         engine.bubbles.forEach(b => {
             ctx.strokeStyle = `rgba(100, 255, 255, ${b.alpha})`;
             ctx.lineWidth = 1;
@@ -1618,13 +1654,11 @@ class Renderer {
             ctx.stroke();
         });
 
-        // Speed Lines during dash
         if (shark.isDashing || shark.inCurrent) {
             ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
             for(let i=0; i<15; i++) { ctx.fillRect(Math.random() * baseWidth, Math.random() * baseHeight, Math.random() * 200 + 50, 1.5); }
         }
 
-        // Jellyfishes
         ctx.shadowBlur = 20; ctx.shadowColor = '#ff00ff';
         engine.jellyfishes.forEach(jelly => {
             ctx.fillStyle = 'rgba(255, 100, 255, 0.8)'; ctx.beginPath(); ctx.arc(jelly.x, jelly.y, jelly.radius, Math.PI, 0); ctx.fill();
@@ -1636,22 +1670,17 @@ class Renderer {
         });
         ctx.shadowBlur = 0;
 
-        // Fishes
         engine.fishes.forEach(fish => {
             if (fish.active) {
                 ctx.shadowBlur = 15; ctx.shadowColor = '#00ffff';
                 ctx.fillStyle = '#00ffff'; 
-                // Body
                 ctx.beginPath(); ctx.arc(fish.x, fish.y, fish.radius, 0, Math.PI * 2); ctx.fill();
-                // Tail (flipped to right side)
                 ctx.beginPath(); ctx.moveTo(fish.x + fish.radius - 1, fish.y); ctx.lineTo(fish.x + fish.radius + 8, fish.y - 5); ctx.lineTo(fish.x + fish.radius + 8, fish.y + 5); ctx.fill();
-                // Eye (flipped to left side)
                 ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(fish.x - 2, fish.y - 1, 1.5, 0, Math.PI*2); ctx.fill();
             }
         });
         ctx.shadowBlur = 0; 
         
-        // Powerups
         engine.powerups.forEach(p => {
             ctx.fillStyle = p.type === 'shield' ? '#00ffff' : '#ff00ff';
             ctx.shadowBlur = 20; ctx.shadowColor = ctx.fillStyle;
@@ -1667,7 +1696,6 @@ class Renderer {
         });
         ctx.shadowBlur = 0;
 
-        // Mines
         engine.mines.forEach(m => {
             ctx.fillStyle = '#222'; ctx.strokeStyle = '#666'; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
@@ -1682,7 +1710,6 @@ class Renderer {
             ctx.shadowBlur = 0;
         });
 
-        // Obstacles
         ctx.fillStyle = '#09081a'; ctx.strokeStyle = '#222144'; ctx.lineWidth = 3;
         engine.obstacles.forEach(obs => {
             if (obs.type === 'debris') {
@@ -1690,6 +1717,8 @@ class Renderer {
                 ctx.fillRect(obs.x, obs.y, obs.width, obs.height); ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
                 ctx.beginPath(); ctx.moveTo(obs.x + 5, obs.y + 5); ctx.lineTo(obs.x + obs.width - 5, obs.y + obs.height - 5); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(obs.x + obs.width - 5, obs.y + 5); ctx.lineTo(obs.x + 5, obs.y + obs.height - 5); ctx.stroke();
+            } else if (obs.type === 'jellyfish') {
+                ctx.fillStyle = 'rgba(255, 100, 255, 0.4)'; ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
             } else {
                 ctx.fillStyle = '#09081a'; ctx.strokeStyle = '#222144';
                 ctx.fillRect(obs.x, obs.y, obs.width, obs.height); ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
@@ -1699,7 +1728,6 @@ class Renderer {
             }
         });
 
-        // Particles
         engine.particles.forEach(p => {
             ctx.fillStyle = p.color;
             ctx.globalAlpha = p.alpha;
@@ -1707,7 +1735,6 @@ class Renderer {
             ctx.globalAlpha = 1.0;
         });
 
-        // Floating Texts
         ctx.font = "bold 16px 'Orbitron', sans-serif";
         ctx.textAlign = 'center';
         engine.floatingTexts.forEach(ft => {
@@ -1719,7 +1746,6 @@ class Renderer {
             ctx.shadowBlur = 0;
         });
 
-        // Shark
         if (engine.state !== 'MENU') {
             ctx.save(); ctx.translate(shark.x, shark.y);
             
@@ -1765,13 +1791,11 @@ class Renderer {
                 const frameWidth = engine.sharkSprite.width / spriteCols;
                 const frameHeight = engine.sharkSprite.height / spriteRows;
                 
-                // Toggle between frames based on animFrames (usually 2, mimicking the original behavior)
                 const framesToPlay = skin.animFrames || (spriteCols * spriteRows);
                 const frameIndex = (Math.floor(engine.frameCount / 10) % framesToPlay) || 0;
                 const col = frameIndex % spriteCols;
                 const row = Math.floor(frameIndex / spriteCols);
                 
-                // Read crop margins from skin config
                 const cropLeft = frameWidth * (skin.cropLeft || 0); 
                 const cropTop = frameHeight * (skin.cropTop || 0); 
                 const cropRight = frameWidth * (skin.cropRight || 0); 
@@ -1783,11 +1807,9 @@ class Renderer {
                 const sx = col * frameWidth + cropLeft;
                 const sy = row * frameHeight + cropTop;
                 
-                // Scale the shark to match collision box.
                 const drawWidth = shark.width * 1.2; 
                 const drawHeight = (sh / sw) * drawWidth;
                 
-                // Offset so the nose aligns roughly with right edge of collision box
                 const dx = -shark.width * 0.1;
                 const dy = -drawHeight * 0.5;
                 
@@ -1796,9 +1818,9 @@ class Renderer {
                     ctx.shadowColor = shark.isDashing ? 'red' : '#00ffff';
                 }
                 if (shark.isParalyzed) {
-                    ctx.filter = 'sepia(1) hue-rotate(250deg) saturate(3)'; // Make it look purple-ish
+                    ctx.filter = 'sepia(1) hue-rotate(250deg) saturate(3)'; 
                 } else if (shark.isDashing) {
-                    ctx.filter = 'sepia(1) hue-rotate(-50deg) saturate(5)'; // Make it look red
+                    ctx.filter = 'sepia(1) hue-rotate(-50deg) saturate(5)'; 
                 }
                 
                 ctx.drawImage(
@@ -1813,25 +1835,21 @@ class Renderer {
                 ctx.fillStyle = shark.isDashing ? '#4a0005' : (shark.isParalyzed ? '#2a002a' : '#040511');
                 if(shark.isDashing) { ctx.shadowBlur = 20; ctx.shadowColor = 'red'; } else if (shark.inCurrent) { ctx.shadowBlur = 15; ctx.shadowColor = '#00ffff'; }
                 
-                // Draw body with animated tail
                 ctx.beginPath(); 
-                ctx.moveTo(0, tailAngle); // Tail tip
+                ctx.moveTo(0, tailAngle); 
                 ctx.quadraticCurveTo(shark.width * 0.3, -shark.height * 0.8, shark.width * 0.7, -shark.height * 0.5); 
-                ctx.lineTo(shark.width, 0); // Nose
-                ctx.quadraticCurveTo(shark.width * 0.6, shark.height * 0.7, 0, tailAngle); // Back to tail
+                ctx.lineTo(shark.width, 0); 
+                ctx.quadraticCurveTo(shark.width * 0.6, shark.height * 0.7, 0, tailAngle); 
                 ctx.fill();
 
-                // Gills
                 ctx.strokeStyle = '#223'; ctx.lineWidth = 1.5;
                 ctx.beginPath(); ctx.moveTo(shark.width * 0.4, -4); ctx.lineTo(shark.width * 0.4 - 3, 4); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(shark.width * 0.45, -5); ctx.lineTo(shark.width * 0.45 - 3, 5); ctx.stroke();
                 ctx.beginPath(); ctx.moveTo(shark.width * 0.5, -4); ctx.lineTo(shark.width * 0.5 - 3, 4); ctx.stroke();
 
-                // Mouth
                 ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.moveTo(shark.width - 6, -1);
                 ctx.lineTo(shark.width - 13, -5); ctx.lineTo(shark.width - 10, 2); ctx.lineTo(shark.width - 16, 4); ctx.fill();
 
-                // Eye
                 ctx.fillStyle = shark.isDashing ? '#ff0000' : (shark.inCurrent ? '#ffffff' : (shark.isParalyzed ? '#ff00ff' : '#00ffff'));
                 ctx.beginPath(); ctx.arc(shark.width - 15, -4, 2.5, 0, Math.PI * 2); ctx.fill();
             }
@@ -1839,7 +1857,6 @@ class Renderer {
             ctx.restore(); ctx.shadowBlur = 0;
         }
 
-        // Foreground Seaweed
         ctx.fillStyle = `rgb(${Math.floor(1 * (1-depth))}, ${Math.floor(2 * (1-depth))}, ${Math.floor(5 * (1-depth))})`;
         for(let i=0; i<4; i++) {
             let sx = ((i * 250 - engine.frameCount * 0.5) % (baseWidth + 250) + (baseWidth + 250)) % (baseWidth + 250) - 100;
@@ -1849,7 +1866,6 @@ class Renderer {
             ctx.fill();
         }
 
-        // Dynamic Vignette / Depth blur effect
         if (depth > 0) {
             let vignette = ctx.createRadialGradient(baseWidth/2, baseHeight/2, baseHeight * 0.4, baseWidth/2, baseHeight/2, baseWidth * 0.8);
             vignette.addColorStop(0, 'rgba(0,0,0,0)');
@@ -1865,7 +1881,6 @@ class Renderer {
             ctx.fillRect(0,0,baseWidth,baseHeight);
         }
 
-        // Post-Processing: Tint overlay
         if (engine.state === 'PLAYING' && (shark.isDashing || shark.isParalyzed)) {
             ctx.globalCompositeOperation = 'screen';
             ctx.fillStyle = shark.isDashing ? 'rgba(255, 0, 0, 0.25)' : 'rgba(255, 0, 255, 0.25)';
@@ -1873,7 +1888,6 @@ class Renderer {
             ctx.globalCompositeOperation = 'source-over';
         }
 
-        // Screens
         if (engine.state === 'PAUSED') {
             ctx.fillStyle = 'rgba(2, 3, 8, 0.8)'; ctx.fillRect(0, 0, baseWidth, baseHeight);
             ctx.fillStyle = '#00ffff'; ctx.font = "900 clamp(28px, 6vw, 48px) 'Orbitron', sans-serif"; ctx.textAlign = 'center';
@@ -1923,9 +1937,8 @@ class EntityManager {
     }
     spawnParticles(x, y, color, count, speedScale = 1) {
         for (let i = 0; i < count; i++) {
-            // Object pooling / hard limit logic
             if (this.engine.particles.length >= 300) {
-                this.engine.particles.shift(); // Remove oldest
+                this.engine.particles.shift(); 
             }
             this.engine.particles.push({
                 x, y,
@@ -2001,14 +2014,15 @@ class InputSystem {
         this.engine.ui.pauseBtn.addEventListener('mousedown', (e) => { e.stopPropagation(); this.engine.togglePause(); });
         this.engine.ui.pauseBtn.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); this.engine.togglePause(); }, {passive: false});
 
-        window.addEventListener('mousedown', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal')) return; handleInputDown(); });
-        window.addEventListener('touchstart', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal')) return; e.preventDefault(); handleInputDown(); }, {passive: false});
-        window.addEventListener('mouseup', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal')) return; handleInputUp(); });
-        window.addEventListener('touchend', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal')) return; e.preventDefault(); handleInputUp(); }, {passive: false});
+        window.addEventListener('mousedown', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#contract-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal')) return; handleInputDown(); });
+        window.addEventListener('touchstart', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#contract-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal')) return; e.preventDefault(); handleInputDown(); }, {passive: false});
+        window.addEventListener('mouseup', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#contract-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal')) return; handleInputUp(); });
+        window.addEventListener('touchend', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#contract-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal')) return; e.preventDefault(); handleInputUp(); }, {passive: false});
         window.addEventListener('keydown', (e) => { 
             if(e.code === 'Space') { 
                 e.preventDefault(); 
                 if (document.getElementById('glossary-modal').style.display === 'flex') return;
+                if (document.getElementById('contract-modal').style.display === 'flex') return;
                 if (document.getElementById('skins-modal').style.display === 'flex') return;
                 if (document.getElementById('achievements-modal').style.display === 'flex') return;
                 if (this.engine.state === 'MENU') return;
@@ -2092,15 +2106,12 @@ class InputSystem {
         document.getElementById('easter-egg-shark').addEventListener('click', (e) => {
             easterEggClickCount++;
             if (easterEggClickCount >= 5) {
-                // Dash transformation
                 e.target.style.transform = 'scale(1.8, 0.6) translateX(10px)';
                 e.target.style.filter = 'brightness(1.5) drop-shadow(0 0 10px #0ff)';
                 
-                // Show cheat toggle in settings
                 document.getElementById('cheat-mode-container').style.display = 'block';
                 if (typeof game !== 'undefined') game.achievementManager.unlockById('cyber_hacker');
             } else {
-                // Bump effect
                 e.target.style.transform = 'scale(1.3) rotate(-15deg)';
                 setTimeout(() => { e.target.style.transform = 'scale(1) rotate(0deg)'; }, 150);
             }
@@ -2172,7 +2183,6 @@ class GameEngine {
         this.ui.update(this.score, this.shark, this.highScore, this.depth);
     }
 
-    
     togglePause() {
         if (this.state === 'PLAYING') {
             this.state = 'PAUSED';
@@ -2191,7 +2201,6 @@ class GameEngine {
         this.bossSystem = new BossSystem(this);
         this.isCheatInvincible = false;
     }
-
 
     triggerGameOver() {
         if (this.isCheatInvincible || (this.mutationSystem && this.mutationSystem.modifiers.invincibleTimer > 0)) return;
@@ -2241,7 +2250,21 @@ class GameEngine {
             if (sharkCX > cz.x && sharkCX < cz.x + cz.w && sharkCY > cz.y && sharkCY < cz.y + cz.h) this.shark.inCurrent = true;
         });
 
-        if (this.shark.inCurrent && !wasInCurrent && !this.shark.isDashing) this.audio.play('dash');
+        if (this.shark.inCurrent && !wasInCurrent) {
+            if (this.activeContracts && this.activeContracts.hydrothermal) {
+                if (this.shark.shield) {
+                    this.shark.shield = false;
+                    this.audio.play('explosion');
+                    this.entityManager.spawnParticles(sharkCX, sharkCY, '#ff0000', 30);
+                    this.cameraShake = 20;
+                } else {
+                    this.shark.huntPoints = Math.max(0, this.shark.huntPoints - 100);
+                    this.entityManager.spawnText(sharkCX, sharkCY - 20, "-100 FURY!", "#ff0000");
+                }
+            } else if (!this.shark.isDashing) {
+                this.audio.play('dash');
+            }
+        }
 
         let isInvincible = this.shark.isDashing || this.shark.inCurrent || this.isCheatInvincible || (this.mutationSystem && this.mutationSystem.modifiers.invincibleTimer > 0);
         if (this.shark.isParalyzed) {
@@ -2262,7 +2285,6 @@ class GameEngine {
             this.depth += currentSpeed * 0.05;
         }
 
-        // Apply Leviathan size
         let targetRadius = 15;
         let targetWidth = 55;
         let targetHeight = 26;
@@ -2281,24 +2303,20 @@ class GameEngine {
         if (this.isPressing) this.shark.velocity += currentDive;
         else this.shark.velocity -= currentBuoyancy;
         
-        // During boss fight: shark charges forward on X when dashing
         if (this.bossSystem.active && this.bossSystem.bossData) {
             let b = this.bossSystem.bossData;
             let bossLeft = b.x - b.width / 2;
             if (this.shark.isDashing) {
-                // Charge forward until circle edge touches boss left edge
                 let sharkCircleEdge = this.shark.x + this.shark.width / 2 + this.shark.radius;
                 if (sharkCircleEdge < bossLeft) {
                     this.shark.x += 6;
                 }
             } else {
-                // Spring back to home position
                 if (this.shark.x > 140) {
                     this.shark.x += (140 - this.shark.x) * 0.08;
                 }
             }
         } else {
-            // Outside boss fight: spring back
             let targetX = 140;
             if (this.shark.x < targetX) {
                 this.shark.x += (targetX - this.shark.x) * 0.05;
@@ -2315,7 +2333,6 @@ class GameEngine {
         if (this.shark.y - this.shark.radius < 0) {
             if (isInvincible) { this.shark.y = this.shark.radius; this.shark.velocity = 0; }
             else if (this.mutationSystem && this.mutationSystem.modifiers.leviathan) {
-                // Leviathan Wall Bounce
                 this.shark.y = this.shark.radius; 
                 this.shark.velocity = Math.abs(this.shark.velocity) * 0.8 + 2; 
                 this.audio.play('smash');
@@ -2325,7 +2342,6 @@ class GameEngine {
         } else if (this.shark.y + this.shark.radius > cvsH) {
             if (isInvincible) { this.shark.y = cvsH - this.shark.radius; this.shark.velocity = 0; }
             else if (this.mutationSystem && this.mutationSystem.modifiers.leviathan) {
-                // Leviathan Wall Bounce
                 this.shark.y = cvsH - this.shark.radius; 
                 this.shark.velocity = -Math.abs(this.shark.velocity) * 0.8 - 2; 
                 this.audio.play('smash');
@@ -2334,9 +2350,6 @@ class GameEngine {
             else { this.triggerGameOver(); return; }
         }
         
-        // Handled by ProgressionSystem
-
-        // Spawn logic
         let spawnInterval = Math.max(40, 110 - Math.floor(this.score / 20));
         
         if (this.frameCount % spawnInterval === 0 && this.frameCount > 180 && this.obstacles.length < 15 && !this.bossSystem.active) {
@@ -2374,7 +2387,6 @@ class GameEngine {
         if (this.frameCount % 500 === 0 && this.score > 100 && this.powerups.length < 5) this.powerups.push({ x: cvsW, y: Math.random() * (cvsH - 100) + 50, radius: 14, type: Math.random() > 0.5 ? 'shield' : 'magnet' });
         if (this.frameCount % mineInterval === 0 && this.score > 300 && this.mines.length < 8 && !this.bossSystem.active) this.mines.push({ x: cvsW, y: Math.random() * (cvsH - 100) + 50, radius: 16, speed: Math.random() * 1.5 + 0.5 });
 
-        // Visual spawns
         if (this.shark.isDashing) {
             let dashFrozen = this.mutationSystem && this.mutationSystem.modifiers.invincibleTimer > 0;
             if (!dashFrozen) {
@@ -2389,24 +2401,20 @@ class GameEngine {
         }
         if (this.shark.isDashing && this.frameCount % 2 === 0) {
             this.entityManager.spawnParticles(this.shark.x, this.shark.y, '#ff3333', 2, 0.5);
-            // Jet exhaust extra particles for visual coverage of the tail hitbox
             this.entityManager.spawnParticles(this.shark.x - 40, this.shark.y, '#ff8800', 1, 0.2);
         }
 
-        // Update Background
         this.bgMountains.forEach(m => {
             m.x -= currentSpeed * 0.15;
             if (m.x + m.width < 0) { m.x = cvsW; m.height = 120 + Math.random()*150; }
         });
 
-        // Update Zones & Planks
         for(let i = this.currentZones.length - 1; i >= 0; i--) {
             this.currentZones[i].x -= dynamicBaseSpeed * 1.6; 
             if (this.currentZones[i].x + this.currentZones[i].w < 0) this.currentZones.splice(i, 1);
         }
         this.planks.forEach(p => { p.x -= p.speed * speedMult * (dynamicBaseSpeed / CONFIG.INITIAL_SPEED); if(p.x < 0) p.x = cvsW; });
 
-        // Update Particles, Texts, Bubbles
         for (let i = this.particles.length - 1; i >= 0; i--) {
             let p = this.particles[i]; p.x += p.vx - currentSpeed * 0.5; p.y += p.vy; p.alpha -= p.decay;
             if (p.alpha <= 0) this.particles.splice(i, 1);
@@ -2417,7 +2425,6 @@ class GameEngine {
         }
         for (let i = this.bubbles.length - 1; i >= 0; i--) {
             let b = this.bubbles[i]; 
-            // Apply Simplex Noise for fluid dynamics
             let n = simplex.noise2D(b.x * 0.01, b.y * 0.01 + this.frameCount * 0.01);
             b.x += b.vx + n * 0.8;
             b.y += b.vy;
@@ -2436,7 +2443,6 @@ class GameEngine {
 
         if (this.shark.magnetTimer > 0) this.shark.magnetTimer--;
 
-        // Powerups
         for (let i = this.powerups.length - 1; i >= 0; i--) {
             let p = this.powerups[i]; p.x -= currentSpeed * 0.9;
             if (Math.hypot(sharkCX - p.x, sharkCY - p.y) < this.shark.radius + p.radius) {
@@ -2454,7 +2460,6 @@ class GameEngine {
             }
         }
 
-        // Mines
         for (let i = this.mines.length - 1; i >= 0; i--) {
             let m = this.mines[i]; 
             m.x -= currentSpeed * 1.1; 
@@ -2494,7 +2499,6 @@ class GameEngine {
             }
         }
 
-        // Jellyfishes
         for (let i = this.jellyfishes.length - 1; i >= 0; i--) {
             let jelly = this.jellyfishes[i];
             jelly.x -= currentSpeed * 0.7; jelly.y += Math.sin(this.frameCount * 0.05 + jelly.offset) * 2; 
@@ -2530,7 +2534,6 @@ class GameEngine {
             } else if (jelly.x + jelly.radius < 0) { this.jellyfishes.splice(i, 1); }
         }
         
-        // Obstacles
         for (let i = this.obstacles.length - 1; i >= 0; i--) {
             let obs = this.obstacles[i]; obs.x -= currentSpeed;
             let hitBody = this.checkCollision(sharkCX, sharkCY, this.shark.radius, obs.x, obs.y, obs.width, obs.height);
@@ -2573,7 +2576,6 @@ class GameEngine {
             if (obs.x + obs.width < 0) this.obstacles.splice(i, 1);
         }
 
-        // Fishes
         let mouthX = this.shark.x + this.shark.width - 5; let mouthY = this.shark.y;
         let fishInMagnetRadius = 0;
         for (let i = this.fishes.length - 1; i >= 0; i--) {
@@ -2584,14 +2586,16 @@ class GameEngine {
                 let isMagnetActive = this.shark.magnetTimer > 0;
                 let activeDist = isMagnetActive ? (300 + magBonus) : (100 + magBonus);
                 if (this.mutationSystem && this.mutationSystem.modifiers.leviathan) {
-                    activeDist = isMagnetActive ? (300 + magBonus) : (200 + magBonus); // Baseline 200 for Leviathan
+                    activeDist = isMagnetActive ? (300 + magBonus) : (200 + magBonus);
                 }
                 
                 let distToShark = Math.hypot(sharkCX - fish.x, sharkCY - fish.y);
                 if (distToShark < activeDist) {
                     fishInMagnetRadius++;
+                    let isInverted = this.activeContracts && this.activeContracts.magneticInversion;
                     let force = isMagnetActive ? 0.15 : 0.05;
-                    // Counteract the ocean scroll so fish don't get stuck trailing behind the shark at high speeds
+                    if (isInverted) force = -force * 1.5;
+                    
                     fish.x += currentSpeed * 0.7; 
                     fish.x -= (fish.x - mouthX) * force;
                     fish.y -= (fish.y - mouthY) * force;
@@ -2701,6 +2705,14 @@ class GameEngine {
         let cvsW = this.renderer.baseWidth;
         let cvsH = this.renderer.baseHeight;
         let currentSpeed = 2;
+        
+        // Check for Megalodon unlock to show contract button
+        if (this.frameCount % 60 === 0 && this.achievementManager) {
+            let megaAch = this.achievementManager.achievements.find(a => a.id === 'boss_megalodon');
+            if (megaAch && megaAch.unlocked) {
+                document.getElementById('btn-contract').style.display = 'block';
+            }
+        }
         
         if (this.frameCount % 50 === 0 && this.fishes.length < 15) {
             this.fishes.push({ x: cvsW, y: Math.random() * (cvsH - 120) + 60, vx: -Math.random()*2-1, vy: (Math.random()-0.5)*2, radius: 5, active: true });
