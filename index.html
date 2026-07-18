@@ -465,7 +465,7 @@ class MutationSystem {
         this.engine = engine;
         this.level = 1;
         this.dna = 0;
-        this.nextLevelDna = 5;
+        this.nextLevelDna = 15;
         this.baseDnaPerFish = 1;
         
         this.modifiers = {
@@ -500,7 +500,7 @@ class MutationSystem {
     init() {
         this.level = 1;
         this.dna = 0;
-        this.nextLevelDna = 5;
+        this.nextLevelDna = 15;
         this.modifiers = { dashCdMult: 1.0, magnetRadiusBonus: 0, shield: 0, speedBonus: 0, scoreMult: 1.0, leviathan: false, invincibleTimer: 0 };
         this.upgradePool.forEach(u => u.level = 0);
         this.updateHUD();
@@ -524,7 +524,7 @@ class MutationSystem {
     
     levelUp() {
         this.level++;
-        this.nextLevelDna = Math.floor(5 * Math.pow(1.5, this.level - 1));
+        this.nextLevelDna = Math.floor(15 * Math.pow(1.6, this.level - 1));
         
         this.engine.state = 'LEVELUP';
         this.engine.audio.play('dash'); // Temporary sound for level up
