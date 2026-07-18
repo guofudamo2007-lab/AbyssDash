@@ -2069,6 +2069,21 @@ class InputSystem {
             document.getElementById('glossary-modal').style.display = 'none';
         });
 
+        document.getElementById('btn-contract').addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.engine.audio.init();
+            document.getElementById('contract-modal').style.display = 'flex';
+        });
+
+        document.getElementById('btn-close-contract').addEventListener('click', (e) => {
+            e.stopPropagation();
+            document.getElementById('contract-modal').style.display = 'none';
+            this.engine.activeContracts.hydrothermal = document.getElementById('contract-hydro').checked;
+            this.engine.activeContracts.magneticInversion = document.getElementById('contract-magnet').checked;
+            this.engine.activeContracts.cellularDecay = document.getElementById('contract-decay').checked;
+        });
+
+
         document.getElementById('btn-settings').addEventListener('click', (e) => {
             e.stopPropagation();
             this.engine.audio.init();
@@ -2144,6 +2159,8 @@ class GameEngine {
         this.lastTime = 0;
         this.accumulator = 0;
         this.cameraShake = 0;
+        this.activeContracts = { hydrothermal: false, magneticInversion: false, cellularDecay: false };
+        this.decayCounter = 0;
 
         this.entityManager = new EntityManager(this);
         this.collisionSystem = new CollisionSystem(this);
