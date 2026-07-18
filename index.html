@@ -772,17 +772,30 @@ class BossSystem {
                     this.projectiles.splice(i, 1);
                 } else {
                     if (this.engine.isCheatInvincible) continue;
-                    this.engine.runStats.damageTaken++;
-                    this.engine.triggerGameOver(); return;
+                    if (p.type === 'ink') {
+                        this.engine.shark.inkTimer = 180;
+                        this.engine.audio.play('explosion');
+                        this.projectiles.splice(i, 1);
+                    } else {
+                        this.engine.runStats.damageTaken++;
+                        this.engine.triggerGameOver(); return;
+                    }
                 }
-            } else if (p.x < -50 || p.y > cvsH + 50) {
-                this.projectiles.splice(i, 1);
+        if (this.shark.magnetTimer > 0 && this.mutationSystem && this.mutationSystem.modifiers.leviathan) {
+            let magnetUpgrade = this.mutationSystem.upgradePool.find(u => u.id === 'magnet');
+            if (magnetUpgrade && magnetUpgrade.level >= magnetUpgrade.maxLevel && fishInMagnetRadius >= 15) {
+                this.achievementManager.unlockById('magnetic_storm');
             }
         }
         
         if (shark.isDashing) {
             if (!b.hitCooldown && this.engine.checkCollision(sharkCX, sharkCY, shark.radius, b.x - b.width/2, b.y - b.height/2, b.width, b.height)) {
-                b.hp--;
+                let dmg = 1;
+                if (this.engine.mutationSystem && this.engine.mutationSystem.modifiers.leviathan && shark.shield) {
+                    dmg = Math.ceil(b.maxHp / 2);
+                    this.engine.achievementManager.unlockById('giga_impact');
+                }
+                b.hp -= dmg;
                 b.hitCooldown = 60;
                 this.engine.cameraShake = 25;
                 this.engine.audio.play('explosion');
@@ -793,6 +806,9 @@ class BossSystem {
                 b.x += 60;
                 
                 if (b.hp <= 0) {
+                    if (b.type === 'octopus' && shark.inkTimer > 0) {
+                        this.engine.achievementManager.unlockById('blind_challenger');
+                    }
                     this.defeatBoss();
                 }
             }
@@ -967,7 +983,12 @@ class AchievementManager {
             { id: 'apex_predator', name: 'Apex Predator (暴食狂鲨)', desc: '单局游戏中累计吃掉 50 条发光小鱼。', target: 50, type: 'predator', unlocked: false },
             { id: 'boss_octopus', name: 'Kraken Slayer (深海屠夫)', desc: '击败巨型章鱼。', target: 1, type: 'boss', unlocked: false },
             { id: 'boss_submarine', name: 'Steel Breaker (破甲者)', desc: '击败深海潜艇。', target: 1, type: 'boss', unlocked: false },
-            { id: 'boss_megalodon', name: 'Apex Rival (霸主之证)', desc: '击败巨齿鲨。', target: 1, type: 'boss', unlocked: false }
+            { id: 'boss_megalodon', name: 'Apex Rival (霸主之证)', desc: '击败巨齿鲨。', target: 1, type: 'boss', unlocked: false },
+            { id: 'magnetic_storm', name: 'Magnetic Storm (万磁王)', desc: '化身利维坦并拥有满级生物电磁，在磁铁持续期间同屏吸附 >15 条鱼。', target: 1, type: 'special', unlocked: false },
+            { id: 'giga_impact', name: 'Giga Impact (终极重炮)', desc: '化身利维坦并携带能量护盾，在冲刺期间对 Boss 造成毁灭性撞击。', target: 1, type: 'special', unlocked: false },
+            { id: 'tactical_exhaust', name: 'Tactical Exhaust (绝地反击)', desc: '利用一次深海尾气冲刺，一口气震碎 5 颗追尾水雷。', target: 1, type: 'special', unlocked: false },
+            { id: 'blind_challenger', name: 'Blind Challenger (墨汁洗澡)', desc: '在屏幕被墨汁致盲的状态下，强杀巨型章鱼 Boss。', target: 1, type: 'special', unlocked: false },
+            { id: 'cyber_hacker', name: 'Developer Tool (赛博黑客)', desc: '解开隐藏在深渊之中的作弊代码开关。', target: 1, type: 'special', unlocked: false }
         ];
         this.loadProgress();
         this.bindEvents();
@@ -1018,6 +1039,13 @@ class AchievementManager {
         this.saveProgress();
         this.showToast(achievement);
         this.engine.audio.play('powerup');
+    }
+
+    unlockById(id) {
+        const ach = this.achievements.find(a => a.id === id);
+        if (ach && !ach.unlocked) {
+            this.unlock(ach);
+        }
     }
 
     showToast(achievement) {
@@ -1103,6 +1131,7 @@ class SkinManager {
             { 
                 id: 'cyber_shark', 
                 name: 'Cyber Shark (机器鲨鱼)', 
+                type: 'image', 
                 type: 'image', 
                 src: 'cyber_shark.png',
                 cols: 4, rows: 2,
@@ -1833,6 +1862,11 @@ class Renderer {
 
         engine.bossSystem.draw(ctx, engine);
         
+        if (engine.shark.inkTimer > 0) {
+            ctx.fillStyle = `rgba(0,0,0,${Math.min(0.95, engine.shark.inkTimer / 60)})`;
+            ctx.fillRect(0,0,baseWidth,baseHeight);
+        }
+
         // Post-Processing: Tint overlay
         if (engine.state === 'PLAYING' && (shark.isDashing || shark.isParalyzed)) {
             ctx.globalCompositeOperation = 'screen';
@@ -2066,6 +2100,7 @@ class InputSystem {
                 
                 // Show cheat toggle in settings
                 document.getElementById('cheat-mode-container').style.display = 'block';
+                if (typeof game !== 'undefined') game.achievementManager.unlockById('cyber_hacker');
             } else {
                 // Bump effect
                 e.target.style.transform = 'scale(1.3) rotate(-15deg)';
@@ -2221,6 +2256,7 @@ class GameEngine {
         if (this.shark.isDashing) speedMult = 3.5;
         else if (this.shark.inCurrent) speedMult = 1.8;
         if (this.shark.isParalyzed && !isInvincible) speedMult *= 0.6; 
+        if (this.shark.inkTimer > 0) this.shark.inkTimer--;
         
         let currentSpeed = Math.min(dynamicBaseSpeed * speedMult, CONFIG.SPEED_HARD_CAP); 
         
@@ -2349,6 +2385,7 @@ class GameEngine {
                     this.shark.isDashing = false; 
                     this.shark.huntPoints = 0; 
                     this.shark.comboCount = 0;
+                    this.shark.tailKillsInDash = 0;
                 }
             }
         }
@@ -2436,6 +2473,10 @@ class GameEngine {
                     if (this.mutationSystem) {
                         let depthMult = 1 + (this.depth / 1000);
                         this.mutationSystem.addDna(this.mutationSystem.baseDnaPerFish * 3 * depthMult);
+                    }
+                    if (hitTail && this.shark.isDashing) {
+                        this.shark.tailKillsInDash = (this.shark.tailKillsInDash || 0) + 1;
+                        if (this.shark.tailKillsInDash >= 5) this.achievementManager.unlockById('tactical_exhaust');
                     }
                     this.mines.splice(i, 1);
                 } else if (this.shark.shield) {
@@ -2536,6 +2577,7 @@ class GameEngine {
 
         // Fishes
         let mouthX = this.shark.x + this.shark.width - 5; let mouthY = this.shark.y;
+        let fishInMagnetRadius = 0;
         for (let i = this.fishes.length - 1; i >= 0; i--) {
             let fish = this.fishes[i]; 
             
@@ -2549,6 +2591,7 @@ class GameEngine {
                 
                 let distToShark = Math.hypot(sharkCX - fish.x, sharkCY - fish.y);
                 if (distToShark < activeDist) {
+                    fishInMagnetRadius++;
                     let force = isMagnetActive ? 0.15 : 0.05;
                     // Counteract the ocean scroll so fish don't get stuck trailing behind the shark at high speeds
                     fish.x += currentSpeed * 0.7; 
@@ -2630,6 +2673,7 @@ class GameEngine {
                     this.shark.huntPoints += huntGain; 
                     if (this.shark.huntPoints >= 100) { 
                         this.shark.isDashing = true; 
+                        this.shark.tailKillsInDash = 0;
                         let dashTime = this.mutationSystem && this.mutationSystem.modifiers.leviathan ? 300 : 150;
                         this.shark.dashTimer = dashTime; 
                         this.audio.play('dash'); 
@@ -2639,6 +2683,13 @@ class GameEngine {
                 }
             }
             if (fish.x < 0) this.fishes.splice(i, 1);
+        }
+
+        if (this.shark.magnetTimer > 0 && this.mutationSystem && this.mutationSystem.modifiers.leviathan) {
+            let magnetUpgrade = this.mutationSystem.upgradePool.find(u => u.id === 'magnet');
+            if (magnetUpgrade && magnetUpgrade.level >= magnetUpgrade.maxLevel && fishInMagnetRadius >= 15) {
+                this.achievementManager.unlockById('magnetic_storm');
+            }
         }
 
         this.bossSystem.update(dynamicBaseSpeed, speedMult);
