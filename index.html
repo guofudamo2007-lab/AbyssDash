@@ -781,10 +781,8 @@ class BossSystem {
                         this.engine.triggerGameOver(); return;
                     }
                 }
-        if (this.shark.magnetTimer > 0 && this.mutationSystem && this.mutationSystem.modifiers.leviathan) {
-            let magnetUpgrade = this.mutationSystem.upgradePool.find(u => u.id === 'magnet');
-            if (magnetUpgrade && magnetUpgrade.level >= magnetUpgrade.maxLevel && fishInMagnetRadius >= 15) {
-                this.achievementManager.unlockById('magnetic_storm');
+            } else if (p.x < -50 || p.y > cvsH + 50) {
+                this.projectiles.splice(i, 1);
             }
         }
         
