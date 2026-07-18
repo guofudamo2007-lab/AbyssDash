@@ -2467,7 +2467,9 @@ class GameEngine {
                 
                 let distToShark = Math.hypot(sharkCX - fish.x, sharkCY - fish.y);
                 if (distToShark < activeDist) {
-                    let force = isMagnetActive ? 0.1 : 0.03;
+                    let force = isMagnetActive ? 0.15 : 0.05;
+                    // Counteract the ocean scroll so fish don't get stuck trailing behind the shark at high speeds
+                    fish.x += currentSpeed * 0.7; 
                     fish.x -= (fish.x - mouthX) * force;
                     fish.y -= (fish.y - mouthY) * force;
                 }
