@@ -39,9 +39,21 @@
         #pause-btn:active { transform: scale(0.95); }
 
         .blood-screen { animation: flashRed 1s cubic-bezier(0.1, 0.8, 0.3, 1) forwards; }
+        .impact-screen { animation: impactFlash 0.38s ease-out forwards; }
         @keyframes pulse { from { transform: scale(1) rotate(-1deg); } to { transform: scale(1.15) rotate(1deg); } }
         @keyframes flashRed { 0% { box-shadow: inset 0 0 250px rgba(255, 0, 0, 1); } 30% { box-shadow: inset 0 0 120px rgba(255, 0, 0, 0.8); } 100% { box-shadow: inset 0 0 300px rgba(255, 0, 0, 0); } }
+        @keyframes impactFlash { 0% { box-shadow: inset 0 0 130px rgba(255, 60, 110, 0.95); } 100% { box-shadow: inset 0 0 220px rgba(255, 60, 110, 0); } }
         @keyframes swimSprite { 100% { background-position: -400px 0; } }
+
+        #tutorial-overlay { position: absolute; left: 50%; bottom: 6cqh; transform: translateX(-50%) translateY(16px); z-index: 1002; width: min(82cqw, 430px); opacity: 0; pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease; }
+        #tutorial-overlay.visible { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
+        #tutorial-card { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid rgba(0, 229, 255, 0.5); border-radius: 14px; background: rgba(3, 14, 30, 0.88); box-shadow: 0 10px 28px rgba(0,0,0,0.45), 0 0 22px rgba(0,229,255,0.12); backdrop-filter: blur(12px); }
+        #tutorial-icon { color: #00ffff; font-size: 24px; line-height: 1; }
+        #tutorial-copy { flex: 1; min-width: 0; }
+        #tutorial-title { color: #00ffff; font-family: 'Orbitron', sans-serif; font-size: clamp(11px, 1.7cqw, 14px); font-weight: 700; letter-spacing: 1px; }
+        #tutorial-text { margin-top: 3px; color: #d7edf6; font-size: clamp(11px, 1.55cqw, 13px); line-height: 1.35; }
+        #tutorial-dismiss { color: #8aa5b5; background: transparent; border: 0; font-size: 18px; cursor: pointer; padding: 4px; }
+        #game-container.reduce-motion *, #game-container.reduce-motion *::before, #game-container.reduce-motion *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
         
         #orientation-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #020308; z-index: 99999; color: white; justify-content: center; align-items: center; flex-direction: column; text-align: center; }
         @media screen and (orientation: portrait) and (max-width: 900px) {
@@ -441,11 +453,36 @@
                         <label style="color: #00ffff; font-size: 18px; margin-bottom: 5px; display: block; font-weight: bold;">SFX Volume: <span id="sfx-vol-val">100%</span></label>
                         <input type="range" id="sfx-vol" min="0" max="1" step="0.05" value="1" style="width: 100%; accent-color: #00ffff;">
                     </div>
+                    <div style="width: 80%; max-width: 300px;">
+                        <label style="color: #b8f8ff; font-size: 16px; display: flex; align-items: center; justify-content: space-between; gap: 12px; font-weight: bold; cursor: pointer;">
+                            <span>减少动态效果</span>
+                            <input type="checkbox" id="reduce-motion" style="width: 20px; height: 20px; accent-color: #00ffff; cursor: pointer;">
+                        </label>
+                        <div style="color: #8aa; font-size: 12px; margin-top: 5px; line-height: 1.4;">关闭画面震动、闪烁与界面过渡，降低视觉负担。</div>
+                    </div>
+                    <div style="width: 80%; max-width: 300px;">
+                        <label for="graphics-quality" style="color: #b8f8ff; font-size: 16px; margin-bottom: 5px; display: block; font-weight: bold;">画质模式</label>
+                        <select id="graphics-quality" style="width: 100%; padding: 9px 10px; color: #eaffff; background: #0a1b2b; border: 1px solid rgba(0, 229, 255, 0.45); border-radius: 8px; font-weight: 700;">
+                            <option value="high">高画质</option>
+                            <option value="balanced">平衡</option>
+                            <option value="performance">性能优先</option>
+                        </select>
+                        <div style="color: #8aa; font-size: 12px; margin-top: 5px; line-height: 1.4;">降低渲染分辨率与粒子上限，以获得更稳定的帧率。</div>
+                    </div>
                     <div id="cheat-mode-container" style="width: 80%; max-width: 300px; display: none; margin-top: 10px; padding-top: 15px; border-top: 1px solid rgba(0, 255, 255, 0.3);">
                         <label style="color: #ff00ff; font-size: 18px; margin-bottom: 5px; display: flex; align-items: center; justify-content: space-between; font-weight: bold; cursor: pointer; text-shadow: 0 0 5px #ff00ff;">
                             <span>作弊模式 (无敌)</span>
                             <input type="checkbox" id="cheat-invincible" style="width: 20px; height: 20px; accent-color: #ff00ff; cursor: pointer;">
                         </label>
+                    </div>
+                    <button type="button" id="btn-reset-progress" style="background: transparent; color: #ff8a9a; border: 1px solid rgba(255, 90, 120, 0.55); border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer;">重置本地进度</button>
+                    <div style="width: 80%; max-width: 320px; margin-top: 5px; padding: 10px 14px; background: rgba(0,255,255,0.05); border: 1px dashed rgba(0, 255, 255, 0.3); border-radius: 8px; font-size: 12px; color: #aae; line-height: 1.6;">
+                        <div style="color: #00ffff; font-weight: bold; margin-bottom: 4px;">🎮 答辩演示快捷键 (Live Demo Keys):</div>
+                        <div>• <b style="color:#fff;">1 / O</b>: 召唤章鱼 Boss (300m)</div>
+                        <div>• <b style="color:#fff;">2 / P</b>: 召唤潜艇 Boss (800m)</div>
+                        <div>• <b style="color:#fff;">3 / M</b>: 召唤巨齿鲨 Boss (1500m)</div>
+                        <div>• <b style="color:#fff;">L</b>: 立即变身终极利维坦</div>
+                        <div>• <b style="color:#fff;">I</b>: 切换无敌/神明模式</div>
                     </div>
                 </div>
                 
@@ -459,6 +496,13 @@
         <div id="combo-display" style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%) scale(0); color: #ff00ff; font-family: 'Orbitron', sans-serif; font-size: clamp(32px, 8cqw, 64px); font-weight: 900; text-shadow: 0 0 2cqw #ff00ff; pointer-events: none; opacity: 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); z-index: 1000; text-align: center;">
             COMBO!<br><span style="font-size: 0.5em; color: #fff; text-shadow: 0 0 1cqw #fff;">2X SCORE</span>
         </div>
+        <div id="tutorial-overlay" aria-live="polite">
+            <div id="tutorial-card">
+                <div id="tutorial-icon">⌄</div>
+                <div id="tutorial-copy"><div id="tutorial-title"></div><div id="tutorial-text"></div></div>
+                <button id="tutorial-dismiss" type="button" aria-label="Dismiss tutorial">×</button>
+            </div>
+        </div>
         <div id="ui-layer">
             <div id="left-ui">
                 <div id="score-box">SCORE: <span id="score" style="margin-left: 8px;">0</span> <span id="combo-badge" style="display:none; color: #ff00ff; font-size: 0.6em; margin-left: 8px; text-shadow: 0 0 1cqw #ff00ff; border: 1px solid #ff00ff; padding: 0 4px; border-radius: 4px; align-self: center;">x2</span><span id="multiplier">x2 RUSH!</span></div>
@@ -471,9 +515,11 @@
                 <div id="pause-btn">⏸</div>
                 <div id="right-ui" style="display: flex; flex-direction: column; align-items: flex-end; background: rgba(5, 15, 30, 0.4); padding: 1cqw 2cqw; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(0, 255, 170, 0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
                     <div style="font-size: clamp(10px, 1.8cqw, 14px); color: #00ffaa; font-weight: 700; letter-spacing: 1px; font-family: 'Orbitron', sans-serif;">MUTATION <span id="mutation-level" style="font-size: clamp(14px, 2.2cqw, 18px); color: #fff;">1</span></div>
-                    <div id="dna-bar-container" style="width: clamp(80px, 15cqw, 150px); height: 1cqw; min-height: 8px; background: rgba(0,0,0,0.5); border-radius: 4px; margin-top: 4px; border: 1px solid rgba(255,255,255,0.15); overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);">
-                        <div id="dna-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00ffaa, #00ffff); box-shadow: 0 0 10px rgba(0, 255, 170, 0.6); transition: width 0.3s cubic-bezier(0.2, 0.8, 0.4, 1);"></div>
-                    </div>
+                        <div id="dna-bar-container" style="width: clamp(80px, 15cqw, 150px); height: 1cqw; min-height: 8px; background: rgba(0,0,0,0.5); border-radius: 4px; margin-top: 4px; border: 1px solid rgba(255,255,255,0.15); overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);">
+                            <div id="dna-bar" style="width: 0%; height: 100%; background: linear-gradient(90deg, #00ffaa, #00ffff); box-shadow: 0 0 10px rgba(0, 255, 170, 0.6); transition: width 0.3s cubic-bezier(0.2, 0.8, 0.4, 1);"></div>
+                        </div>
+                        <div id="status-readout" style="display: none; max-width: 170px; margin-top: 7px; color: #dff; font-family: 'Rajdhani', sans-serif; font-size: clamp(9px, 1.4cqw, 12px); font-weight: 700; letter-spacing: 0.7px; text-align: right;"></div>
+                        <div id="heat-badge" style="display:none; margin-top: 6px; font-size: clamp(10px, 1.6cqw, 13px); color: #ff3333; font-weight: bold; background: rgba(255,0,0,0.2); border: 1px solid #ff3333; padding: 2px 8px; border-radius: 12px; text-shadow: 0 0 10px #ff0000; box-shadow: 0 0 15px rgba(255,0,0,0.3); font-family: 'Orbitron', sans-serif;">🔥 HEAT LEVEL x1.5</div>
                 </div>
             </div>
         </div>
@@ -492,6 +538,56 @@ const CONFIG = {
     LOGIC_FPS: 120, 
     FRAME_TIME: 1000 / 120
 };
+
+// Gameplay windows are expressed in seconds, then converted once for the
+// fixed-step loop. This keeps tuning honest when the simulation rate changes.
+const PACING = {
+    COMBO_WINDOW_TICKS: CONFIG.LOGIC_FPS * 3,
+    LEVELUP_GRACE_TICKS: CONFIG.LOGIC_FPS * 2,
+    BOSS_SUPPLY_INTERVAL_TICKS: CONFIG.LOGIC_FPS * 6,
+    BOSS_EMERGENCY_TICKS: CONFIG.LOGIC_FPS * 16
+};
+
+// One source of truth for the four traversal zones.  Keeping pacing and art
+// together makes it much easier to tune a zone without changing the game loop.
+const ZONE_PROFILES = {
+    shallow: {
+        name: '浅海 (SHALLOW SEA)', threshold: 0, accent: '#00e5ff',
+        top: '#0a1535', middle: '#06101c', bottom: '#020308',
+        obstacleInterval: 118, fishInterval: 54, jellyInterval: 240, mineInterval: 999,
+        currentChance: 0.18, debris: false, obstacleChance: 0.62, hazardGap: 110, hazardCap: 3
+    },
+    shipwreck: {
+        name: '沉船区 (SHIPWRECK)', threshold: 300, accent: '#ffb347',
+        top: '#17223a', middle: '#101622', bottom: '#080a12',
+        obstacleInterval: 102, fishInterval: 48, jellyInterval: 190, mineInterval: 330,
+        currentChance: 0.28, debris: true, obstacleChance: 0.82, hazardGap: 105, hazardCap: 4
+    },
+    trench: {
+        name: '海沟 (TRENCH)', threshold: 800, accent: '#ff5f45',
+        top: '#17142d', middle: '#0b0b1c', bottom: '#03030b',
+        obstacleInterval: 88, fishInterval: 66, jellyInterval: 120, mineInterval: 190,
+        currentChance: 0.45, debris: false, obstacleChance: 0.9, hazardGap: 100, hazardCap: 5
+    },
+    dark: {
+        name: '黑暗区 (DARK ZONE)', threshold: 1500, accent: '#d36bff',
+        top: '#09061c', middle: '#050412', bottom: '#010107',
+        obstacleInterval: 76, fishInterval: 78, jellyInterval: 88, mineInterval: 125,
+        currentChance: 0.52, debris: false, obstacleChance: 0.94, hazardGap: 92, hazardCap: 6
+    }
+};
+
+function getZoneProfile(score) {
+    if (score < 300) return ZONE_PROFILES.shallow;
+    if (score < 800) return ZONE_PROFILES.shipwreck;
+    if (score < 1500) return ZONE_PROFILES.trench;
+    return ZONE_PROFILES.dark;
+}
+
+function hexToRgb(hex) {
+    const value = hex.replace('#', '');
+    return [parseInt(value.slice(0, 2), 16), parseInt(value.slice(2, 4), 16), parseInt(value.slice(4, 6), 16)];
+}
 
 // Minimal 2D Simplex Noise for Fluid Dynamics
 class SimplexNoise {
@@ -574,7 +670,7 @@ class MutationSystem {
         this.fallbackUpgrades = [
             { id: 'fallback_heal', name: '细胞修复 (Cellular Repair)', desc: '恢复一层护盾', icon: '🧬', apply: () => { this.modifiers.shield = 1; this.engine.shark.shield = true; } },
             { id: 'fallback_score', name: '深海掠夺 (Abyssal Plunder)', desc: '立刻获得 5000 分', icon: '💰', apply: () => { this.engine.score += 5000; } },
-            { id: 'fallback_clear', name: '生物炸弹 (Bio-Bomb)', desc: '全屏清障', icon: '💥', apply: () => { this.engine.entityManager.obstacles = []; this.engine.entityManager.jellyfishes = []; this.engine.entityManager.mines = []; this.engine.cameraShake = 30; } }
+            { id: 'fallback_clear', name: '生物炸弹 (Bio-Bomb)', desc: '全屏清障', icon: '💥', apply: () => { this.engine.obstacles = []; this.engine.jellyfishes = []; this.engine.mines = []; this.engine.cameraShake = 30; } }
         ];
         
         this.currentChoices = [];
@@ -698,7 +794,7 @@ class MutationSystem {
         const modal = document.getElementById('levelup-modal');
         modal.style.display = 'none';
         
-        this.modifiers.invincibleTimer = 90; 
+        this.modifiers.invincibleTimer = PACING.LEVELUP_GRACE_TICKS;
         
         this.engine.lastTime = performance.now();
         this.engine.state = 'PLAYING';
@@ -740,12 +836,36 @@ class BossSystem {
         let restX = cvsW * 0.62;
         
         if (threshold === 300) {
-            this.bossData = { type: 'octopus', threshold: 300, maxHp: 2, hp: 2, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 120, height: 120, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0 };
+            this.bossData = { type: 'octopus', threshold: 300, maxHp: 2, hp: 2, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 120, height: 120, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0, supplyTimer: 0, emergencySupplyUsed: false };
         } else if (threshold === 800) {
-            this.bossData = { type: 'submarine', threshold: 800, maxHp: 3, hp: 3, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 150, height: 80, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0 };
+            this.bossData = { type: 'submarine', threshold: 800, maxHp: 3, hp: 3, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 150, height: 80, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0, supplyTimer: 0, emergencySupplyUsed: false };
         } else if (threshold === 1500) {
-            this.bossData = { type: 'megalodon', threshold: 1500, maxHp: 4, hp: 4, x: cvsW + 300, y: cvsH / 2, targetY: cvsH / 2, restX: restX + 50, width: 250, height: 120, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0 };
+            this.bossData = { type: 'megalodon', threshold: 1500, maxHp: 4, hp: 4, x: cvsW + 300, y: cvsH / 2, targetY: cvsH / 2, restX: restX + 50, width: 250, height: 120, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0, supplyTimer: 0, emergencySupplyUsed: false };
         }
+        this.deliverSupply({ emergency: true });
+    }
+
+    deliverSupply({ emergency = false } = {}) {
+        const engine = this.engine;
+        const cvsW = engine.renderer.baseWidth;
+        const cvsH = engine.renderer.baseHeight;
+        const baseY = Math.max(60, Math.min(cvsH - 60, engine.shark.y));
+        const fishCount = emergency ? 4 : 3;
+        for (let i = 0; i < fishCount && engine.fishes.length < 30; i++) {
+            const offset = (i - (fishCount - 1) / 2) * 42;
+            engine.fishes.push({
+                x: cvsW * 0.48 + i * 36,
+                y: Math.max(50, Math.min(cvsH - 50, baseY + offset)),
+                vx: -1.4,
+                vy: 0,
+                radius: 5,
+                active: true
+            });
+        }
+        if (emergency && !engine.shark.shield && engine.powerups.length < 5) {
+            engine.powerups.push({ x: cvsW * 0.7, y: baseY, radius: 14, type: 'shield' });
+        }
+        engine.entityManager.spawnText(cvsW / 2, Math.max(54, baseY - 70), emergency ? 'EMERGENCY SUPPLY' : 'SUPPLY CURRENT', '#00ffaa');
     }
 
     update(dynamicBaseSpeed, speedMult) {
@@ -759,6 +879,16 @@ class BossSystem {
         
         b.timer++;
         b.fightTime++;
+        b.supplyTimer++;
+
+        if (b.supplyTimer >= PACING.BOSS_SUPPLY_INTERVAL_TICKS) {
+            b.supplyTimer = 0;
+            this.deliverSupply();
+        }
+        if (!b.emergencySupplyUsed && b.fightTime >= PACING.BOSS_EMERGENCY_TICKS && b.hp > 0) {
+            b.emergencySupplyUsed = true;
+            this.deliverSupply({ emergency: true });
+        }
         
         if (b.fightTime > 3600) {
             this.defeatBoss(true);
@@ -817,6 +947,7 @@ class BossSystem {
                     shark.shield = false;
                     shark.comboCount = 0; shark.comboActive = false;
                     this.engine.audio.play('explosion');
+                    this.engine.ui.triggerImpactFlash();
                     this.engine.entityManager.spawnParticles(p.x, p.y, '#00ffff', 20);
                     this.engine.cameraShake = 15;
                     this.projectiles.splice(i, 1);
@@ -868,6 +999,7 @@ class BossSystem {
                     shark.shield = false;
                     shark.comboCount = 0; shark.comboActive = false;
                     this.engine.audio.play('explosion');
+                    this.engine.ui.triggerImpactFlash();
                     this.engine.entityManager.spawnParticles(sharkCX, sharkCY, '#00ffff', 25);
                     b.x += 80;
                     this.engine.cameraShake = 20;
@@ -1168,19 +1300,19 @@ class SkinManager {
                 id: 'normal_shark',
                 name: 'Normal Shark (普通鲨鱼)',
                 type: 'image',
-                src: 'normal_shark.png',
+                src: 'assets/normal_shark.png',
                 cols: 4, rows: 2,
-                animFrames: 2, 
-                cropLeft: 0.12, cropTop: 0.25, cropRight: 0.05, cropBottom: 0.35
+                animFrames: 8, 
+                cropLeft: 0, cropTop: 0, cropRight: 0, cropBottom: 0
             },
             { 
                 id: 'cyber_shark', 
                 name: 'Cyber Shark (机器鲨鱼)', 
                 type: 'image', 
-                src: 'cyber_shark.png',
+                src: 'assets/cyber_shark.png',
                 cols: 4, rows: 2,
                 animFrames: 2, 
-                cropLeft: 0.12, cropTop: 0.25, cropRight: 0.05, cropBottom: 0.35
+                cropLeft: 0, cropTop: 0, cropRight: 0, cropBottom: 0
             }
         ];
         
@@ -1323,7 +1455,7 @@ class AudioManager {
     constructor() { 
         this.ctx = null; 
         this.ambientOsc = null; 
-        this.bossMusic = new Audio('Beneath_the_Crush.mp3');
+        this.bossMusic = new Audio('assets/Beneath_the_Crush.mp3');
         this.bossMusic.loop = true;
         this.bossMusicFadeInterval = null;
         
@@ -1478,12 +1610,28 @@ class UIManager {
         this.comboDisplay = document.getElementById('combo-display');
         this.zoneDisplay = document.getElementById('zone-display');
         this.zoneName = document.getElementById('zone-name');
+        this.tutorialOverlay = document.getElementById('tutorial-overlay');
+        this.tutorialIcon = document.getElementById('tutorial-icon');
+        this.tutorialTitle = document.getElementById('tutorial-title');
+        this.tutorialText = document.getElementById('tutorial-text');
+        this.tutorialDismiss = document.getElementById('tutorial-dismiss');
+        this.statusReadout = document.getElementById('status-readout');
+        this.tutorialDismiss.addEventListener('click', () => {
+            this.hideTutorial();
+            localStorage.setItem('abyssDashTutorialSeen', '1');
+            if (this.onTutorialDismiss) this.onTutorialDismiss();
+        });
     }
     setPauseBtnVisible(isVisible) { this.pauseBtn.style.display = isVisible ? 'flex' : 'none'; }
     updatePauseBtnIcon(isPaused) { this.pauseBtn.innerText = isPaused ? '▶️' : '⏸'; }
-    triggerZoneDisplay(zoneName) {
+    setReducedMotion(enabled) { this.container.classList.toggle('reduce-motion', enabled); }
+    triggerZoneDisplay(zoneName, profile = null) {
         if (!this.zoneDisplay || !this.zoneName) return;
         this.zoneName.innerText = zoneName;
+        if (profile) {
+            this.zoneDisplay.style.color = profile.accent;
+            this.zoneDisplay.style.textShadow = `0 0 2cqw ${profile.accent}`;
+        }
         this.zoneDisplay.style.transition = 'none';
         this.zoneDisplay.style.transform = 'translate(-50%, -50%) scale(0.5)';
         this.zoneDisplay.style.opacity = '0';
@@ -1516,12 +1664,28 @@ class UIManager {
             }
         }, 1200);
     }
-    update(score, shark, highScore, depth) {
+    showTutorial(step) {
+        const steps = [
+            { icon: '⌄', title: 'DIVE', text: 'Hold mouse, Space, or touch to descend. Release to rise.' },
+            { icon: '✦', title: 'HUNT', text: 'Eat the glowing fish to gain DNA and fill the RUSH meter.' },
+            { icon: '⚡', title: 'RUSH', text: 'A full meter triggers RUSH. Smash hazards while it lasts.' }
+        ];
+        const item = steps[step];
+        if (!item || !this.tutorialOverlay) return;
+        this.tutorialIcon.textContent = item.icon;
+        this.tutorialTitle.textContent = item.title;
+        this.tutorialText.textContent = item.text;
+        this.tutorialOverlay.classList.add('visible');
+    }
+    hideTutorial() {
+        if (this.tutorialOverlay) this.tutorialOverlay.classList.remove('visible');
+    }
+    update(score, shark, highScore, depth, engine) {
         document.getElementById('score').innerText = Math.floor(score);
         document.getElementById('high-score').innerText = Math.floor(highScore);
         if (document.getElementById('depth')) document.getElementById('depth').innerText = Math.floor(depth || 0);
         
-        if (shark.comboActive) {
+        if (shark && shark.comboActive) {
             this.comboBadge.style.display = 'inline-block';
             this.scoreEl.style.color = '#ff00ff';
             this.scoreEl.style.textShadow = '0 0 10px #ff00ff';
@@ -1531,30 +1695,43 @@ class UIManager {
             this.scoreEl.style.textShadow = 'none';
         }
 
-        if (shark.inCurrent) this.multiplierEl.classList.add('active');
+        if (shark && shark.inCurrent) this.multiplierEl.classList.add('active');
         else this.multiplierEl.classList.remove('active');
 
-        if (shark.isDashing) {
+        if (shark && shark.isDashing) {
             this.huntBar.style.width = (shark.dashTimer / 150 * 100) + '%';
             this.huntBar.style.background = 'linear-gradient(90deg, #ff0055, #ff0000)';
             this.huntBar.style.boxShadow = '0 0 20px #ff0000';
-        } else {
+        } else if (shark) {
             this.huntBar.style.width = Math.min(shark.huntPoints, 100) + '%';
             this.huntBar.style.background = 'linear-gradient(90deg, #00ffff, #0088ff)';
             this.huntBar.style.boxShadow = '0 0 15px #00ffff';
         }
 
         const leftUI = document.getElementById('left-ui');
-        if (leftUI) {
+        if (leftUI && shark) {
             if (shark.x < 320 && shark.y < 140) {
                 leftUI.style.opacity = '0.25';
             } else {
                 leftUI.style.opacity = '1';
             }
         }
+
+        const heatBadge = document.getElementById('heat-badge');
+        if (heatBadge && typeof engine !== 'undefined' && engine && engine.activeContracts) {
+            let count = (engine.activeContracts.hydrothermal ? 1 : 0) + (engine.activeContracts.magneticInversion ? 1 : 0) + (engine.activeContracts.cellularDecay ? 1 : 0);
+            if (count > 0) {
+                let mult = 1.0 + count * 0.5;
+                heatBadge.style.display = 'block';
+                heatBadge.innerText = `🔥 HEAT LEVEL x${mult.toFixed(1)}`;
+            } else {
+                heatBadge.style.display = 'none';
+            }
+        }
     }
     triggerBloodScreen() { this.container.classList.remove('blood-screen'); void this.container.offsetWidth; this.container.classList.add('blood-screen'); }
     clearBloodScreen() { this.container.classList.remove('blood-screen'); }
+    triggerImpactFlash() { this.container.classList.remove('impact-screen'); void this.container.offsetWidth; this.container.classList.add('impact-screen'); }
 }
 
 class Renderer {
@@ -1564,13 +1741,73 @@ class Renderer {
         
         this.baseWidth = 900;
         this.baseHeight = 500;
-        
-        const dpr = Math.min(window.devicePixelRatio || 1, 2); 
-        
-        this.canvas.width = this.baseWidth * dpr;
-        this.canvas.height = this.baseHeight * dpr;
-        
-        this.ctx.scale(dpr, dpr);
+        this.devicePixelRatio = window.devicePixelRatio || 1;
+        this.setQuality('high');
+    }
+
+    setQuality(quality) {
+        const pixelCaps = { high: 2, balanced: 1.5, performance: 1 };
+        this.quality = pixelCaps[quality] ? quality : 'high';
+        const dpr = Math.min(this.devicePixelRatio, pixelCaps[this.quality]);
+        this.canvas.width = Math.round(this.baseWidth * dpr);
+        this.canvas.height = Math.round(this.baseHeight * dpr);
+        this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    drawZoneTheme(ctx, engine, profile) {
+        const { baseWidth: w, baseHeight: h } = this;
+        const t = engine.frameCount;
+        ctx.save();
+        ctx.globalAlpha = 0.9;
+        if (profile === ZONE_PROFILES.shallow) {
+            ctx.strokeStyle = 'rgba(70, 210, 255, 0.15)';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 5; i++) {
+                const x = 100 + i * 210 + Math.sin(t * 0.01 + i) * 24;
+                ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + 180, h); ctx.stroke();
+            }
+            ctx.fillStyle = 'rgba(15, 100, 120, 0.22)';
+            for (let i = 0; i < 7; i++) {
+                const x = ((i * 170 - t * 0.35) % (w + 180) + w + 180) % (w + 180) - 90;
+                ctx.fillRect(x, h - 105, 10, 105);
+                ctx.fillRect(x - 18, h - 65, 46, 7);
+            }
+        } else if (profile === ZONE_PROFILES.shipwreck) {
+            ctx.fillStyle = 'rgba(50, 35, 34, 0.6)';
+            for (let i = 0; i < 4; i++) {
+                const x = ((i * 300 - t * 0.55) % (w + 320) + w + 320) % (w + 320) - 160;
+                ctx.save(); ctx.translate(x, h - 45); ctx.rotate(-0.08 + i * 0.03);
+                ctx.fillRect(-80, -18, 160, 30); ctx.fillRect(-48, -60, 18, 42); ctx.fillRect(18, -48, 12, 30);
+                ctx.restore();
+            }
+            ctx.strokeStyle = 'rgba(210, 150, 90, 0.25)';
+            for (let i = 0; i < 8; i++) { ctx.beginPath(); ctx.moveTo((i * 130 - t) % w, h); ctx.lineTo((i * 130 + 90 - t) % w, h - 180); ctx.stroke(); }
+        } else if (profile === ZONE_PROFILES.trench) {
+            ctx.fillStyle = 'rgba(30, 12, 26, 0.72)';
+            ctx.beginPath(); ctx.moveTo(0, h); ctx.lineTo(0, h - 80);
+            for (let x = 0; x <= w; x += 80) ctx.lineTo(x, h - 80 - Math.sin(x * 0.04 + t * 0.01) * 28);
+            ctx.lineTo(w, h); ctx.fill();
+            for (let i = 0; i < 5; i++) {
+                const x = 90 + i * 210;
+                const pulse = 0.45 + Math.sin(t * 0.05 + i) * 0.15;
+                ctx.fillStyle = `rgba(255, 85, 45, ${pulse})`; ctx.shadowBlur = 18; ctx.shadowColor = '#ff4a3d';
+                ctx.beginPath(); ctx.ellipse(x, h - 70, 28, 9, 0, 0, Math.PI * 2); ctx.fill();
+                ctx.fillRect(x - 3, h - 150, 6, 80);
+            }
+            ctx.shadowBlur = 0;
+        } else {
+            ctx.fillStyle = 'rgba(115, 45, 170, 0.14)';
+            for (let i = 0; i < 26; i++) {
+                const x = (i * 137 + t * (0.3 + (i % 3) * 0.1)) % w;
+                const y = (i * 71 + Math.sin(t * 0.012 + i) * 30) % h;
+                const r = 1 + (i % 3);
+                ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+            }
+            const glow = ctx.createRadialGradient(w * 0.78, h * 0.25, 4, w * 0.78, h * 0.25, 180);
+            glow.addColorStop(0, 'rgba(210, 100, 255, 0.22)'); glow.addColorStop(1, 'rgba(0,0,0,0)');
+            ctx.fillStyle = glow; ctx.fillRect(0, 0, w, h);
+        }
+        ctx.restore();
     }
     
     draw(engine) {
@@ -1580,18 +1817,10 @@ class Renderer {
         ctx.clearRect(0, 0, baseWidth, baseHeight);
 
         let depth = Math.min(1, engine.score / 1500);
-
-        let r1 = Math.floor(10 * (1 - depth) + 1 * depth);
-        let g1 = Math.floor(21 * (1 - depth) + 2 * depth);
-        let b1 = Math.floor(53 * (1 - depth) + 10 * depth);
-
-        let r2 = Math.floor(6 * (1 - depth) + 0 * depth);
-        let g2 = Math.floor(10 * (1 - depth) + 1 * depth);
-        let b2 = Math.floor(28 * (1 - depth) + 5 * depth);
-
-        let r3 = Math.floor(2 * (1 - depth) + 0 * depth);
-        let g3 = Math.floor(3 * (1 - depth) + 0 * depth);
-        let b3 = Math.floor(8 * (1 - depth) + 2 * depth);
+        const profile = engine.zoneProfile || ZONE_PROFILES.shallow;
+        const [r1, g1, b1] = hexToRgb(profile.top);
+        const [r2, g2, b2] = hexToRgb(profile.middle);
+        const [r3, g3, b3] = hexToRgb(profile.bottom);
 
         let bgGradient = ctx.createLinearGradient(0, 0, 0, baseHeight);
         bgGradient.addColorStop(0, `rgb(${r1}, ${g1}, ${b1})`);
@@ -1599,6 +1828,8 @@ class Renderer {
         bgGradient.addColorStop(1, `rgb(${r3}, ${g3}, ${b3})`);
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, baseWidth, baseHeight);
+
+        this.drawZoneTheme(ctx, engine, profile);
 
         let mR = Math.floor(4 * (1 - depth) + 1 * depth);
         let mG = Math.floor(7 * (1 - depth) + 1 * depth);
@@ -1775,7 +2006,7 @@ class Renderer {
             ctx.save(); ctx.translate(shark.x, shark.y);
             
             if (engine.mutationSystem && engine.mutationSystem.modifiers.invincibleTimer > 0) {
-                ctx.globalAlpha = 0.5 + Math.sin(engine.frameCount * 0.15) * 0.5;
+                ctx.globalAlpha = engine.reduceMotion ? 0.85 : 0.5 + Math.sin(engine.frameCount * 0.15) * 0.5;
             }
             
             let tilt = shark.velocity * 0.06;
@@ -1788,12 +2019,15 @@ class Renderer {
             
             if (shark.isParalyzed) {
                 ctx.strokeStyle = '#ff00ff'; ctx.lineWidth = 2; ctx.beginPath();
-                ctx.arc(shark.width/2 + (Math.random()*4-2), Math.random()*4-2, shark.radius + 6, 0, Math.PI*2); ctx.stroke();
+                const jitterX = engine.reduceMotion ? 0 : Math.random() * 4 - 2;
+                const jitterY = engine.reduceMotion ? 0 : Math.random() * 4 - 2;
+                ctx.arc(shark.width/2 + jitterX, jitterY, shark.radius + 6, 0, Math.PI*2); ctx.stroke();
             }
             
             if (shark.isDashing) {
                 ctx.strokeStyle = 'rgba(255, 0, 0, 0.5)'; ctx.lineWidth = 4; ctx.shadowBlur = 30; ctx.shadowColor = 'red';
-                ctx.beginPath(); ctx.arc(shark.width/2, 0, shark.radius * 1.8 + Math.sin(engine.frameCount*0.4)*5, 0, Math.PI*2); ctx.stroke();
+                const dashRadius = shark.radius * 1.8 + (engine.reduceMotion ? 0 : Math.sin(engine.frameCount * 0.4) * 5);
+                ctx.beginPath(); ctx.arc(shark.width/2, 0, dashRadius, 0, Math.PI*2); ctx.stroke();
             } else if (shark.inCurrent) {
                 ctx.strokeStyle = 'rgba(0, 255, 255, 0.7)'; ctx.lineWidth = 3; ctx.shadowBlur = 25; ctx.shadowColor = '#00ffff';
                 ctx.beginPath(); ctx.arc(shark.width/2, 0, shark.radius * 1.6, 0, Math.PI*2); ctx.stroke();
@@ -1804,7 +2038,7 @@ class Renderer {
                 ctx.beginPath(); ctx.arc(shark.width/2, 0, shark.radius * 2, 0, Math.PI*2); ctx.stroke();
             }
             if (shark.magnetTimer > 0) {
-                ctx.strokeStyle = 'rgba(255, 0, 255, 0.6)'; ctx.lineWidth = 2.5; ctx.setLineDash([5, 5]); ctx.lineDashOffset = -engine.frameCount * 0.8;
+                ctx.strokeStyle = 'rgba(255, 0, 255, 0.6)'; ctx.lineWidth = 2.5; ctx.setLineDash([5, 5]); ctx.lineDashOffset = engine.reduceMotion ? 0 : -engine.frameCount * 0.8;
                 ctx.beginPath(); ctx.arc(shark.width/2, 0, shark.radius * 2.3, 0, Math.PI*2); ctx.stroke();
                 ctx.setLineDash([]);
             }
@@ -1953,7 +2187,7 @@ class EntityManager {
         
         let cvsW = this.engine.renderer.baseWidth;
         let cvsH = this.engine.renderer.baseHeight;
-        for(let i=0; i<30; i++) {
+        for(let i=0; i<this.engine.maxBackgroundPlanks; i++) {
             this.engine.planks.push({ x: Math.random() * cvsW, y: Math.random() * cvsH, size: Math.random() * 2 + 1, speed: Math.random() * 0.6 + 0.2, alpha: Math.random() * 0.5 + 0.2 });
         }
         for(let i=0; i<6; i++) {
@@ -1961,8 +2195,10 @@ class EntityManager {
         }
     }
     spawnParticles(x, y, color, count, speedScale = 1) {
-        for (let i = 0; i < count; i++) {
-            if (this.engine.particles.length >= 300) {
+        const qualityScale = this.engine.quality === 'performance' ? 0.4 : (this.engine.quality === 'balanced' ? 0.7 : 1);
+        const particleCount = Math.max(1, Math.ceil(count * qualityScale));
+        for (let i = 0; i < particleCount; i++) {
+            if (this.engine.particles.length >= this.engine.maxParticles) {
                 this.engine.particles.shift(); 
             }
             this.engine.particles.push({
@@ -1988,6 +2224,12 @@ class CollisionSystem {
         let dx = cx - nearX; let dy = cy - nearY;
         return (dx * dx + dy * dy) < (radius * radius);
     }
+    checkCircleCollision(cx1, cy1, r1, cx2, cy2, r2) {
+        let dx = cx1 - cx2;
+        let dy = cy1 - cy2;
+        let rSum = r1 + r2;
+        return (dx * dx + dy * dy) < (rSum * rSum);
+    }
 }
 
 class ProgressionSystem {
@@ -1998,14 +2240,11 @@ class ProgressionSystem {
         let dynamicBaseSpeed = Math.min(CONFIG.MAX_BASE_SPEED, CONFIG.INITIAL_SPEED + score * CONFIG.SPEED_GROWTH);
         let speedBonus = this.engine.mutationSystem ? this.engine.mutationSystem.modifiers.speedBonus : 0;
         let oldZone = this.engine.currentZoneName;
-        
-        if (score < 300) this.engine.currentZoneName = '浅海 (SHALLOW SEA)';
-        else if (score < 800) this.engine.currentZoneName = '沉船区 (SHIPWRECK)';
-        else if (score < 1500) this.engine.currentZoneName = '海沟 (TRENCH)';
-        else this.engine.currentZoneName = '黑暗区 (DARK ZONE)';
-        
+        const profile = getZoneProfile(score);
+        this.engine.currentZoneName = profile.name;
+        this.engine.zoneProfile = profile;
         let zoneChanged = (oldZone !== this.engine.currentZoneName && oldZone !== undefined);
-        return { speed: dynamicBaseSpeed + speedBonus, zoneChanged };
+        return { speed: dynamicBaseSpeed + speedBonus, zoneChanged, profile };
     }
 }
 
@@ -2032,6 +2271,7 @@ class InputSystem {
             }
             if (this.engine.state === 'PAUSED') { this.engine.resume(); return; }
             this.isPressing = true;
+            this.engine.markTutorialEvent('dive');
         };
 
         const handleInputUp = () => { this.isPressing = false; };
@@ -2053,8 +2293,28 @@ class InputSystem {
                 if (this.engine.state === 'MENU') return;
                 handleInputDown(); 
             }
+            // Presentation / Demo shortcuts for live competition defense
+            if (this.engine && (this.engine.state === 'PLAYING' || this.engine.state === 'MENU')) {
+                if (e.code === 'Digit1' || e.code === 'KeyO') {
+                    if (this.engine.bossSystem) { this.engine.bossSystem.spawnBoss(300); this.engine.entityManager.spawnText(this.engine.shark.x, this.engine.shark.y - 40, "DEMO: OCTOPUS", "#00ffff"); }
+                } else if (e.code === 'Digit2' || e.code === 'KeyP') {
+                    if (this.engine.bossSystem) { this.engine.bossSystem.spawnBoss(800); this.engine.entityManager.spawnText(this.engine.shark.x, this.engine.shark.y - 40, "DEMO: SUBMARINE", "#ffaa00"); }
+                } else if (e.code === 'Digit3' || e.code === 'KeyM') {
+                    if (this.engine.bossSystem) { this.engine.bossSystem.spawnBoss(1500); this.engine.entityManager.spawnText(this.engine.shark.x, this.engine.shark.y - 40, "DEMO: MEGALODON", "#ff4444"); }
+                } else if (e.code === 'KeyL') {
+                    if (this.engine.mutationSystem) {
+                        this.engine.mutationSystem.dna = 500;
+                        this.engine.mutationSystem.evolveToLeviathan();
+                        this.engine.entityManager.spawnText(this.engine.shark.x, this.engine.shark.y - 50, "DEMO: LEVIATHAN FORM!", "#ff00ff");
+                    }
+                } else if (e.code === 'KeyI') {
+                    this.engine.isCheatInvincible = !this.engine.isCheatInvincible;
+                    this.engine.entityManager.spawnText(this.engine.shark.x, this.engine.shark.y - 50, this.engine.isCheatInvincible ? "GOD MODE: ON" : "GOD MODE: OFF", "#ffff00");
+                }
+            }
         });
         window.addEventListener('keyup', (e) => { if(e.code === 'Space') handleInputUp(); });
+        window.addEventListener('blur', handleInputUp);
         
         document.getElementById('btn-start').addEventListener('click', (e) => {
             e.stopPropagation();
@@ -2080,6 +2340,7 @@ class InputSystem {
                 this.engine.lastTime = performance.now();
                 this.engine.accumulator = 0;
                 this.engine.audio.playAmbient();
+                this.engine.startTutorial();
             }, 600);
         });
 
@@ -2115,11 +2376,15 @@ class InputSystem {
             
             const mVol = document.getElementById('music-vol');
             const sVol = document.getElementById('sfx-vol');
+            const reduceMotion = document.getElementById('reduce-motion');
+            const graphicsQuality = document.getElementById('graphics-quality');
             const mVal = document.getElementById('music-vol-val');
             const sVal = document.getElementById('sfx-vol-val');
             
             mVol.value = this.engine.audio.musicVol;
             sVol.value = this.engine.audio.sfxVol;
+            reduceMotion.checked = this.engine.reduceMotion;
+            graphicsQuality.value = this.engine.quality;
             mVal.innerText = Math.round(this.engine.audio.musicVol * 100) + '%';
             sVal.innerText = Math.round(this.engine.audio.sfxVol * 100) + '%';
             
@@ -2164,7 +2429,23 @@ class InputSystem {
         
         document.addEventListener('visibilitychange', () => {
             if (document.hidden && this.engine.state === 'PLAYING') {
+                handleInputUp();
                 this.engine.togglePause();
+            }
+        });
+        
+        document.getElementById('reduce-motion').addEventListener('change', (e) => {
+            this.engine.setReducedMotion(e.target.checked);
+        });
+
+        document.getElementById('graphics-quality').addEventListener('change', (e) => {
+            this.engine.setGraphicsQuality(e.target.value);
+        });
+
+        document.getElementById('btn-reset-progress').addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (window.confirm('确定要重置本地最高分、成就、皮肤与设置吗？此操作无法撤销。')) {
+                this.engine.resetLocalProgress();
             }
         });
     }
@@ -2176,16 +2457,26 @@ class GameEngine {
         this.octopusSprite = null;
         this.audio = new AudioManager();
         this.ui = new UIManager();
+        this.ui.onTutorialDismiss = () => {
+            this.tutorialActive = false;
+            this.tutorialStep = -1;
+        };
         this.renderer = new Renderer('gameCanvas');
         
-        this.state = 'MENU'; 
-        this.highScore = localStorage.getItem('abyssDashHighScore') || 0;
+            this.state = 'MENU'; 
+            this.highScore = localStorage.getItem('abyssDashHighScore') || 0;
         
         this.lastTime = 0;
         this.accumulator = 0;
         this.cameraShake = 0;
         this.activeContracts = { hydrothermal: false, magneticInversion: false, cellularDecay: false };
         this.decayCounter = 0;
+        this.reduceMotion = localStorage.getItem('abyssDashReduceMotion') === '1';
+        this.ui.setReducedMotion(this.reduceMotion);
+        this.quality = localStorage.getItem('abyssDashGraphicsQuality') || 'high';
+        this.setGraphicsQuality(this.quality);
+        this.tutorialStep = -1;
+        this.tutorialActive = localStorage.getItem('abyssDashTutorialSeen') !== '1';
 
         this.entityManager = new EntityManager(this);
         this.collisionSystem = new CollisionSystem(this);
@@ -2205,10 +2496,54 @@ class GameEngine {
         return this.inputSystem.isPressing;
     }
 
+    setReducedMotion(enabled) {
+        this.reduceMotion = Boolean(enabled);
+        localStorage.setItem('abyssDashReduceMotion', this.reduceMotion ? '1' : '0');
+        this.ui.setReducedMotion(this.reduceMotion);
+        if (this.reduceMotion) {
+            this.cameraShake = 0;
+            this.renderer.canvas.style.transform = 'translate(0, 0)';
+        }
+    }
+
+    setGraphicsQuality(quality) {
+        const allowed = ['high', 'balanced', 'performance'];
+        this.quality = allowed.includes(quality) ? quality : 'high';
+        const limits = {
+            high: { particles: 300, planks: 30, menuBubbles: 50 },
+            balanced: { particles: 210, planks: 20, menuBubbles: 35 },
+            performance: { particles: 130, planks: 12, menuBubbles: 20 }
+        };
+        const limit = limits[this.quality];
+        this.maxParticles = limit.particles;
+        this.maxBackgroundPlanks = limit.planks;
+        this.maxMenuBubbles = limit.menuBubbles;
+        this.renderer.setQuality(this.quality);
+        localStorage.setItem('abyssDashGraphicsQuality', this.quality);
+    }
+
+    resetLocalProgress() {
+        const storedKeys = [];
+        for (let index = 0; index < localStorage.length; index++) {
+            const key = localStorage.key(index);
+            if (key && key.startsWith('abyssDash')) storedKeys.push(key);
+        }
+        storedKeys.forEach((key) => localStorage.removeItem(key));
+        window.location.reload();
+    }
+
     initEntities() {
         this.entityManager.initEntities();
         this.score = 0; this.depth = 0; this.frameCount = 0; this.isNewRecord = false;
         this.currentZoneName = '浅海 (SHALLOW SEA)';
+        this.zoneProfile = ZONE_PROFILES.shallow;
+        this.zoneTransitionTimer = 0;
+        this.hazardWarningTimer = 0;
+        this.nearMissTimer = 0;
+        this.cameraShake = 0;
+        if (this.renderer && this.renderer.canvas) {
+            this.renderer.canvas.style.transform = 'translate(0, 0)';
+        }
         this.cameraShake = 0;
         if (this.renderer && this.renderer.canvas) {
             this.renderer.canvas.style.transform = 'translate(0, 0)';
@@ -2222,7 +2557,39 @@ class GameEngine {
         this.ui.clearBloodScreen();
         this.ui.setPauseBtnVisible(false);
         this.ui.updatePauseBtnIcon(false);
-        this.ui.update(this.score, this.shark, this.highScore, this.depth);
+        this.ui.update(this.score, this.shark, this.highScore, this.depth, this);
+        this.ui.hideTutorial();
+    }
+
+    startTutorial() {
+        if (!this.tutorialActive) return;
+        this.tutorialStep = 0;
+        this.ui.showTutorial(this.tutorialStep);
+    }
+
+    markTutorialEvent(eventName) {
+        if (!this.tutorialActive) return;
+        const expectedEvents = ['dive', 'fish', 'rush'];
+        if (expectedEvents[this.tutorialStep] !== eventName) return;
+        this.tutorialStep++;
+        if (this.tutorialStep < expectedEvents.length) {
+            this.ui.showTutorial(this.tutorialStep);
+            return;
+        }
+
+        if (this.statusReadout && shark) {
+            const states = [];
+            if (shark.shield) states.push('SHIELD READY');
+            if (shark.magnetTimer > 0) states.push('MAGNET ACTIVE');
+            if (shark.isParalyzed) states.push('PARALYZED');
+            if (engine && engine.mutationSystem && engine.mutationSystem.modifiers.invincibleTimer > 0) states.push('STABILIZING');
+            this.statusReadout.style.display = states.length ? 'block' : 'none';
+            this.statusReadout.style.color = shark.isParalyzed ? '#ff8cff' : '#dff';
+            this.statusReadout.innerText = states.join(' • ');
+        }
+        this.tutorialActive = false;
+        localStorage.setItem('abyssDashTutorialSeen', '1');
+        this.ui.hideTutorial();
     }
 
     togglePause() {
@@ -2260,11 +2627,44 @@ class GameEngine {
             this.isNewRecord = true;
         }
 
-        this.ui.update(this.score, this.shark, this.highScore, this.depth);
+        this.ui.update(this.score, this.shark, this.highScore, this.depth, this);
     }
 
     checkCollision(cx, cy, radius, rx, ry, rw, rh) {
         return this.collisionSystem.checkCollision(cx, cy, radius, rx, ry, rw, rh);
+    }
+    
+    checkCircleCollision(cx1, cy1, r1, cx2, cy2, r2) {
+        return this.collisionSystem.checkCircleCollision(cx1, cy1, r1, cx2, cy2, r2);
+    }
+
+    canSpawnHazard(y, gap = 100) {
+        const x = this.renderer.baseWidth;
+        const nearby = (item, itemY, itemX = item.x) => itemX > x - 210 && Math.abs(itemY - y) < gap;
+        return !this.obstacles.some(o => nearby(o, o.y + o.height / 2))
+            && !this.mines.some(m => nearby(m, m.y))
+            && !this.jellyfishes.some(j => nearby(j, j.y));
+    }
+
+    getActiveHazardCount() {
+        return this.obstacles.length + this.mines.length + this.jellyfishes.length;
+    }
+
+    warnHazard(text, color) {
+        if (this.hazardWarningTimer > 0 || this.bossSystem.active) return;
+        this.hazardWarningTimer = 48;
+        // Hazard warnings are intentionally visual-only: frequent warning tones
+        // compete with the music and make dense zones feel noisy.
+        this.entityManager.spawnText(this.shark.x + 100, this.shark.y - 42, text, color);
+    }
+
+    registerNearMiss(item, x, y, clearance, label, color) {
+        if (item.nearMissed || this.nearMissTimer > 0 || x > this.shark.x - 8 || x < this.shark.x - 65) return;
+        if (Math.abs(y - this.shark.y) < this.shark.radius + clearance + 55 && Math.abs(y - this.shark.y) > this.shark.radius + clearance) {
+            item.nearMissed = true;
+            this.nearMissTimer = 24;
+            this.score += 3;
+        }
     }
 
     updateLogic() {
@@ -2275,12 +2675,25 @@ class GameEngine {
         let cvsH = this.renderer.baseHeight;
         
         let intDepth = Math.floor(this.depth);
-        this.bossSystem.checkTrigger(intDepth);
-        
-        let { speed: dynamicBaseSpeed, zoneChanged } = this.progressionSystem.updateZoneAndSpeed(intDepth);
-        if (zoneChanged && this.frameCount > 10) {
-            this.ui.triggerZoneDisplay(this.currentZoneName);
+        const bossTriggered = this.bossSystem.checkTrigger(intDepth);
+        if (bossTriggered) {
+            // Clear leftover traffic so the boss entrance is readable and fair.
+            this.obstacles = [];
+            this.mines = [];
+            this.jellyfishes = [];
+            this.zoneTransitionTimer = 180;
+            this.entityManager.spawnText(cvsW / 2, 90, 'BOSS APPROACH — CLEAR THE LANE', '#ffcc66');
         }
+        
+        let { speed: dynamicBaseSpeed, zoneChanged, profile: zoneProfile } = this.progressionSystem.updateZoneAndSpeed(intDepth);
+        if (zoneChanged && this.frameCount > 10) {
+            this.zoneTransitionTimer = 150;
+            this.ui.triggerZoneDisplay(this.currentZoneName, zoneProfile);
+            this.entityManager.spawnText(cvsW / 2, 120, `${zoneProfile.name.split(' ')[0]} • PRESSURE SHIFT`, zoneProfile.accent);
+        }
+        if (this.zoneTransitionTimer > 0) this.zoneTransitionTimer--;
+        if (this.hazardWarningTimer > 0) this.hazardWarningTimer--;
+        if (this.nearMissTimer > 0) this.nearMissTimer--;
 
         let wasInCurrent = this.shark.inCurrent;
         this.shark.inCurrent = false;
@@ -2300,7 +2713,6 @@ class GameEngine {
                     this.cameraShake = 20;
                 } else {
                     this.shark.huntPoints = Math.max(0, this.shark.huntPoints - 100);
-                    this.entityManager.spawnText(sharkCX, sharkCY - 20, "-100 FURY!", "#ff0000");
                 }
             } else if (!this.shark.isDashing) {
                 this.audio.play('dash');
@@ -2324,6 +2736,19 @@ class GameEngine {
         
         if (!this.bossSystem.active) {
             this.depth += currentSpeed * 0.05;
+        }
+
+        // Cellular Decay Contract Logic
+        if (this.activeContracts && this.activeContracts.cellularDecay) {
+            this.decayCounter += currentSpeed * 0.02;
+            if (this.decayCounter >= 25) {
+                this.decayCounter = 0;
+                if (this.mutationSystem && this.mutationSystem.dna > 0) {
+                    this.mutationSystem.dna = Math.max(0, this.mutationSystem.dna - 10);
+                    this.mutationSystem.updateHUD();
+                    this.entityManager.spawnText(this.shark.x + 30, this.shark.y - 30, "DECAY -10 DNA", "#ff4444");
+                }
+            }
         }
 
         let targetRadius = 15;
@@ -2391,42 +2816,42 @@ class GameEngine {
             else { this.triggerGameOver(); return; }
         }
         
-        let spawnInterval = Math.max(40, 110 - Math.floor(this.score / 20));
-        
-        if (this.frameCount % spawnInterval === 0 && this.frameCount > 180 && this.obstacles.length < 15 && !this.bossSystem.active) {
+        const profile = zoneProfile || this.zoneProfile || ZONE_PROFILES.shallow;
+        const hazardsAllowed = this.zoneTransitionTimer <= 0 && !this.bossSystem.active && this.frameCount > 180 && !this.tutorialActive;
+        if (hazardsAllowed && this.getActiveHazardCount() < profile.hazardCap && this.frameCount % profile.obstacleInterval === 0 && Math.random() < profile.obstacleChance) {
             let type = (this.score > 100 && Math.random() > 0.5) ? 'top' : 'bottom';
-            let height = Math.random() * 90 + 50; 
-            this.obstacles.push({ x: cvsW, y: type === 'top' ? 0 : cvsH - height, width: 40, height: height, type: type, passed: false });
-        }
-        
-        let fishInterval = 60;
-        let jellyInterval = 160;
-        let mineInterval = 300;
-        let currentZoneProb = 0.3;
-
-        if (this.currentZoneName === '沉船区 (SHIPWRECK)') {
-            fishInterval = 50;
-            if (this.frameCount % 200 === 0 && this.obstacles.length < 20 && !this.bossSystem.active) {
-                this.obstacles.push({ x: cvsW, y: Math.random()*(cvsH - 120)+60, width: 35, height: 35, type: 'debris', passed: true });
+            let height = Math.random() * 70 + (profile === ZONE_PROFILES.dark ? 70 : 50);
+            let centerY = type === 'top' ? height / 2 : cvsH - height / 2;
+            if (this.canSpawnHazard(centerY, profile.hazardGap)) {
+                this.obstacles.push({ x: cvsW, y: type === 'top' ? 0 : cvsH - height, width: 40, height, type, passed: false });
             }
-        } else if (this.currentZoneName === '海沟 (TRENCH)') {
-            fishInterval = 70;
-            mineInterval = 150; 
-            jellyInterval = 120;
-            currentZoneProb = 0.5;
-        } else if (this.currentZoneName === '黑暗区 (DARK ZONE)') {
-            fishInterval = 80;
-            mineInterval = 90;
-            jellyInterval = 80;
-            currentZoneProb = 0.6;
+        }
+        if (hazardsAllowed && profile.debris && this.getActiveHazardCount() < profile.hazardCap && this.frameCount % 210 === 0) {
+            let debrisY = Math.random() * (cvsH - 160) + 80;
+            if (this.canSpawnHazard(debrisY, profile.hazardGap)) this.obstacles.push({ x: cvsW, y: debrisY, width: 35, height: 35, type: 'debris', passed: true });
         }
 
-        if (this.frameCount % fishInterval === 0 && this.fishes.length < 30) this.fishes.push({ x: cvsW, y: Math.random() * (cvsH - 120) + 60, vx: -Math.random()*2-1, vy: (Math.random()-0.5)*2, radius: 5, active: true });
-        if (this.frameCount % jellyInterval === 0 && this.score > 200 && this.jellyfishes.length < 10 && !this.bossSystem.active) this.jellyfishes.push({ x: cvsW, y: Math.random() * (cvsH - 180) + 90, radius: 18, offset: Math.random() * Math.PI * 2 });
-        if (this.frameCount > 250 && this.frameCount % 450 === 0 && Math.random() < currentZoneProb && this.currentZones.length < 3 && !this.bossSystem.active) this.currentZones.push({ x: cvsW, y: Math.random() * (cvsH - 160) + 40, w: 1800, h: 100 });
+        let actualFishInterval = profile.fishInterval;
+        if (this.bossSystem.active && this.bossSystem.bossData && this.bossSystem.bossData.type === 'megalodon') {
+            actualFishInterval = 40;
+        }
+        if (this.frameCount % actualFishInterval === 0 && this.fishes.length < 30) this.fishes.push({ x: cvsW, y: Math.random() * (cvsH - 120) + 60, vx: -Math.random()*2-1, vy: (Math.random()-0.5)*2, radius: 5, active: true });
+        if (hazardsAllowed && this.getActiveHazardCount() < profile.hazardCap && this.frameCount % profile.jellyInterval === 0 && this.score > 200) {
+            let jellyY = Math.random() * (cvsH - 180) + 90;
+            if (this.canSpawnHazard(jellyY, profile.hazardGap)) this.jellyfishes.push({ x: cvsW, y: jellyY, radius: 18, offset: Math.random() * Math.PI * 2, nearMissed: false });
+        }
+        if (hazardsAllowed && this.frameCount > 250 && this.frameCount % 450 === 0 && Math.random() < profile.currentChance && this.currentZones.length < 3) this.currentZones.push({ x: cvsW, y: Math.random() * (cvsH - 160) + 40, w: 1800, h: 100 });
         
-        if (this.frameCount % 500 === 0 && this.score > 100 && this.powerups.length < 5) this.powerups.push({ x: cvsW, y: Math.random() * (cvsH - 100) + 50, radius: 14, type: Math.random() > 0.5 ? 'shield' : 'magnet' });
-        if (this.frameCount % mineInterval === 0 && this.score > 300 && this.mines.length < 8 && !this.bossSystem.active) this.mines.push({ x: cvsW, y: Math.random() * (cvsH - 100) + 50, radius: 16, speed: Math.random() * 1.5 + 0.5 });
+        if (this.frameCount % 500 === 0 && this.score > 100 && this.powerups.length < 5) {
+            let powerupY = Math.random() * (cvsH - 100) + 50;
+            if (this.canSpawnHazard(powerupY, 60)) {
+                this.powerups.push({ x: cvsW, y: powerupY, radius: 14, type: Math.random() > 0.5 ? 'shield' : 'magnet' });
+            }
+        }
+        if (hazardsAllowed && this.getActiveHazardCount() < profile.hazardCap && this.frameCount % profile.mineInterval === 0 && this.score > 300) {
+            let mineY = Math.random() * (cvsH - 100) + 50;
+            if (this.canSpawnHazard(mineY, profile.hazardGap)) this.mines.push({ x: cvsW, y: mineY, radius: 16, speed: Math.random() * 1.5 + 0.5, nearMissed: false });
+        }
 
         if (this.shark.isDashing) {
             let dashFrozen = this.mutationSystem && this.mutationSystem.modifiers.invincibleTimer > 0;
@@ -2480,7 +2905,7 @@ class GameEngine {
             }
         }
 
-        if (this.shark.inCurrent && this.frameCount % 10 === 0) { this.score += Math.floor(2 * (this.mutationSystem ? this.mutationSystem.modifiers.scoreMult : 1)); if(this.frameCount % 30 === 0) this.entityManager.spawnText(sharkCX, sharkCY - 20, "+6", "#00ffff"); }
+        if (this.shark.inCurrent && this.frameCount % 10 === 0) { this.score += Math.floor(2 * (this.mutationSystem ? this.mutationSystem.modifiers.scoreMult : 1)); }
 
         if (this.shark.magnetTimer > 0) this.shark.magnetTimer--;
 
@@ -2493,7 +2918,6 @@ class GameEngine {
                 let pts = 25;
                 if(this.mutationSystem) pts = Math.floor(pts * this.mutationSystem.modifiers.scoreMult);
                 this.score += pts;
-                this.entityManager.spawnText(p.x, p.y, `+${pts}`, p.type==='shield'?"#00ffff":"#ff00ff");
                 this.entityManager.spawnParticles(p.x, p.y, p.type==='shield'?"#00ffff":"#ff00ff", 15);
                 this.powerups.splice(i, 1);
             } else if (p.x + p.radius < 0) {
@@ -2506,12 +2930,13 @@ class GameEngine {
             m.x -= currentSpeed * 1.1; 
             if (m.y < sharkCY) m.y += m.speed; else if (m.y > sharkCY) m.y -= m.speed;
 
-            let hitBody = this.checkCollision(sharkCX, sharkCY, this.shark.radius, m.x - m.radius, m.y - m.radius, m.radius*2, m.radius*2);
-            let hitTail = this.shark.isDashing && this.checkCollision(this.shark.x - 40, this.shark.y, 40, m.x - m.radius, m.y - m.radius, m.radius*2, m.radius*2);
+            if (m.x > this.shark.x + 85 && m.x < this.shark.x + 210) this.warnHazard('⚠ MINE LOCK', '#ff5555');
+
+            let hitBody = this.checkCircleCollision(sharkCX, sharkCY, this.shark.radius, m.x, m.y, m.radius);
+            let hitTail = this.shark.isDashing && this.checkCircleCollision(this.shark.x - 40, this.shark.y, 40, m.x, m.y, m.radius);
             if (hitBody || hitTail) {
                 if (isInvincible || hitTail) {
                     this.audio.play('explosion'); this.score += Math.floor(50 * (this.mutationSystem ? this.mutationSystem.modifiers.scoreMult : 1)); 
-                    this.entityManager.spawnText(m.x, m.y, "+50", "#ff4444");
                     this.entityManager.spawnParticles(m.x, m.y, '#ff4444', 35, 1.5);
                     this.cameraShake = 15;
                     if (this.mutationSystem) {
@@ -2527,6 +2952,7 @@ class GameEngine {
                     this.runStats.shieldsBroken++;
                     this.shark.comboCount = 0; this.shark.comboActive = false;
                     this.audio.play('explosion'); this.shark.shield = false;
+                    this.ui.triggerImpactFlash();
                     this.entityManager.spawnParticles(m.x, m.y, '#00ffff', 30, 1.5);
                     this.cameraShake = 15;
                     this.mines.splice(i, 1);
@@ -2535,7 +2961,10 @@ class GameEngine {
                     this.shark.comboCount = 0; this.shark.comboActive = false;
                     this.triggerGameOver(); return;
                 }
-            } else if (m.x + m.radius < 0) {
+            } else {
+                this.registerNearMiss(m, m.x, m.y, m.radius, 'CLOSE CALL +3', '#ffcc66');
+            }
+            if (m.x + m.radius < 0) {
                 this.mines.splice(i, 1);
             }
         }
@@ -2543,24 +2972,37 @@ class GameEngine {
         for (let i = this.jellyfishes.length - 1; i >= 0; i--) {
             let jelly = this.jellyfishes[i];
             jelly.x -= currentSpeed * 0.7; jelly.y += Math.sin(this.frameCount * 0.05 + jelly.offset) * 2; 
+            if (jelly.x > this.shark.x + 85 && jelly.x < this.shark.x + 210) this.warnHazard('⚠ BIO-LIGHT', '#ff66ff');
             let dist = Math.hypot(sharkCX - jelly.x, sharkCY - jelly.y);
             let hitBody = dist < this.shark.radius + jelly.radius;
-            let hitTail = this.shark.isDashing && this.checkCollision(this.shark.x - 40, this.shark.y, 40, jelly.x - jelly.radius, jelly.y - jelly.radius, jelly.radius*2, jelly.radius*2);
+            let hitTail = this.shark.isDashing && this.checkCircleCollision(this.shark.x - 40, this.shark.y, 40, jelly.x, jelly.y, jelly.radius);
             if (hitBody || hitTail) {
                 if (isInvincible || hitTail) { 
                     this.audio.play('smash'); this.score += Math.floor(30 * (this.mutationSystem ? this.mutationSystem.modifiers.scoreMult : 1)); 
-                    this.entityManager.spawnText(jelly.x, jelly.y, "+30", "#ff00ff");
                     this.entityManager.spawnParticles(jelly.x, jelly.y, '#ff00ff', 15);
                     if (this.mutationSystem) {
                         let depthMult = 1 + (this.depth / 1000);
                         this.mutationSystem.addDna(this.mutationSystem.baseDnaPerFish * 3 * depthMult);
                     }
                     this.jellyfishes.splice(i, 1); 
-                } 
+                }
+                else if (this.mutationSystem && this.mutationSystem.modifiers.jellyfishGraft) {
+                    this.shark.huntPoints = 100;
+                    this.shark.isDashing = true; 
+                    this.shark.tailKillsInDash = 0;
+                    let dashTime = this.mutationSystem.modifiers.leviathan ? 300 : 150;
+                    this.shark.dashTimer = dashTime; 
+                    this.audio.play('dash'); 
+                    this.entityManager.spawnText(sharkCX, sharkCY - 30, "GRAFT RUSH!", "#ff00ff");
+                    this.cameraShake = 15;
+                    this.entityManager.spawnParticles(jelly.x, jelly.y, '#ff00ff', 20);
+                    this.jellyfishes.splice(i, 1);
+                }
                 else if (this.shark.shield) { 
                     this.runStats.shieldsBroken++;
                     this.shark.comboCount = 0; this.shark.comboActive = false;
                     this.audio.play('smash'); this.shark.shield = false; 
+                    this.ui.triggerImpactFlash();
                     this.entityManager.spawnParticles(jelly.x, jelly.y, '#00ffff', 20);
                     this.jellyfishes.splice(i, 1);
                 }
@@ -2568,15 +3010,20 @@ class GameEngine {
                     this.runStats.damageTaken++;
                     this.shark.comboCount = 0; this.shark.comboActive = false;
                     this.audio.play('shock'); this.shark.isParalyzed = true; this.shark.paralyzeTimer = 100;
+                    this.ui.triggerImpactFlash();
                     this.entityManager.spawnParticles(jelly.x, jelly.y, '#ff00ff', 20, 1.5);
                     this.cameraShake = 12;
                     this.jellyfishes.splice(i, 1);
                 }
-            } else if (jelly.x + jelly.radius < 0) { this.jellyfishes.splice(i, 1); }
+            } else {
+                this.registerNearMiss(jelly, jelly.x, jelly.y, jelly.radius, 'CLOSE CALL +3', '#ff99ff');
+                if (jelly.x + jelly.radius < 0) this.jellyfishes.splice(i, 1);
+            }
         }
         
         for (let i = this.obstacles.length - 1; i >= 0; i--) {
             let obs = this.obstacles[i]; obs.x -= currentSpeed;
+            if (obs.x > this.shark.x + 90 && obs.x < this.shark.x + 210) this.warnHazard('⚠ IMPACT VECTOR', profile.accent);
             let hitBody = this.checkCollision(sharkCX, sharkCY, this.shark.radius, obs.x, obs.y, obs.width, obs.height);
             let hitTail = this.shark.isDashing && this.checkCollision(this.shark.x - 40, this.shark.y, 40, obs.x, obs.y, obs.width, obs.height);
             if (hitBody || hitTail) {
@@ -2597,6 +3044,7 @@ class GameEngine {
                     this.runStats.shieldsBroken++;
                     this.shark.comboCount = 0; this.shark.comboActive = false;
                     this.audio.play('smash'); this.shark.shield = false;
+                    this.ui.triggerImpactFlash();
                     this.entityManager.spawnParticles(obs.x, sharkCY, '#00ffff', 25, 1.5);
                     this.cameraShake = 15;
                     this.obstacles.splice(i, 1); 
@@ -2614,6 +3062,7 @@ class GameEngine {
                 this.score += Math.floor(pts * (this.mutationSystem ? this.mutationSystem.modifiers.scoreMult : 1)); 
                 this.entityManager.spawnText(obs.x + obs.width, obs.y + obs.height/2, `+${pts}`, "#00ffff");
             }
+            if (!hitBody && !hitTail) this.registerNearMiss(obs, obs.x + obs.width / 2, obs.y + obs.height / 2, obs.height / 2, 'CLOSE CALL +3', profile.accent);
             if (obs.x + obs.width < 0) this.obstacles.splice(i, 1);
         }
 
@@ -2691,6 +3140,8 @@ class GameEngine {
             if (fish.active && Math.hypot(fish.x - mouthX, fish.y - mouthY) < 30) {
                 this.runStats.fishesEaten++;
                 fish.active = false; this.audio.play('eat');
+                this.markTutorialEvent('fish');
+                this.decayCounter = 0;
                 this.entityManager.spawnParticles(fish.x, fish.y, '#00ffff', 5, 0.5);
                 
                 let dnaMult = this.shark.comboActive ? 1.5 : 1.0;
@@ -2698,7 +3149,7 @@ class GameEngine {
                 this.mutationSystem.addDna(this.mutationSystem.baseDnaPerFish * dnaMult * depthMult);
                 
                 this.shark.comboCount++;
-                this.shark.comboTimer = 240; // 4 seconds at 60fps
+                this.shark.comboTimer = PACING.COMBO_WINDOW_TICKS;
                 if (this.shark.comboCount === 3) {
                     this.shark.comboActive = true;
                     this.ui.triggerComboDisplay();
@@ -2720,6 +3171,7 @@ class GameEngine {
                         let dashTime = this.mutationSystem && this.mutationSystem.modifiers.leviathan ? 300 : 150;
                         this.shark.dashTimer = dashTime; 
                         this.audio.play('dash'); 
+                        this.markTutorialEvent('rush');
                         this.entityManager.spawnText(sharkCX, sharkCY - 30, "RUSH!", "#ff0000");
                         this.cameraShake = 15;
                     }
@@ -2737,7 +3189,7 @@ class GameEngine {
 
         this.bossSystem.update(dynamicBaseSpeed, speedMult);
 
-        this.ui.update(this.score, this.shark, this.highScore, this.depth);
+        this.ui.update(this.score, this.shark, this.highScore, this.depth, this);
         this.achievementManager.evaluate(this.runStats, this.score, this.depth);
     }
 
@@ -2801,7 +3253,7 @@ class GameEngine {
             if (fish.x < -20) this.fishes.splice(i, 1);
         }
         
-        if (this.frameCount % 8 === 0 && this.bubbles.length < 50) {
+        if (this.frameCount % 8 === 0 && this.bubbles.length < this.maxMenuBubbles) {
             this.bubbles.push({ 
                 x: Math.random() * cvsW, 
                 y: cvsH + 10, 
@@ -2830,7 +3282,10 @@ class GameEngine {
     loop(currentTime) {
         requestAnimationFrame((time) => this.loop(time));
 
-        if (this.cameraShake > 0) {
+        if (this.reduceMotion && this.cameraShake > 0) {
+            this.cameraShake = 0;
+            this.renderer.canvas.style.transform = 'translate(0, 0)';
+        } else if (this.cameraShake > 0) {
             this.renderer.canvas.style.transform = `translate(${Math.random()*this.cameraShake - this.cameraShake/2}px, ${Math.random()*this.cameraShake - this.cameraShake/2}px)`;
             this.cameraShake *= 0.85;
             if (this.cameraShake < 0.5) { this.cameraShake = 0; this.renderer.canvas.style.transform = 'translate(0, 0)'; }
