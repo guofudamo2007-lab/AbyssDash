@@ -22,6 +22,10 @@
 | `art/bosses/boss-submarine-spritesheet.png` | 潜艇 Boss 三帧动画 |
 | `audio/music/boss-battle-beneath-the-crush.mp3` | Boss 战音乐 |
 
+> v9.8.0 说明：最终 Boss 巨齿鲨复用
+> `art/characters/shark-default-spritesheet.png` 的固定序列帧，不读取玩家当前皮肤。
+> `references`、`workfiles` 和 `archive` 中的文件均不参与运行时加载。
+
 ## 命名规则
 
 - 角色：`角色名-外观-spritesheet.png`
