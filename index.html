@@ -2,9 +2,9 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="application-version" content="9.7.0">
-    <title>深渊冲刺 (Abyss Dash) v9.7.0</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="application-version" content="9.8.0">
+    <title>深渊冲刺 (Abyss Dash) v9.8.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; overflow: hidden; background-color: #01060e; display: flex; justify-content: center; align-items: center; height: 100dvh; width: 100dvw; color: white; font-family: 'Inter', sans-serif; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; }
@@ -80,6 +80,7 @@
         .god-boss-action { border: 1px solid rgba(255, 75, 135, 0.58); border-radius: 8px; padding: 8px 5px; cursor: pointer; color: #fff4fa; background: rgba(255, 45, 115, 0.12); font: 700 12px 'Rajdhani', sans-serif; }
         .god-boss-action:hover { background: rgba(255, 45, 115, 0.28); box-shadow: 0 0 12px rgba(255, 45, 115, 0.25); }
         .god-boss-action:disabled { opacity: 0.38; cursor: not-allowed; box-shadow: none; }
+        #easter-egg-shark:focus-visible { outline: 2px solid #ffe36d; outline-offset: 5px; border-radius: 50%; }
         #easter-egg-shark.rush-unlocked { animation: easterEggRush 1.05s cubic-bezier(0.18, 0.8, 0.2, 1) both; }
         @keyframes easterEggRush {
             0% { transform: scale(1) translateX(0); filter: brightness(1); }
@@ -154,7 +155,7 @@
             border-radius: 30px; padding: 3cqw; display: flex; flex-direction: column;
             box-shadow: 0 30px 60px rgba(0,0,0,0.6), inset 0 0 30px rgba(0, 229, 255, 0.05);
             backdrop-filter: blur(30px) saturate(150%); -webkit-backdrop-filter: blur(30px) saturate(150%);
-            position: relative; overflow: hidden; font-family: 'Inter', sans-serif;
+            position: relative; max-height: min(88cqh, 88vh); overflow-x: hidden; overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y; font-family: 'Inter', sans-serif;
         }
         .modal-panel::before {
             content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
@@ -168,15 +169,22 @@
             .intro-box { margin-top: 10px; padding: 10px; }
             .intro-title { font-size: 14px; margin-bottom: 4px; }
             .intro-line { font-size: 11px; margin-bottom: 2px; }
+            .modal-panel { max-height: 90cqh; border-radius: 18px; padding: 14px; }
         }
 
         .icon-btn:hover { transform: scale(1.1); background: rgba(0, 229, 255, 0.2) !important; border-color: rgba(0, 229, 255, 0.5) !important; box-shadow: 0 10px 25px rgba(0, 229, 255, 0.3), inset 0 0 15px rgba(0, 229, 255, 0.2) !important; }
         #btn-achievements.icon-btn:hover { background: rgba(0, 255, 170, 0.2) !important; border-color: rgba(0, 255, 170, 0.5) !important; box-shadow: 0 10px 25px rgba(0, 255, 170, 0.3), inset 0 0 15px rgba(0, 255, 170, 0.2) !important; color: #00ffaa !important; }
+        button { font: inherit; }
+        .menu-btn, .icon-btn, .gl-tab, #pause-btn { appearance: none; -webkit-appearance: none; }
+        button:focus-visible, select:focus-visible, input:focus-visible, canvas:focus-visible, [role="button"]:focus-visible {
+            outline: 3px solid #ffe36d;
+            outline-offset: 4px;
+        }
     </style>
 </head>
 <body>
 
-    <div id="orientation-overlay">
+    <div id="orientation-overlay" role="status" aria-live="polite">
         <div style="font-size: 48px; margin-bottom: 20px;">📱🔄</div>
         <div style="font-size: 24px; font-weight: 700; color: #00ffff; letter-spacing: 2px;">ROTATE DEVICE</div>
         <div style="font-size: 16px; margin-top: 12px; color: #8ab;">Please play Abyss Dash in landscape mode.</div>
@@ -184,12 +192,12 @@
 
     <div id="game-container">
         <div id="main-menu">
-            <div id="menu-logo">ABYSS DASH <span id="easter-egg-shark" style="display:inline-block; transition:transform 0.2s ease, filter 0.2s ease; cursor:pointer;">🦈</span></div>
-            <div id="version-label">v9.7.0 · ABYSS SOVEREIGNTY</div>
-            <div class="menu-btn" id="btn-start">START GAME</div>
-            <div class="menu-btn" id="btn-contract" style="display: none; background: linear-gradient(135deg, #8b0000, #ff0000); box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);">ABYSSAL CONTRACT (深海契约)</div>
-            <div class="menu-btn" id="btn-skins">SKINS (皮肤)</div>
-            <div class="menu-btn" id="btn-glossary">ENCYCLOPEDIA (图鉴)</div>
+            <div id="menu-logo">ABYSS DASH <span id="easter-egg-shark" role="button" tabindex="0" aria-label="鲨鱼彩蛋" style="display:inline-block; transition:transform 0.2s ease, filter 0.2s ease; cursor:pointer;">🦈</span></div>
+            <div id="version-label">v9.8.0 · DEEP ECHOES</div>
+            <button type="button" class="menu-btn" id="btn-start">START GAME</button>
+            <button type="button" class="menu-btn" id="btn-contract" style="display: none; background: linear-gradient(135deg, #8b0000, #ff0000); box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);">ABYSSAL CONTRACT (深海契约)</button>
+            <button type="button" class="menu-btn" id="btn-skins">SKINS (皮肤)</button>
+            <button type="button" class="menu-btn" id="btn-glossary">ENCYCLOPEDIA (图鉴)</button>
             <div class="intro-box">
                 <div class="intro-title">轻按 屏幕 / 空格键 下潜，松开上浮</div>
                 <div class="intro-line" style="color: #00ffff;">🦈 吃小鱼积攒怒气 → 满怒触发冲刺（无敌+破障）</div>
@@ -198,13 +206,13 @@
             </div>
 
             <div style="position: absolute; bottom: 2cqw; left: 2cqw; display: flex; gap: 15px; z-index: 1000;">
-            <div id="btn-settings" class="icon-btn" style="width: 50px; height: 50px; background: rgba(5, 15, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 25px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #00e5ff; font-size: 24px; pointer-events: auto; box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset 0 0 10px rgba(0, 229, 255, 0.1); backdrop-filter: blur(20px); transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">⚙️</div>
-            <div id="btn-achievements" class="icon-btn" style="width: 50px; height: 50px; background: rgba(5, 15, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 25px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #00ffaa; font-size: 24px; pointer-events: auto; box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset 0 0 10px rgba(0, 255, 170, 0.1); backdrop-filter: blur(20px); transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">🏆</div>
+            <button type="button" id="btn-settings" class="icon-btn" aria-label="打开设置" title="设置" style="width: 50px; height: 50px; background: rgba(5, 15, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 25px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #00e5ff; font-size: 24px; pointer-events: auto; box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset 0 0 10px rgba(0, 229, 255, 0.1); backdrop-filter: blur(20px); transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">⚙️</button>
+            <button type="button" id="btn-achievements" class="icon-btn" aria-label="打开成就" title="成就" style="width: 50px; height: 50px; background: rgba(5, 15, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 25px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #00ffaa; font-size: 24px; pointer-events: auto; box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset 0 0 10px rgba(0, 255, 170, 0.1); backdrop-filter: blur(20px); transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">🏆</button>
         </div>
         </div>
 
         <!-- Achievement Toast -->
-        <div id="achievement-toast" style="position: absolute; top: -100px; left: 50%; transform: translateX(-50%); background: rgba(5, 15, 30, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; padding: 12px 35px; border-radius: 40px; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(0, 255, 170, 0.1); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); z-index: 9999; transition: top 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; align-items: center; gap: 15px; pointer-events: none;">
+        <div id="achievement-toast" role="status" aria-live="polite" style="position: absolute; top: -100px; left: 50%; transform: translateX(-50%); background: rgba(5, 15, 30, 0.6); border: 1px solid rgba(255, 255, 255, 0.15); color: #fff; padding: 12px 35px; border-radius: 40px; font-family: 'Inter', sans-serif; font-weight: 500; font-size: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.5), inset 0 0 20px rgba(0, 255, 170, 0.1); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); z-index: 9999; transition: top 0.6s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; align-items: center; gap: 15px; pointer-events: none;">
             <span style="font-size: 24px;">🏆</span>
             <div>
                 <div style="font-size: 12px; opacity: 0.8;">成就解锁 Achievement Unlocked</div>
@@ -212,16 +220,16 @@
             </div>
         </div>
 
-        <div id="achievements-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+        <div id="achievements-modal" role="dialog" aria-modal="true" aria-label="成就" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
             <div class="modal-panel" style="width: 85%; max-width: 800px; max-height: 85%;">
                 <h2 style="font-family: 'Orbitron', sans-serif; color: #ffd700; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 15px 0; text-align: center; text-shadow: 0 0 10px #ffd700; letter-spacing: 2px;">ACHIEVEMENTS</h2>
                 <div id="achievements-list" style="overflow-y: auto; flex-grow: 1; padding-right: 10px; font-family: 'Rajdhani', sans-serif;">
                 </div>
-                <div class="menu-btn" id="btn-close-achievements" style="margin: 15px auto 0; width: 60%; max-width: 200px;">CLOSE</div>
+                <button type="button" class="menu-btn" id="btn-close-achievements" style="margin: 15px auto 0; width: 60%; max-width: 200px;">CLOSE</button>
             </div>
         </div>
 
-        <div id="levelup-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.7); z-index: 2500; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(20px) saturate(120%); -webkit-backdrop-filter: blur(20px) saturate(120%);">
+        <div id="levelup-modal" role="dialog" aria-modal="true" aria-label="选择变异升级" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.7); z-index: 2500; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(20px) saturate(120%); -webkit-backdrop-filter: blur(20px) saturate(120%);">
             <h1 style="font-family: 'Orbitron', sans-serif; color: #00ffaa; font-size: clamp(28px, 6cqw, 42px); margin: 0 0 5px 0; text-shadow: 0 0 20px rgba(0, 255, 170, 0.6); letter-spacing: 4px; text-transform: uppercase;">MUTATION</h1>
             <div style="font-size: clamp(14px, 2.5cqw, 18px); color: #e0f0ff; margin-bottom: 25px; font-weight: 500; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Choose your evolutionary path</div>
             <div id="upgrade-cards" style="display: flex; gap: 15px; width: 90%; max-width: 900px; justify-content: center; flex-wrap: wrap;">
@@ -229,7 +237,7 @@
             </div>
         </div>
 
-        <div id="contract-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.7); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+        <div id="contract-modal" role="dialog" aria-modal="true" aria-label="深海契约" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.7); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
             <div class="modal-panel" style="width: 85%; max-width: 500px; border-color: #ff4444; box-shadow: inset 0 0 50px rgba(255,0,0,0.1), 0 0 20px rgba(255,0,0,0.3);">
                 <h2 style="font-family: 'Orbitron', sans-serif; color: #ff4444; font-size: clamp(20px, 5cqw, 28px); margin: 0 0 5px 0; text-align: center; text-shadow: 0 0 10px #ff0000; letter-spacing: 2px;">ABYSSAL CONTRACT</h2>
                 <div style="text-align: center; color: #aaa; font-size: 14px; margin-bottom: 20px;">勾选深海畸变机制，换取极限挑战</div>
@@ -258,13 +266,13 @@
                     </div>
                 </label>
 
-                <div class="menu-btn" id="btn-close-contract" style="margin: 0 auto; width: 80%; background: #222; border-color: #555; color: #fff;">CONFIRM (确认)</div>
+                <button type="button" class="menu-btn" id="btn-close-contract" style="margin: 0 auto; width: 80%; background: #222; border-color: #555; color: #fff;">CONFIRM (确认)</button>
             </div>
         </div>
 
-        <div id="glossary-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+        <div id="glossary-modal" role="dialog" aria-modal="true" aria-label="百科图鉴" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
             <style>
-                .gl-tab { flex: 1; text-align: center; padding: 8px 4px; cursor: pointer; color: #8ab; font-weight: bold; border-bottom: 2px solid transparent; transition: all 0.2s; font-size: clamp(12px, 3cqw, 18px); font-family: 'Orbitron', sans-serif; white-space: nowrap; }
+                .gl-tab { flex: 1; text-align: center; padding: 8px 4px; cursor: pointer; color: #8ab; background: transparent; font-weight: bold; border: 0; border-bottom: 2px solid transparent; transition: all 0.2s; font-size: clamp(12px, 3cqw, 18px); font-family: 'Orbitron', sans-serif; white-space: nowrap; }
                 .gl-tab.active { color: #00ffff; border-bottom: 2px solid #00ffff; text-shadow: 0 0 10px #00ffff; }
                 .gl-pane { display: none; flex-direction: column; gap: 15px; overflow-y: auto; flex-grow: 1; padding-right: 10px; font-family: 'Rajdhani', sans-serif; margin-top: 15px; }
                 .gl-pane.active { display: flex; }
@@ -274,12 +282,12 @@
             <div class="modal-panel" style="width: 90%; max-width: 800px; height: 85%; max-height: 800px;">
                 <h2 style="font-family: 'Orbitron', sans-serif; color: #00ffff; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 15px 0; text-align: center; text-shadow: 0 0 10px #00ffff; letter-spacing: 2px;">ENCYCLOPEDIA</h2>
 
-                <div style="display: flex; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
-                    <div class="gl-tab active" onclick="switchGlTab('items')">道具 ITEMS</div>
-                    <div class="gl-tab" onclick="switchGlTab('terrain')">地形 TERRAIN</div>
-                    <div class="gl-tab" onclick="switchGlTab('enemies')">敌对 ENEMIES</div>
-                    <div class="gl-tab" style="color: #ff00ff;" onclick="switchGlTab('mutation')">基因 MUTATION</div>
-                    <div class="gl-tab" style="color: #ff0000;" onclick="switchGlTab('boss')">领主 BOSS</div>
+                <div role="tablist" aria-label="图鉴分类" style="display: flex; width: 100%; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 10px;">
+                    <button type="button" role="tab" aria-selected="true" class="gl-tab active" onclick="switchGlTab('items')">道具 ITEMS</button>
+                    <button type="button" role="tab" aria-selected="false" class="gl-tab" onclick="switchGlTab('terrain')">地形 TERRAIN</button>
+                    <button type="button" role="tab" aria-selected="false" class="gl-tab" onclick="switchGlTab('enemies')">敌对 ENEMIES</button>
+                    <button type="button" role="tab" aria-selected="false" class="gl-tab" style="color: #ff00ff;" onclick="switchGlTab('mutation')">基因 MUTATION</button>
+                    <button type="button" role="tab" aria-selected="false" class="gl-tab" style="color: #ff0000;" onclick="switchGlTab('boss')">领主 BOSS</button>
                 </div>
 
                 <!-- ITEMS -->
@@ -423,13 +431,14 @@
                     </div>
                 </div>
 
-                <div class="menu-btn" id="btn-close-glossary" style="margin: 15px auto 0; width: 60%; max-width: 200px; flex-shrink: 0;">CLOSE</div>
+                <button type="button" class="menu-btn" id="btn-close-glossary" style="margin: 15px auto 0; width: 60%; max-width: 200px; flex-shrink: 0;">CLOSE</button>
             </div>
 
             <script>
                 function switchGlTab(tabId) {
                     document.querySelectorAll('.gl-tab').forEach(t => {
                         t.classList.remove('active');
+                        t.setAttribute('aria-selected', 'false');
                         if (t.style.color === 'rgb(255, 0, 0)') t.style.textShadow = 'none';
                     });
                     document.querySelectorAll('.gl-pane').forEach(p => p.classList.remove('active'));
@@ -437,6 +446,7 @@
                     const clickedTab = Array.from(document.querySelectorAll('.gl-tab')).find(t => t.innerText.toLowerCase().includes(tabId.replace('boss', 'boss')));
                     if(clickedTab) {
                         clickedTab.classList.add('active');
+                        clickedTab.setAttribute('aria-selected', 'true');
                         if (tabId === 'boss') clickedTab.style.textShadow = '0 0 10px #ff0000';
                     }
                     document.getElementById('gl-' + tabId).classList.add('active');
@@ -444,18 +454,18 @@
             </script>
         </div>
 
-        <div id="skins-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+        <div id="skins-modal" role="dialog" aria-modal="true" aria-label="皮肤选择" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
             <div class="modal-panel" style="width: 85%; max-width: 800px; max-height: 85%;">
                 <h2 style="font-family: 'Orbitron', sans-serif; color: #00ffff; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 15px 0; text-align: center; text-shadow: 0 0 10px #00ffff; letter-spacing: 2px;">SKIN SELECTOR</h2>
 
                 <div id="skins-grid" style="overflow-y: auto; flex-grow: 1; padding-right: 10px; font-family: 'Rajdhani', sans-serif; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px;">
                 </div>
 
-                <div class="menu-btn" id="btn-close-skins" style="margin: 15px auto 0; width: 60%; max-width: 200px;">CLOSE</div>
+                <button type="button" class="menu-btn" id="btn-close-skins" style="margin: 15px auto 0; width: 60%; max-width: 200px;">CLOSE</button>
             </div>
         </div>
 
-        <div id="settings-modal" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+        <div id="settings-modal" role="dialog" aria-modal="true" aria-label="设置" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
             <div class="modal-panel" style="width: 85%; max-width: 500px;">
                 <h2 style="font-family: 'Orbitron', sans-serif; color: #00ffff; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 20px 0; text-align: center; text-shadow: 0 0 10px #00ffff; letter-spacing: 2px;">SETTINGS</h2>
 
@@ -506,7 +516,7 @@
                     <button type="button" id="btn-reset-progress" style="background: transparent; color: #ff8a9a; border: 1px solid rgba(255, 90, 120, 0.55); border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer;">重置本地进度</button>
                 </div>
 
-                <div class="menu-btn" id="btn-close-settings" style="margin: 15px auto 0; width: 60%; max-width: 200px;">CLOSE</div>
+                <button type="button" class="menu-btn" id="btn-close-settings" style="margin: 15px auto 0; width: 60%; max-width: 200px;">CLOSE</button>
             </div>
         </div>
         <div id="ripple-effect"></div>
@@ -532,7 +542,7 @@
                 <div id="hunt-bar-container"><div id="hunt-bar"></div></div>
             </div>
             <div id="right-ui-container" style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
-                <div id="pause-btn">⏸</div>
+                <button type="button" id="pause-btn" aria-label="暂停游戏" title="暂停">⏸</button>
                 <div id="right-ui" style="display: flex; flex-direction: column; align-items: flex-end; background: rgba(5, 15, 30, 0.4); padding: 1cqw 2cqw; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(0, 255, 170, 0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
                     <div style="font-size: clamp(10px, 1.8cqw, 14px); color: #00ffaa; font-weight: 700; letter-spacing: 1px; font-family: 'Orbitron', sans-serif;">MUTATION <span id="mutation-level" style="font-size: clamp(14px, 2.2cqw, 18px); color: #fff;">1</span></div>
                         <div id="dna-bar-container" style="width: clamp(80px, 15cqw, 150px); height: 1cqw; min-height: 8px; background: rgba(0,0,0,0.5); border-radius: 4px; margin-top: 4px; border: 1px solid rgba(255,255,255,0.15); overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);">
@@ -543,7 +553,7 @@
                 </div>
             </div>
         </div>
-        <canvas id="gameCanvas"></canvas>
+        <canvas id="gameCanvas" tabindex="0" role="application" aria-label="Abyss Dash 游戏区域。按空格键下潜，松开后上浮。"></canvas>
     </div>
 
 <script>
@@ -766,13 +776,15 @@ class MutationSystem {
         }
 
         choices.forEach((choice, index) => {
-            const card = document.createElement('div');
+            const card = document.createElement('button');
+            card.type = 'button';
+            card.setAttribute('aria-label', `${choice.name}，等级 ${choice.level !== undefined ? choice.level + 1 : '无限'}`);
             card.style.cssText = `
                 background: rgba(10, 25, 45, 0.6); border: 1px solid rgba(0,255,170,0.3);
                 border-radius: 20px; padding: 25px; width: clamp(150px, 20vw, 240px); text-align: center;
                 cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
                 box-shadow: 0 15px 35px rgba(0,0,0,0.6); display: flex; flex-direction: column; align-items: center;
-                backdrop-filter: blur(10px);
+                backdrop-filter: blur(10px); color: inherit; font: inherit;
             `;
             card.onmouseover = () => { card.style.transform = 'scale(1.08) translateY(-10px)'; card.style.boxShadow = '0 20px 40px rgba(0, 255, 170, 0.4), inset 0 0 20px rgba(0, 255, 170, 0.2)'; card.style.borderColor = 'rgba(0,255,170,0.8)'; card.style.background = 'rgba(10, 35, 60, 0.8)'; };
             card.onmouseout = () => { card.style.transform = 'scale(1)'; card.style.boxShadow = '0 15px 35px rgba(0,0,0,0.6)'; card.style.borderColor = 'rgba(0,255,170,0.3)'; card.style.background = 'rgba(10, 25, 45, 0.6)'; };
@@ -793,6 +805,8 @@ class MutationSystem {
 
         this.currentChoices = choices;
         modal.style.display = 'flex';
+        const firstCard = cardsContainer.querySelector('button');
+        if (firstCard) firstCard.focus({ preventScroll: true });
     }
 
     bindEvents() {
@@ -844,7 +858,7 @@ class BossSystem {
         return false;
     }
 
-    spawnBoss(threshold, { force = false } = {}) {
+    spawnBoss(threshold, { force = false, isDemo = false } = {}) {
         if (![300, 800, 1500].includes(threshold)) return false;
         if (this.active || (!force && this.defeatedBosses.includes(threshold))) return false;
         this.active = true;
@@ -857,11 +871,11 @@ class BossSystem {
         let restX = cvsW * 0.62;
 
         if (threshold === 300) {
-            this.bossData = { type: 'octopus', threshold: 300, maxHp: 2, hp: 2, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 155, height: 130, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0, supplyTimer: 0, emergencySupplyUsed: false, attackPulse: 0, musicStarted: false };
+            this.bossData = { type: 'octopus', threshold: 300, maxHp: 2, hp: 2, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 155, height: 130, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0, supplyTimer: 0, emergencySupplyUsed: false, attackPulse: 0, attackTelegraph: 0, musicStarted: false, isDemo: Boolean(isDemo) };
         } else if (threshold === 800) {
-            this.bossData = { type: 'submarine', threshold: 800, maxHp: 3, hp: 3, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 150, height: 80, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0, supplyTimer: 0, emergencySupplyUsed: false, musicStarted: false };
+            this.bossData = { type: 'submarine', threshold: 800, maxHp: 3, hp: 3, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 150, height: 80, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0, supplyTimer: 0, emergencySupplyUsed: false, attackPulse: 0, attackTelegraph: 0, musicStarted: false, isDemo: Boolean(isDemo) };
         } else if (threshold === 1500) {
-            this.bossData = { type: 'megalodon', threshold: 1500, maxHp: 4, hp: 4, x: cvsW + 300, y: cvsH / 2, targetY: cvsH / 2, restX: restX + 50, width: 250, height: 120, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0, supplyTimer: 0, emergencySupplyUsed: false, musicStarted: false };
+            this.bossData = { type: 'megalodon', threshold: 1500, maxHp: 4, hp: 4, x: cvsW + 300, y: cvsH / 2, targetY: cvsH / 2, restX: restX + 50, width: 250, height: 120, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0, supplyTimer: 0, emergencySupplyUsed: false, attackPulse: 0, attackTelegraph: 0, musicStarted: false, isDemo: Boolean(isDemo) };
         }
         this.deliverSupply({ emergency: true });
         return true;
@@ -903,6 +917,7 @@ class BossSystem {
         b.fightTime++;
         b.supplyTimer++;
         if (b.attackPulse > 0) b.attackPulse--;
+        if (b.attackTelegraph > 0) b.attackTelegraph--;
 
         if (b.supplyTimer >= PACING.BOSS_SUPPLY_INTERVAL_TICKS) {
             b.supplyTimer = 0;
@@ -931,22 +946,47 @@ class BossSystem {
                 }
             }
         } else if (b.state === 'idle' || b.state === 'attacking') {
-            b.targetY = shark.y;
+            const visualHalfHeight = b.type === 'octopus'
+                ? b.height * 1.08
+                : (b.type === 'submarine' ? b.height * 0.8 : b.height * 0.75);
+            b.targetY = Math.max(visualHalfHeight + 18, Math.min(cvsH - visualHalfHeight - 18, shark.y));
             b.y += (b.targetY - b.y) * 0.02;
 
             b.x += (b.restX - b.x) * 0.04;
 
 
-            if (b.type === 'octopus' && b.timer % 120 === 0) {
-                this.projectiles.push({ type: 'ink', x: b.x - b.width/2, y: b.y, vx: -4 - Math.random() * 3, vy: -6 - Math.random() * 4, radius: 12 });
-                b.attackPulse = 18;
-                this.engine.audio.play('shoot');
-            } else if (b.type === 'submarine' && b.timer % 100 === 0) {
-                this.projectiles.push({ type: 'torpedo', x: b.x - b.width/2, y: b.y + 20, vx: -8, vy: 0, radius: 10 });
-                this.engine.audio.play('shoot');
+            if (b.type === 'octopus') {
+                const attackCycle = b.timer % 120;
+                if (attackCycle === 90) {
+                    b.attackTelegraph = 30;
+                    b.state = 'attacking';
+                } else if (attackCycle === 0) {
+                    this.projectiles.push({ type: 'ink', x: b.x - b.width/2, y: b.y, vx: -4 - Math.random() * 3, vy: -6 - Math.random() * 4, radius: 12 });
+                    b.attackPulse = 18;
+                    b.attackTelegraph = 0;
+                    b.state = 'idle';
+                    this.engine.audio.play('shoot');
+                }
+            } else if (b.type === 'submarine') {
+                const attackCycle = b.timer % 100;
+                if (attackCycle === 72) {
+                    b.attackTelegraph = 28;
+                    b.state = 'attacking';
+                } else if (attackCycle === 0) {
+                    this.projectiles.push({ type: 'torpedo', x: b.x - b.width/2, y: b.y + 20, vx: -8, vy: 0, radius: 10 });
+                    b.attackPulse = 12;
+                    b.attackTelegraph = 0;
+                    b.state = 'idle';
+                    this.engine.audio.play('shoot');
+                }
             } else if (b.type === 'megalodon') {
-                if (b.timer % 150 === 0) {
+                const attackCycle = b.timer % 150;
+                if (attackCycle === 120) {
+                    b.attackTelegraph = 30;
+                } else if (attackCycle === 0) {
                     this.projectiles.push({ type: 'sonic', x: b.x - b.width/2, y: b.y, vx: -12, vy: 0, radius: 25 });
+                    b.attackPulse = 16;
+                    b.attackTelegraph = 0;
                     this.engine.audio.play('shoot');
                 }
                 if (b.timer % 400 === 0) {
@@ -1048,34 +1088,46 @@ class BossSystem {
     }
 
     defeatBoss(isPacifist = false) {
+        if (!this.bossData) return;
+        const defeatedBoss = this.bossData;
+        const isDemo = Boolean(defeatedBoss.isDemo);
         this.active = false;
-        if (this.bossData.musicStarted) this.engine.audio.stopBossMusic();
-        this.defeatedBosses.push(this.bossData.threshold);
-        let bonus = 100 * this.bossData.maxHp;
-        if (isPacifist) bonus *= 2;
-        this.engine.score += bonus;
+        if (defeatedBoss.musicStarted) this.engine.audio.stopBossMusic();
+        let bonus = 0;
+        if (!isDemo) {
+            if (!this.defeatedBosses.includes(defeatedBoss.threshold)) {
+                this.defeatedBosses.push(defeatedBoss.threshold);
+            }
+            bonus = 100 * defeatedBoss.maxHp;
+            if (isPacifist) bonus *= 2;
+            this.engine.score += bonus;
+        }
         this.projectiles = [];
         this.engine.audio.play('powerup');
 
-        let msg = isPacifist ? `PACIFIST WIN! +${bonus}` : `BOSS DEFEATED! +${bonus}`;
-        let color = isPacifist ? "#00ff00" : "#ffd700";
+        let msg = isDemo ? 'DEMO COMPLETE' : (isPacifist ? `PACIFIST WIN! +${bonus}` : `BOSS DEFEATED! +${bonus}`);
+        let color = isDemo ? '#ffb5d1' : (isPacifist ? "#00ff00" : "#ffd700");
 
-        this.engine.entityManager.spawnText(this.bossData.x, this.bossData.y, msg, color);
-        this.engine.entityManager.spawnParticles(this.bossData.x, this.bossData.y, color, 100, 3);
+        this.engine.entityManager.spawnText(defeatedBoss.x, defeatedBoss.y, msg, color);
+        this.engine.entityManager.spawnParticles(defeatedBoss.x, defeatedBoss.y, color, 100, 3);
         this.engine.cameraShake = 40;
+        if (isDemo && this.engine.setGodModeStatus) {
+            this.engine.setGodModeStatus('Boss 演示结束，正式进度未改变。', '#ffb5d1');
+        }
 
         const achievementMap = {
             'octopus':   'boss_octopus',
             'submarine': 'boss_submarine',
             'megalodon': 'boss_megalodon'
         };
-        const achId = achievementMap[this.bossData.type];
-        if (achId) {
+        const achId = achievementMap[defeatedBoss.type];
+        if (!isDemo && achId) {
             const ach = this.engine.achievementManager.achievements.find(a => a.id === achId);
             if (ach && !ach.unlocked) {
                 this.engine.achievementManager.unlock(ach);
             }
         }
+        this.bossData = null;
     }
 
     draw(ctx, engine) {
@@ -1099,7 +1151,7 @@ class BossSystem {
                 const idleFrame = Math.floor(b.timer / 16) % 2;
                 const frame = b.hp <= 1
                     ? (Math.floor(b.timer / 10) % 2 === 0 ? 2 : 1)
-                    : (b.attackPulse > 0 ? 1 : idleFrame);
+                    : (b.attackTelegraph > 0 || b.attackPulse > 0 ? 1 : idleFrame);
                 const drawWidth = b.width * 2.7;
                 const drawHeight = b.height * 2.15;
                 const hover = engine.reduceMotion ? 0 : Math.sin(b.timer * 0.055) * 4;
@@ -1129,17 +1181,27 @@ class BossSystem {
                 const eyeX = -drawWidth * 0.28 + (engine.reduceMotion ? 0 : Math.sin(b.timer * 0.13) * 2);
                 const eyeY = -drawHeight * 0.08 + hover + (engine.reduceMotion ? 0 : Math.cos(b.timer * 0.1) * 1.5);
                 ctx.save();
-                if (b.attackPulse > 0) {
-                    ctx.strokeStyle = 'rgba(255, 92, 118, 0.58)';
+                if (b.attackTelegraph > 0) {
+                    const chargeProgress = 1 - b.attackTelegraph / 30;
+                    const ringRadius = 17 - chargeProgress * 7;
+                    ctx.globalAlpha = engine.reduceMotion ? 0.72 : 0.48 + chargeProgress * 0.28;
+                    ctx.strokeStyle = '#ff6f8f';
+                    ctx.lineWidth = 2.5;
+                    ctx.beginPath();
+                    ctx.arc(eyeX, eyeY, ringRadius, 0, Math.PI * 2);
+                    ctx.stroke();
+                    ctx.setLineDash([5, 5]);
+                    ctx.beginPath();
+                    ctx.moveTo(-drawWidth * 0.39, hover);
+                    ctx.lineTo(-drawWidth * 0.54, hover);
+                    ctx.stroke();
+                } else if (b.attackPulse > 0) {
+                    ctx.globalAlpha = b.attackPulse / 30;
+                    ctx.strokeStyle = '#7d516d';
                     ctx.lineWidth = 2;
                     ctx.beginPath();
-                    ctx.arc(eyeX, eyeY, 13 + (18 - b.attackPulse) * 1.1, -0.55, 0.55);
+                    ctx.arc(eyeX, eyeY, 10 + (18 - b.attackPulse) * 0.45, -0.55, 0.55);
                     ctx.stroke();
-                    ctx.globalAlpha = b.attackPulse / 18;
-                    ctx.fillStyle = 'rgba(95, 42, 82, 0.10)';
-                    ctx.beginPath();
-                    ctx.ellipse(-drawWidth * 0.44, hover, drawWidth * 0.12, drawHeight * 0.24, 0, 0, Math.PI * 2);
-                    ctx.fill();
                 }
                 ctx.restore();
             } else {
@@ -1162,9 +1224,16 @@ class BossSystem {
                 const drawWidth = b.width * 2.15;
                 const drawHeight = drawWidth * (sprite.height / frameWidth);
                 const hover = engine.reduceMotion ? 0 : Math.sin(b.timer * 0.045) * 2;
+                const frameOffsets = [
+                    { x: 0, y: 0 },
+                    { x: 0.5, y: 0 },
+                    { x: 0.5, y: -0.5 }
+                ];
+                const frameOffset = frameOffsets[frame];
+                const sourceScale = drawWidth / frameWidth;
 
                 ctx.save();
-                ctx.translate(0, hover);
+                ctx.translate(frameOffset.x * sourceScale, hover + frameOffset.y * sourceScale);
                 ctx.globalAlpha = b.state === 'entering' ? 0.9 : 1;
                 ctx.drawImage(
                     sprite,
@@ -1172,6 +1241,27 @@ class BossSystem {
                     -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight
                 );
                 ctx.restore();
+
+                if (b.attackTelegraph > 0) {
+                    const chargeProgress = 1 - b.attackTelegraph / 28;
+                    const muzzleX = -drawWidth * 0.46;
+                    const muzzleY = drawHeight * 0.18 + hover;
+                    ctx.save();
+                    ctx.globalAlpha = engine.reduceMotion ? 0.72 : 0.42 + chargeProgress * 0.32;
+                    ctx.strokeStyle = '#ffbd59';
+                    ctx.fillStyle = '#ffbd59';
+                    ctx.lineWidth = 2.5;
+                    ctx.setLineDash([8, 7]);
+                    ctx.beginPath();
+                    ctx.moveTo(muzzleX, muzzleY);
+                    ctx.lineTo(muzzleX - 110, muzzleY);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.beginPath();
+                    ctx.arc(muzzleX, muzzleY, 4 + chargeProgress * 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
             } else {
                 ctx.fillStyle = '#3a4a5a';
                 ctx.beginPath(); ctx.ellipse(0, 0, b.width/2, b.height/2, 0, 0, Math.PI*2); ctx.fill();
@@ -1184,42 +1274,51 @@ class BossSystem {
                 }
             }
         } else if (b.type === 'megalodon') {
-            if (engine.skinManager && engine.skinManager.currentSkin.type === 'image' && engine.skinManager.isLoaded && engine.sharkSprite) {
-                const skin = engine.skinManager.currentSkin;
-                const spriteCols = skin.cols || 1;
-                const spriteRows = skin.rows || 1;
-                const frameWidth = engine.sharkSprite.width / spriteCols;
-                const frameHeight = engine.sharkSprite.height / spriteRows;
+            const megalodonDrawWidth = b.width * 1.5;
+            const glowBlur = engine.reduceMotion ? 10 : (engine.quality === 'performance' ? 20 : 34);
 
-                const framesToPlay = skin.animFrames || (spriteCols * spriteRows);
-                const frameIndex = (Math.floor(engine.frameCount / 10) % framesToPlay) || 0;
+            if (b.state === 'charging') {
+                ctx.save();
+                ctx.globalAlpha = engine.reduceMotion ? 0.58 : 0.34 + Math.sin(b.timer * 0.28) * 0.12;
+                ctx.strokeStyle = '#ff315f';
+                ctx.lineWidth = engine.reduceMotion ? 4 : 6;
+                ctx.setLineDash([18, 14]);
+                ctx.lineDashOffset = engine.reduceMotion ? 0 : -b.timer * 1.5;
+                ctx.beginPath();
+                ctx.moveTo(-b.x + 36, 0);
+                ctx.lineTo(-megalodonDrawWidth * 0.42, 0);
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            if (engine.megalodonSpriteLoaded && engine.megalodonSprite) {
+                const spriteCols = 4;
+                const spriteRows = 2;
+                const frameWidth = engine.megalodonSprite.width / spriteCols;
+                const frameHeight = engine.megalodonSprite.height / spriteRows;
+                const frameIndex = engine.reduceMotion ? 0 : (Math.floor(b.timer / 12) % (spriteCols * spriteRows));
                 const col = frameIndex % spriteCols;
                 const row = Math.floor(frameIndex / spriteCols);
+                const sw = frameWidth;
+                const sh = frameHeight;
+                const sx = col * frameWidth;
+                const sy = row * frameHeight;
 
-                const cropLeft = frameWidth * (skin.cropLeft || 0);
-                const cropTop = frameHeight * (skin.cropTop || 0);
-                const cropRight = frameWidth * (skin.cropRight || 0);
-                const cropBottom = frameHeight * (skin.cropBottom || 0);
-
-                const sw = frameWidth - cropLeft - cropRight;
-                const sh = frameHeight - cropTop - cropBottom;
-
-                const sx = col * frameWidth + cropLeft;
-                const sy = row * frameHeight + cropTop;
-
-                const drawWidth = b.width * 1.5;
+                const drawWidth = megalodonDrawWidth;
                 const drawHeight = (sh / sw) * drawWidth;
 
                 ctx.save();
                 ctx.scale(-1, 1);
-                ctx.filter = 'sepia(1) hue-rotate(-50deg) saturate(5) brightness(0.4)';
-                ctx.shadowBlur = 40; ctx.shadowColor = '#ff0000';
+                ctx.filter = 'sepia(1) hue-rotate(-50deg) saturate(4.5) brightness(0.52)';
+                ctx.shadowBlur = glowBlur;
+                ctx.shadowColor = engine.reduceMotion ? 'rgba(255, 35, 65, 0.7)' : '#ff163f';
 
-                ctx.drawImage(engine.sharkSprite, sx, sy, sw, sh, -drawWidth/2, -drawHeight/2, drawWidth, drawHeight);
+                ctx.drawImage(engine.megalodonSprite, sx, sy, sw, sh, -drawWidth/2, -drawHeight/2, drawWidth, drawHeight);
                 ctx.restore();
             } else {
                 ctx.fillStyle = '#100000';
-                ctx.shadowBlur = 30; ctx.shadowColor = '#f00';
+                ctx.shadowBlur = glowBlur;
+                ctx.shadowColor = engine.reduceMotion ? 'rgba(255, 35, 65, 0.7)' : '#ff163f';
                 ctx.beginPath(); ctx.ellipse(0, 0, b.width/2, b.height/2, 0, 0, Math.PI*2); ctx.fill();
                 ctx.shadowBlur = 0;
                 ctx.fillStyle = '#f00'; ctx.beginPath(); ctx.arc(-b.width/4, -15, 10, 0, Math.PI*2); ctx.fill();
@@ -1229,6 +1328,20 @@ class BossSystem {
                         ctx.beginPath(); ctx.moveTo(-b.width/2 + 10 + i*15, 10); ctx.lineTo(-b.width/2 + 17 + i*15, 30); ctx.lineTo(-b.width/2 + 25 + i*15, 10); ctx.fill();
                     }
                 }
+            }
+
+            if (b.state !== 'charging' && b.attackTelegraph > 0) {
+                const sonicProgress = 1 - b.attackTelegraph / 30;
+                ctx.save();
+                ctx.globalAlpha = engine.reduceMotion ? 0.68 : 0.44 + sonicProgress * 0.28;
+                ctx.strokeStyle = '#ff7894';
+                ctx.lineWidth = 3;
+                for (let i = 0; i < 2; i++) {
+                    ctx.beginPath();
+                    ctx.arc(-megalodonDrawWidth * 0.43, 0, 18 + i * 15 - sonicProgress * 5, -0.8, 0.8);
+                    ctx.stroke();
+                }
+                ctx.restore();
             }
         }
 
@@ -1242,8 +1355,17 @@ class BossSystem {
                 ctx.fillStyle = '#200020'; ctx.beginPath(); ctx.arc(0, 0, p.radius, 0, Math.PI*2); ctx.fill();
                 ctx.fillStyle = '#800080'; ctx.beginPath(); ctx.arc(-3, -3, p.radius*0.5, 0, Math.PI*2); ctx.fill();
             } else if (p.type === 'torpedo') {
-                ctx.fillStyle = '#556'; ctx.fillRect(-p.radius*1.8, -p.radius/2, p.radius*3.6, p.radius);
-                ctx.fillStyle = '#f90'; ctx.beginPath(); ctx.arc(-p.radius*1.8, 0, p.radius/2, 0, Math.PI*2); ctx.fill();
+                ctx.fillStyle = '#687783';
+                ctx.fillRect(-p.radius * 1.35, -p.radius / 2, p.radius * 2.7, p.radius);
+                ctx.beginPath();
+                ctx.moveTo(-p.radius * 1.35, -p.radius / 2);
+                ctx.lineTo(-p.radius * 2.05, 0);
+                ctx.lineTo(-p.radius * 1.35, p.radius / 2);
+                ctx.fill();
+                ctx.fillStyle = '#ff9d35';
+                ctx.beginPath();
+                ctx.ellipse(p.radius * 1.55, 0, p.radius * 0.65, p.radius * 0.38, 0, 0, Math.PI * 2);
+                ctx.fill();
             } else if (p.type === 'sonic') {
                 ctx.strokeStyle = '#f00'; ctx.lineWidth = 4;
                 ctx.beginPath(); ctx.arc(0, 0, p.radius, -Math.PI/2.5, Math.PI/2.5); ctx.stroke();
@@ -1372,10 +1494,12 @@ class AchievementManager {
         });
 
         document.getElementById('achievements-modal').style.display = 'flex';
+        document.getElementById('btn-close-achievements').focus({ preventScroll: true });
     }
 
     closeModal() {
         document.getElementById('achievements-modal').style.display = 'none';
+        document.getElementById('btn-achievements').focus({ preventScroll: true });
     }
 
     bindEvents() {
@@ -1467,8 +1591,11 @@ class SkinManager {
         grid.innerHTML = '';
         this.availableSkins.forEach(skin => {
             const isSelected = this.currentSkin.id === skin.id;
-            const item = document.createElement('div');
-            item.style.cssText = `background: ${isSelected ? 'rgba(0, 255, 170, 0.1)' : 'rgba(5, 15, 30, 0.4)'}; border: 1px solid ${isSelected ? '#00ffaa' : 'rgba(255, 255, 255, 0.15)'}; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: ${isSelected ? '0 5px 15px rgba(0,255,170,0.3), inset 0 0 10px rgba(0,255,170,0.1)' : '0 5px 15px rgba(0,0,0,0.3)'}; backdrop-filter: blur(10px); position: relative;`;
+            const item = document.createElement('button');
+            item.type = 'button';
+            item.setAttribute('aria-label', `${skin.name}${isSelected ? '，当前已选择' : ''}`);
+            item.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+            item.style.cssText = `background: ${isSelected ? 'rgba(0, 255, 170, 0.1)' : 'rgba(5, 15, 30, 0.4)'}; border: 1px solid ${isSelected ? '#00ffaa' : 'rgba(255, 255, 255, 0.15)'}; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: ${isSelected ? '0 5px 15px rgba(0,255,170,0.3), inset 0 0 10px rgba(0,255,170,0.1)' : '0 5px 15px rgba(0,0,0,0.3)'}; backdrop-filter: blur(10px); position: relative; color: inherit; font: inherit;`;
 
             if (skin.default) {
                 const badge = document.createElement('div');
@@ -1487,8 +1614,7 @@ class SkinManager {
                     this.setSkin(skin);
                 }
             };
-            item.addEventListener('touchstart', handleSelect, {passive: false});
-            item.addEventListener('mousedown', handleSelect);
+            item.addEventListener('click', handleSelect);
 
             const imgContainer = document.createElement('div');
             imgContainer.style.cssText = `width: 80px; height: 80px; margin-bottom: 12px; display: flex; justify-content: center; align-items: center; overflow: hidden; border-radius: 12px; background: transparent; pointer-events: none;`;
@@ -1537,10 +1663,13 @@ class SkinManager {
         this.engine.audio.init();
         this.renderGrid();
         document.getElementById('skins-modal').style.display = 'flex';
+        const firstSkin = document.querySelector('#skins-grid button');
+        if (firstSkin) firstSkin.focus({ preventScroll: true });
     }
 
     closeModal() {
         document.getElementById('skins-modal').style.display = 'none';
+        document.getElementById('btn-skins').focus({ preventScroll: true });
     }
 
     bindEvents() {
@@ -1563,6 +1692,11 @@ class AudioManager {
         this.bossMusic = new Audio('assets/audio/music/boss-battle-beneath-the-crush.mp3');
         this.bossMusic.loop = true;
         this.bossMusicFadeInterval = null;
+        this.bossMusicStopping = false;
+        this.resumeAmbientAfterBoss = false;
+        this.bossMusicWasPlaying = false;
+        this.ambientWasPlaying = false;
+        this.musicPaused = false;
 
         this.musicVol = parseFloat(localStorage.getItem('abyssDashMusicVol'));
         if (isNaN(this.musicVol)) this.musicVol = 1.0;
@@ -1627,7 +1761,13 @@ class AudioManager {
     }
 
     playBossMusic() {
-        if (this.bossMusicFadeInterval) clearInterval(this.bossMusicFadeInterval);
+        if (this.bossMusicFadeInterval) {
+            clearInterval(this.bossMusicFadeInterval);
+            this.bossMusicFadeInterval = null;
+        }
+        this.bossMusicStopping = false;
+        this.resumeAmbientAfterBoss = false;
+        this.bossMusicWasPlaying = false;
         this.bossMusic.volume = 0;
         this.bossMusic.currentTime = 0;
         this.bossMusic.play().catch(e => console.log("Audio play prevented:", e));
@@ -1639,28 +1779,60 @@ class AudioManager {
             } else {
                 this.bossMusic.volume = targetVol;
                 clearInterval(this.bossMusicFadeInterval);
+                this.bossMusicFadeInterval = null;
             }
         }, 100);
 
         this.stopAmbient();
     }
 
-    stopBossMusic() {
-        if (this.bossMusicFadeInterval) clearInterval(this.bossMusicFadeInterval);
+    finishBossMusicStop() {
+        this.bossMusic.volume = 0;
+        this.bossMusic.pause();
+        this.bossMusic.currentTime = 0;
+        this.bossMusicStopping = false;
+        this.bossMusicWasPlaying = false;
+        if (this.bossMusicFadeInterval) {
+            clearInterval(this.bossMusicFadeInterval);
+            this.bossMusicFadeInterval = null;
+        }
+        const shouldResumeAmbient = this.resumeAmbientAfterBoss;
+        this.resumeAmbientAfterBoss = false;
+        if (shouldResumeAmbient) {
+            if (this.musicPaused) this.ambientWasPlaying = true;
+            else this.playAmbient();
+        }
+    }
 
+    stopBossMusic({ resumeAmbient = true, immediate = false } = {}) {
+        if (this.bossMusicFadeInterval) {
+            clearInterval(this.bossMusicFadeInterval);
+            this.bossMusicFadeInterval = null;
+        }
+        this.bossMusicStopping = true;
+        this.resumeAmbientAfterBoss = Boolean(resumeAmbient);
+        if (immediate || this.bossMusic.paused || this.bossMusic.volume <= 0.05) {
+            this.finishBossMusicStop();
+            return;
+        }
         this.bossMusicFadeInterval = setInterval(() => {
             if (this.bossMusic.volume > 0.05) {
-                this.bossMusic.volume -= 0.05;
+                this.bossMusic.volume = Math.max(0, this.bossMusic.volume - 0.05);
             } else {
-                this.bossMusic.volume = 0;
-                this.bossMusic.pause();
-                clearInterval(this.bossMusicFadeInterval);
-                this.playAmbient();
+                this.finishBossMusicStop();
             }
         }, 100);
     }
 
     pauseMusic() {
+        this.musicPaused = true;
+        if (this.bossMusicFadeInterval) {
+            clearInterval(this.bossMusicFadeInterval);
+            this.bossMusicFadeInterval = null;
+        }
+        if (this.bossMusicStopping) {
+            this.finishBossMusicStop();
+        }
         if (!this.bossMusic.paused && this.bossMusic.currentTime > 0 && !this.bossMusic.ended) {
             this.bossMusicWasPlaying = true;
             this.bossMusic.pause();
@@ -1671,17 +1843,19 @@ class AudioManager {
             this.ambientWasPlaying = true;
             try { this.ambientOsc.stop(); this.ambientOsc.disconnect(); } catch(e){}
             this.ambientOsc = null;
-        } else {
-            this.ambientWasPlaying = false;
         }
     }
 
     resumeMusic() {
+        this.musicPaused = false;
         if (this.bossMusicWasPlaying) {
+            this.bossMusic.volume = this.musicVol * 0.4;
             this.bossMusic.play().catch(e => console.log("Audio play prevented:", e));
         } else if (this.ambientWasPlaying) {
             this.playAmbient();
         }
+        this.bossMusicWasPlaying = false;
+        this.ambientWasPlaying = false;
     }
 
     play(type) {
@@ -1728,7 +1902,11 @@ class UIManager {
         });
     }
     setPauseBtnVisible(isVisible) { this.pauseBtn.style.display = isVisible ? 'flex' : 'none'; }
-    updatePauseBtnIcon(isPaused) { this.pauseBtn.innerText = isPaused ? '▶️' : '⏸'; }
+    updatePauseBtnIcon(isPaused) {
+        this.pauseBtn.innerText = isPaused ? '▶️' : '⏸';
+        this.pauseBtn.setAttribute('aria-label', isPaused ? '继续游戏' : '暂停游戏');
+        this.pauseBtn.title = isPaused ? '继续' : '暂停';
+    }
     setReducedMotion(enabled) { this.container.classList.toggle('reduce-motion', enabled); }
     triggerZoneDisplay(zoneName, profile = null) {
         if (!this.zoneDisplay || !this.zoneName) return;
@@ -2353,6 +2531,35 @@ class ProgressionSystem {
     }
 }
 
+class ConsecutiveActivationTracker {
+    constructor(requiredActivations = 5, maxGapMs = 650, maxWindowMs = 2200) {
+        this.requiredActivations = requiredActivations;
+        this.maxGapMs = maxGapMs;
+        this.maxWindowMs = maxWindowMs;
+        this.reset();
+    }
+
+    register(now) {
+        const expiredByGap = this.count > 0 && now - this.lastActivationAt > this.maxGapMs;
+        const expiredByWindow = this.count > 0 && now - this.firstActivationAt > this.maxWindowMs;
+        if (expiredByGap || expiredByWindow) this.reset();
+
+        if (this.count === 0) this.firstActivationAt = now;
+        this.count++;
+        this.lastActivationAt = now;
+
+        if (this.count < this.requiredActivations) return false;
+        this.reset();
+        return true;
+    }
+
+    reset() {
+        this.count = 0;
+        this.firstActivationAt = 0;
+        this.lastActivationAt = 0;
+    }
+}
+
 class InputSystem {
     constructor(engine) {
         this.engine = engine;
@@ -2381,23 +2588,51 @@ class InputSystem {
 
         const handleInputUp = () => { this.isPressing = false; };
 
-        this.engine.ui.pauseBtn.addEventListener('mousedown', (e) => { e.stopPropagation(); this.engine.togglePause(); });
-        this.engine.ui.pauseBtn.addEventListener('touchstart', (e) => { e.preventDefault(); e.stopPropagation(); this.engine.togglePause(); }, {passive: false});
+        this.engine.ui.pauseBtn.addEventListener('mousedown', (e) => { e.stopPropagation(); });
+        this.engine.ui.pauseBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); }, {passive: true});
+        this.engine.ui.pauseBtn.addEventListener('click', (e) => { e.stopPropagation(); this.engine.togglePause(); });
 
         window.addEventListener('mousedown', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#contract-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal') || e.target.closest('#levelup-modal')) return; handleInputDown(); });
         window.addEventListener('touchstart', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#contract-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal') || e.target.closest('#levelup-modal')) return; e.preventDefault(); handleInputDown(); }, {passive: false});
         window.addEventListener('mouseup', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#contract-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal') || e.target.closest('#levelup-modal')) return; handleInputUp(); });
         window.addEventListener('touchend', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#contract-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal') || e.target.closest('#levelup-modal')) return; e.preventDefault(); handleInputUp(); }, {passive: false});
+        window.addEventListener('touchcancel', handleInputUp, {passive: true});
+        window.addEventListener('pointercancel', handleInputUp, {passive: true});
         window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modalClosePairs = [
+                    ['settings-modal', 'btn-close-settings'],
+                    ['glossary-modal', 'btn-close-glossary'],
+                    ['contract-modal', 'btn-close-contract'],
+                    ['skins-modal', 'btn-close-skins'],
+                    ['achievements-modal', 'btn-close-achievements']
+                ];
+                const openModal = modalClosePairs.find(([modalId]) => document.getElementById(modalId).style.display === 'flex');
+                if (openModal) {
+                    e.preventDefault();
+                    document.getElementById(openModal[1]).click();
+                    return;
+                }
+                if (this.engine.state === 'PLAYING' || this.engine.state === 'PAUSED') {
+                    e.preventDefault();
+                    this.engine.togglePause();
+                    return;
+                }
+            }
             const godBossKeys = { Digit1: 300, Digit2: 800, Digit3: 1500 };
             if (godBossKeys[e.code] && this.engine.godModeEnabled) {
-                if (e.repeat || ['INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+                if (e.repeat || ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+                if (this.engine.state !== 'PLAYING') {
+                    if (this.engine.setGodModeStatus) this.engine.setGodModeStatus('数字键仅在游戏进行中召唤 Boss。', '#ffd166');
+                    return;
+                }
                 e.preventDefault();
                 const result = this.engine.requestGodBoss(godBossKeys[e.code]);
                 if (this.engine.setGodModeStatus) this.engine.setGodModeStatus(result.message, result.ok ? '#ffb5d1' : '#ffd166');
                 return;
             }
             if(e.code === 'Space') {
+                if (['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName) || document.activeElement?.isContentEditable) return;
                 e.preventDefault();
                 if (document.getElementById('glossary-modal').style.display === 'flex') return;
                 if (document.getElementById('contract-modal').style.display === 'flex') return;
@@ -2408,7 +2643,10 @@ class InputSystem {
             }
         });
         window.addEventListener('keyup', (e) => { if(e.code === 'Space') handleInputUp(); });
-        window.addEventListener('blur', handleInputUp);
+        window.addEventListener('blur', () => {
+            handleInputUp();
+            if (this.engine.state === 'PLAYING') this.engine.togglePause();
+        });
 
         document.getElementById('btn-start').addEventListener('click', (e) => {
             e.stopPropagation();
@@ -2433,6 +2671,7 @@ class InputSystem {
                 this.engine.ui.setPauseBtnVisible(true);
                 this.engine.lastTime = performance.now();
                 this.engine.accumulator = 0;
+                this.engine.renderer.canvas.focus({ preventScroll: true });
                 this.engine.audio.playAmbient();
                 const demoBossStarted = this.engine.activatePendingGodBoss();
                 if (demoBossStarted) {
@@ -2448,17 +2687,20 @@ class InputSystem {
             e.stopPropagation();
             this.engine.audio.init();
             document.getElementById('glossary-modal').style.display = 'flex';
+            document.querySelector('#glossary-modal [role="tab"]').focus({ preventScroll: true });
         });
 
         document.getElementById('btn-close-glossary').addEventListener('click', (e) => {
             e.stopPropagation();
             document.getElementById('glossary-modal').style.display = 'none';
+            document.getElementById('btn-glossary').focus({ preventScroll: true });
         });
 
         document.getElementById('btn-contract').addEventListener('click', (e) => {
             e.stopPropagation();
             this.engine.audio.init();
             document.getElementById('contract-modal').style.display = 'flex';
+            document.getElementById('contract-hydro').focus({ preventScroll: true });
         });
 
         document.getElementById('btn-close-contract').addEventListener('click', (e) => {
@@ -2467,6 +2709,7 @@ class InputSystem {
             this.engine.activeContracts.hydrothermal = document.getElementById('contract-hydro').checked;
             this.engine.activeContracts.magneticInversion = document.getElementById('contract-magnet').checked;
             this.engine.activeContracts.cellularDecay = document.getElementById('contract-decay').checked;
+            document.getElementById('btn-contract').focus({ preventScroll: true });
         });
 
 
@@ -2490,6 +2733,7 @@ class InputSystem {
             sVal.innerText = Math.round(this.engine.audio.sfxVol * 100) + '%';
 
             document.getElementById('settings-modal').style.display = 'flex';
+            mVol.focus({ preventScroll: true });
         });
 
         document.getElementById('music-vol').addEventListener('input', (e) => {
@@ -2528,6 +2772,8 @@ class InputSystem {
             if (this.engine.godModeEnabled) {
                 this.engine.achievementManager.unlockById('cyber_hacker');
                 setGodModeStatus('上帝模式已开启。游戏中可按 1 / 2 / 3 召唤 Boss。', '#ffe36d');
+            } else {
+                setGodModeStatus('上帝模式已关闭。无敌与 Boss 召唤已停用。', '#b9c4d6');
             }
         });
 
@@ -2549,16 +2795,14 @@ class InputSystem {
         this.engine.setGodModeStatus = setGodModeStatus;
         refreshGodModeControls();
 
-        let easterEggClickCount = 0;
         const easterEggShark = document.getElementById('easter-egg-shark');
-        easterEggShark.addEventListener('click', (e) => {
-            e.stopPropagation();
-            easterEggClickCount++;
-            easterEggShark.style.transform = `scale(${1 + easterEggClickCount * 0.08}) rotate(${-8 + easterEggClickCount * 3}deg)`;
+        const easterEggTracker = new ConsecutiveActivationTracker();
+        const activateEasterEgg = () => {
+            const triggered = easterEggTracker.register(performance.now());
+            easterEggShark.style.transform = `scale(${1 + easterEggTracker.count * 0.08}) rotate(${-8 + easterEggTracker.count * 3}deg)`;
             setTimeout(() => { easterEggShark.style.transform = 'scale(1) rotate(0deg)'; }, 160);
-            if (easterEggClickCount < 5) return;
+            if (!triggered) return;
 
-            easterEggClickCount = 0;
             const newlyUnlocked = this.engine.unlockGodMode();
             refreshGodModeControls();
             easterEggShark.classList.remove('rush-unlocked');
@@ -2567,11 +2811,28 @@ class InputSystem {
             setTimeout(() => { easterEggShark.classList.remove('rush-unlocked'); }, 1100);
             if (newlyUnlocked) this.engine.achievementManager.unlockById('cyber_hacker');
             setGodModeStatus(newlyUnlocked ? '彩蛋解锁：上帝模式已加入设置。' : '上帝模式已解锁。', '#ffe36d');
+            easterEggShark.setAttribute('aria-label', '已解锁上帝模式的鲨鱼彩蛋');
+            easterEggShark.title = '上帝模式已解锁';
+        };
+        easterEggShark.addEventListener('click', (e) => {
+            e.stopPropagation();
+            activateEasterEgg();
         });
+        easterEggShark.addEventListener('keydown', (e) => {
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            e.preventDefault();
+            e.stopPropagation();
+            activateEasterEgg();
+        });
+        if (this.engine.godModeUnlocked) {
+            easterEggShark.setAttribute('aria-label', '已解锁上帝模式的鲨鱼彩蛋');
+            easterEggShark.title = '上帝模式已解锁';
+        }
 
         document.getElementById('btn-close-settings').addEventListener('click', (e) => {
             e.stopPropagation();
             document.getElementById('settings-modal').style.display = 'none';
+            document.getElementById('btn-settings').focus({ preventScroll: true });
         });
 
         document.addEventListener('visibilitychange', () => {
@@ -2618,6 +2879,14 @@ class GameEngine {
             console.warn('Submarine boss sprite failed to load. Falling back to code rendering.');
         };
         this.submarineSprite.src = 'assets/art/bosses/boss-submarine-spritesheet.png?v=2';
+        this.megalodonSprite = new Image();
+        this.megalodonSpriteLoaded = false;
+        this.megalodonSprite.onload = () => { this.megalodonSpriteLoaded = true; };
+        this.megalodonSprite.onerror = () => {
+            this.megalodonSpriteLoaded = false;
+            console.warn('Megalodon boss sprite failed to load. Falling back to code rendering.');
+        };
+        this.megalodonSprite.src = 'assets/art/characters/shark-default-spritesheet.png?v=2';
         this.audio = new AudioManager();
         this.ui = new UIManager();
         this.ui.onTutorialDismiss = () => {
@@ -2638,9 +2907,11 @@ class GameEngine {
         this.ui.setReducedMotion(this.reduceMotion);
         this.quality = localStorage.getItem('abyssDashGraphicsQuality') || 'high';
         this.setGraphicsQuality(this.quality);
-        const storedGodModeEnabled = localStorage.getItem('abyssDashGodMode') === '1';
-        this.godModeUnlocked = localStorage.getItem('abyssDashGodModeUnlocked') === '1' || storedGodModeEnabled;
-        this.godModeEnabled = this.godModeUnlocked && storedGodModeEnabled;
+        const legacyGodModeEnabled = localStorage.getItem('abyssDashGodMode') === '1';
+        this.godModeUnlocked = localStorage.getItem('abyssDashGodModeUnlocked') === '1' || legacyGodModeEnabled;
+        this.godModeEnabled = false;
+        if (legacyGodModeEnabled) localStorage.setItem('abyssDashGodModeUnlocked', '1');
+        localStorage.removeItem('abyssDashGodMode');
         this.isCheatInvincible = false;
         this.pendingGodBossThreshold = null;
         this.tutorialStep = -1;
@@ -2687,12 +2958,34 @@ class GameEngine {
         this.maxBackgroundPlanks = limit.planks;
         this.maxMenuBubbles = limit.menuBubbles;
         this.renderer.setQuality(this.quality);
+        if (Array.isArray(this.particles) && this.particles.length > this.maxParticles) {
+            this.particles.splice(0, this.particles.length - this.maxParticles);
+        }
+        if (Array.isArray(this.bubbles) && this.bubbles.length > this.maxMenuBubbles) {
+            this.bubbles.splice(0, this.bubbles.length - this.maxMenuBubbles);
+        }
+        if (Array.isArray(this.planks)) {
+            if (this.planks.length > this.maxBackgroundPlanks) {
+                this.planks.splice(this.maxBackgroundPlanks);
+            } else {
+                const cvsW = this.renderer.baseWidth;
+                const cvsH = this.renderer.baseHeight;
+                while (this.planks.length < this.maxBackgroundPlanks) {
+                    this.planks.push({
+                        x: Math.random() * cvsW,
+                        y: Math.random() * cvsH,
+                        size: Math.random() * 2 + 1,
+                        speed: Math.random() * 0.6 + 0.2,
+                        alpha: Math.random() * 0.5 + 0.2
+                    });
+                }
+            }
+        }
         localStorage.setItem('abyssDashGraphicsQuality', this.quality);
     }
 
     setGodMode(enabled) {
         this.godModeEnabled = this.godModeUnlocked && Boolean(enabled);
-        localStorage.setItem('abyssDashGodMode', this.godModeEnabled ? '1' : '0');
         if (!this.godModeEnabled) {
             this.isCheatInvincible = false;
             this.pendingGodBossThreshold = null;
@@ -2722,20 +3015,26 @@ class GameEngine {
         if (this.state !== 'PLAYING') {
             return { ok: false, message: '请在游戏进行中召唤 Boss。' };
         }
-        if (!this.bossSystem.spawnBoss(threshold, { force: true })) {
+        if (!this.bossSystem.spawnBoss(threshold, { force: true, isDemo: true })) {
             return { ok: false, message: '场上已有 Boss，击败后可再次召唤。' };
         }
+        this.prepareGodBossArena();
+        return { ok: true, message: `${names[threshold]}正在进入战场。` };
+    }
+
+    prepareGodBossArena() {
         this.obstacles = [];
         this.mines = [];
         this.jellyfishes = [];
-        return { ok: true, message: `${names[threshold]}正在进入战场。` };
+        this.bossSystem.projectiles = [];
     }
 
     activatePendingGodBoss() {
         if (!this.godModeEnabled || !this.pendingGodBossThreshold) return false;
         const threshold = this.pendingGodBossThreshold;
         this.pendingGodBossThreshold = null;
-        const started = this.bossSystem.spawnBoss(threshold, { force: true });
+        const started = this.bossSystem.spawnBoss(threshold, { force: true, isDemo: true });
+        if (started) this.prepareGodBossArena();
         if (this.setGodModeStatus) {
             this.setGodModeStatus(started ? '预设 Boss 已部署。' : 'Boss 部署失败，请重新选择。', started ? '#ffb5d1' : '#ffd166');
         }
@@ -2753,6 +3052,8 @@ class GameEngine {
     }
 
     initEntities() {
+        this.audio.stopAmbient();
+        this.audio.stopBossMusic({ resumeAmbient: false, immediate: true });
         this.entityManager.initEntities();
         this.score = 0; this.depth = 0; this.frameCount = 0; this.isNewRecord = false;
         this.currentZoneName = '浅海 (SHALLOW SEA)';
@@ -2835,7 +3136,7 @@ class GameEngine {
         this.state = 'GAMEOVER';
         this.ui.setPauseBtnVisible(false);
         this.audio.stopAmbient();
-        this.audio.stopBossMusic();
+        this.audio.stopBossMusic({ resumeAmbient: false });
         this.audio.play('crash');
         this.ui.triggerBloodScreen();
         this.cameraShake = 25;
