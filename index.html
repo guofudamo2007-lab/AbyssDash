@@ -850,11 +850,11 @@ class BossSystem {
         this.defeatedBosses = [];
     }
 
-    checkTrigger(score) {
+    checkTrigger(depth) {
         if (this.active) return false;
-        if (score >= 300 && !this.defeatedBosses.includes(300)) { this.spawnBoss(300); return true; }
-        if (score >= 800 && !this.defeatedBosses.includes(800)) { this.spawnBoss(800); return true; }
-        if (score >= 1500 && !this.defeatedBosses.includes(1500)) { this.spawnBoss(1500); return true; }
+        if (depth >= 300 && !this.defeatedBosses.includes(300)) { this.spawnBoss(300); return true; }
+        if (depth >= 800 && !this.defeatedBosses.includes(800)) { this.spawnBoss(800); return true; }
+        if (depth >= 1500 && !this.defeatedBosses.includes(1500)) { this.spawnBoss(1500); return true; }
         return false;
     }
 
@@ -2011,6 +2011,17 @@ class UIManager {
                 heatBadge.style.display = 'none';
             }
         }
+
+        if (this.statusReadout && shark) {
+            const states = [];
+            if (shark.shield) states.push('SHIELD READY');
+            if (shark.magnetTimer > 0) states.push('MAGNET ACTIVE');
+            if (shark.isParalyzed) states.push('PARALYZED');
+            if (engine && engine.mutationSystem && engine.mutationSystem.modifiers.invincibleTimer > 0) states.push('STABILIZING');
+            this.statusReadout.style.display = states.length ? 'block' : 'none';
+            this.statusReadout.style.color = shark.isParalyzed ? '#ff8cff' : '#dff';
+            this.statusReadout.innerText = states.join(' • ');
+        }
     }
     triggerBloodScreen() { this.container.classList.remove('blood-screen'); void this.container.offsetWidth; this.container.classList.add('blood-screen'); }
     clearBloodScreen() { this.container.classList.remove('blood-screen'); }
@@ -3065,10 +3076,6 @@ class GameEngine {
         if (this.renderer && this.renderer.canvas) {
             this.renderer.canvas.style.transform = 'translate(0, 0)';
         }
-        this.cameraShake = 0;
-        if (this.renderer && this.renderer.canvas) {
-            this.renderer.canvas.style.transform = 'translate(0, 0)';
-        }
         this.runStats = { fishesEaten: 0, damageTaken: 0, shieldsBroken: 0 };
         this.bossSystem.active = false;
         this.bossSystem.bossData = null;
@@ -3099,16 +3106,6 @@ class GameEngine {
             return;
         }
 
-        if (this.statusReadout && shark) {
-            const states = [];
-            if (shark.shield) states.push('SHIELD READY');
-            if (shark.magnetTimer > 0) states.push('MAGNET ACTIVE');
-            if (shark.isParalyzed) states.push('PARALYZED');
-            if (engine && engine.mutationSystem && engine.mutationSystem.modifiers.invincibleTimer > 0) states.push('STABILIZING');
-            this.statusReadout.style.display = states.length ? 'block' : 'none';
-            this.statusReadout.style.color = shark.isParalyzed ? '#ff8cff' : '#dff';
-            this.statusReadout.innerText = states.join(' • ');
-        }
         this.tutorialActive = false;
         localStorage.setItem('abyssDashTutorialSeen', '1');
         this.ui.hideTutorial();
