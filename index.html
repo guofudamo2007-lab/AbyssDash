@@ -7,6 +7,7 @@
     <title>深渊冲刺 (Abyss Dash) v9.8.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
+        *, *::before, *::after { box-sizing: border-box; }
         body { margin: 0; overflow: hidden; background-color: #01060e; display: flex; justify-content: center; align-items: center; height: 100dvh; width: 100dvw; color: white; font-family: 'Inter', sans-serif; user-select: none; -webkit-user-select: none; touch-action: none; -webkit-touch-callout: none; }
 
         #game-container {
@@ -24,7 +25,7 @@
 
         canvas { display: block; width: 100% !important; height: 100% !important; object-fit: contain; }
 
-        #ui-layer { position: absolute; top: 3cqh; left: 3cqw; right: 3cqw; z-index: 999; pointer-events: none; display: flex; justify-content: space-between; align-items: flex-start; }
+        #ui-layer { position: absolute; top: max(3cqh, env(safe-area-inset-top)); left: max(3cqw, env(safe-area-inset-left)); right: max(3cqw, env(safe-area-inset-right)); z-index: 999; pointer-events: none; display: flex; justify-content: space-between; align-items: flex-start; }
         #left-ui { display: flex; flex-direction: column; background: rgba(5, 15, 30, 0.4); padding: 1.5cqw 2.5cqw; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(0, 229, 255, 0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: opacity 0.2s ease-out; }
         #score-box { font-family: 'Orbitron', sans-serif; font-size: clamp(14px, 3cqw, 32px); font-weight: 900; text-shadow: 0 0 1.5cqw rgba(0,255,255,0.9); display: flex; align-items: baseline; color: #fff; letter-spacing: 1px; }
         #multiplier { color: #ff2a5f; font-size: clamp(10px, 2cqw, 18px); margin-left: 1.5cqw; text-shadow: 0 0 1.5cqw #ff0055; opacity: 0; transition: opacity 0.2s; font-weight: 700; }
@@ -35,7 +36,7 @@
         #hunt-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00e5ff, #00ffaa); box-shadow: 0 0 1.5cqw rgba(0, 229, 255, 0.6); transition: width 0.15s ease-out, background 0.3s; position: relative; border-radius: 1cqw; }
         #hunt-bar::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%); }
 
-        #pause-btn { pointer-events: auto; font-size: clamp(16px, 3cqw, 24px); cursor: pointer; background: rgba(5, 15, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 50%; width: 6cqw; height: 6cqw; min-width: 32px; min-height: 32px; display: none; justify-content: center; align-items: center; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(0, 229, 255, 0.1); transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: #00e5ff; }
+        #pause-btn { pointer-events: auto; font-size: clamp(16px, 3cqw, 24px); cursor: pointer; background: rgba(5, 15, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 50%; width: 6cqw; height: 6cqw; min-width: 44px; min-height: 44px; display: none; justify-content: center; align-items: center; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3), inset 0 0 10px rgba(0, 229, 255, 0.1); transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); color: #00e5ff; }
         #pause-btn:hover { background: rgba(0, 229, 255, 0.2); transform: scale(1.1); box-shadow: 0 10px 25px rgba(0, 229, 255, 0.3); }
         #pause-btn:active { transform: scale(0.95); }
 
@@ -46,7 +47,7 @@
         @keyframes impactFlash { 0% { box-shadow: inset 0 0 130px rgba(255, 60, 110, 0.95); } 100% { box-shadow: inset 0 0 220px rgba(255, 60, 110, 0); } }
         @keyframes swimSprite { 100% { background-position: -400px 0; } }
 
-        #tutorial-overlay { position: absolute; left: 50%; bottom: 6cqh; transform: translateX(-50%) translateY(16px); z-index: 1002; width: min(82cqw, 430px); opacity: 0; pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease; }
+        #tutorial-overlay { position: absolute; left: 50%; bottom: max(6cqh, env(safe-area-inset-bottom)); transform: translateX(-50%) translateY(16px); z-index: 1002; width: min(82cqw, 430px); opacity: 0; pointer-events: none; transition: opacity 0.25s ease, transform 0.25s ease; }
         #tutorial-overlay.visible { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto; }
         #tutorial-card { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 1px solid rgba(0, 229, 255, 0.5); border-radius: 14px; background: rgba(3, 14, 30, 0.88); box-shadow: 0 10px 28px rgba(0,0,0,0.45), 0 0 22px rgba(0,229,255,0.12); backdrop-filter: blur(12px); }
         #tutorial-icon { color: #00ffff; font-size: 24px; line-height: 1; }
@@ -56,7 +57,7 @@
         #tutorial-dismiss { color: #8aa5b5; background: transparent; border: 0; font-size: 18px; cursor: pointer; padding: 4px; }
         #game-container.reduce-motion *, #game-container.reduce-motion *::before, #game-container.reduce-motion *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
 
-        #orientation-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #020308; z-index: 99999; color: white; justify-content: center; align-items: center; flex-direction: column; text-align: center; }
+        #orientation-overlay { display: none; position: fixed; inset: 0; padding: max(24px, env(safe-area-inset-top)) max(24px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(24px, env(safe-area-inset-left)); background: #020308; z-index: 99999; color: white; justify-content: center; align-items: center; flex-direction: column; text-align: center; }
         @media screen and (orientation: portrait) and (max-width: 900px) {
             #orientation-overlay { display: flex; }
             #game-container { display: none; }
@@ -67,8 +68,11 @@
             background: radial-gradient(circle at center, rgba(0, 30, 50, 0.2) 0%, rgba(1, 6, 14, 0.6) 100%);
             backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
             display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 1001;
+            overflow-y: auto; overscroll-behavior: contain; touch-action: pan-y;
+            padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
             transition: opacity 0.8s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.8s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
+        #menu-corner-actions { position: absolute; bottom: max(2cqw, env(safe-area-inset-bottom)); left: max(2cqw, env(safe-area-inset-left)); display: flex; gap: 15px; z-index: 1000; }
         #menu-logo {
             font-family: 'Orbitron', sans-serif; font-size: clamp(42px, 10cqw, 82px); font-weight: 900;
             color: #ffffff; text-shadow: 0 0 20px rgba(0, 229, 255, 0.6), 0 0 40px rgba(0, 255, 170, 0.4);
@@ -162,14 +166,48 @@
             background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,255,0.03) 2px, rgba(0,255,255,0.03) 4px);
             pointer-events: none;
         }
+        .modal-overlay {
+            padding: max(10px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left));
+            overflow-y: auto;
+            overscroll-behavior: contain;
+            touch-action: pan-y;
+        }
+        .modal-overlay > .modal-panel {
+            width: min(90%, 800px) !important;
+            max-height: calc(100% - 4px) !important;
+        }
+        #glossary-modal [role="tablist"] {
+            overflow-x: auto;
+            overflow-y: hidden;
+            overscroll-behavior-x: contain;
+            touch-action: pan-x;
+            scrollbar-width: thin;
+            flex-shrink: 0;
+            min-height: 48px;
+        }
+        #glossary-modal [role="tab"] {
+            flex: 0 0 auto;
+            min-width: max-content;
+        }
 
         @media (max-height: 600px) {
+            #main-menu { justify-content: flex-start; }
             #menu-logo { font-size: clamp(28px, 10vh, 45px); margin-bottom: 2vh; }
             .menu-btn { padding: 6px 20px; margin: 4px; font-size: 14px; min-height: 32px; display: flex; justify-content: center; align-items: center; }
             .intro-box { margin-top: 10px; padding: 10px; }
             .intro-title { font-size: 14px; margin-bottom: 4px; }
             .intro-line { font-size: 11px; margin-bottom: 2px; }
             .modal-panel { max-height: 90cqh; border-radius: 18px; padding: 14px; }
+            #levelup-modal { justify-content: flex-start !important; }
+            #upgrade-cards { align-content: flex-start; }
+        }
+
+        @media (pointer: coarse) {
+            .menu-btn, .icon-btn, .god-boss-action, #tutorial-dismiss, #btn-reset-progress, select {
+                min-height: 44px;
+            }
+            input[type="checkbox"] { min-width: 24px; min-height: 24px; }
+            input[type="range"] { min-height: 44px; }
         }
 
         .icon-btn:hover { transform: scale(1.1); background: rgba(0, 229, 255, 0.2) !important; border-color: rgba(0, 229, 255, 0.5) !important; box-shadow: 0 10px 25px rgba(0, 229, 255, 0.3), inset 0 0 15px rgba(0, 229, 255, 0.2) !important; }
@@ -205,7 +243,7 @@
                 <div class="intro-line" style="color: #ff4444;">⚠️ 警告：深海区域将遭遇追踪水雷与瘫痪水母！</div>
             </div>
 
-            <div style="position: absolute; bottom: 2cqw; left: 2cqw; display: flex; gap: 15px; z-index: 1000;">
+            <div id="menu-corner-actions">
             <button type="button" id="btn-settings" class="icon-btn" aria-label="打开设置" title="设置" style="width: 50px; height: 50px; background: rgba(5, 15, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 25px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #00e5ff; font-size: 24px; pointer-events: auto; box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset 0 0 10px rgba(0, 229, 255, 0.1); backdrop-filter: blur(20px); transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">⚙️</button>
             <button type="button" id="btn-achievements" class="icon-btn" aria-label="打开成就" title="成就" style="width: 50px; height: 50px; background: rgba(5, 15, 30, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 25px; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #00ffaa; font-size: 24px; pointer-events: auto; box-shadow: 0 10px 20px rgba(0,0,0,0.3), inset 0 0 10px rgba(0, 255, 170, 0.1); backdrop-filter: blur(20px); transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);">🏆</button>
         </div>
@@ -220,7 +258,7 @@
             </div>
         </div>
 
-        <div id="achievements-modal" role="dialog" aria-modal="true" aria-label="成就" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+        <div id="achievements-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-label="成就" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
             <div class="modal-panel" style="width: 85%; max-width: 800px; max-height: 85%;">
                 <h2 style="font-family: 'Orbitron', sans-serif; color: #ffd700; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 15px 0; text-align: center; text-shadow: 0 0 10px #ffd700; letter-spacing: 2px;">ACHIEVEMENTS</h2>
                 <div id="achievements-list" style="overflow-y: auto; flex-grow: 1; padding-right: 10px; font-family: 'Rajdhani', sans-serif;">
@@ -229,7 +267,7 @@
             </div>
         </div>
 
-        <div id="levelup-modal" role="dialog" aria-modal="true" aria-label="选择变异升级" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.7); z-index: 2500; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(20px) saturate(120%); -webkit-backdrop-filter: blur(20px) saturate(120%);">
+        <div id="levelup-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-label="选择变异升级" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.7); z-index: 2500; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(20px) saturate(120%); -webkit-backdrop-filter: blur(20px) saturate(120%);">
             <h1 style="font-family: 'Orbitron', sans-serif; color: #00ffaa; font-size: clamp(28px, 6cqw, 42px); margin: 0 0 5px 0; text-shadow: 0 0 20px rgba(0, 255, 170, 0.6); letter-spacing: 4px; text-transform: uppercase;">MUTATION</h1>
             <div style="font-size: clamp(14px, 2.5cqw, 18px); color: #e0f0ff; margin-bottom: 25px; font-weight: 500; letter-spacing: 1px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">Choose your evolutionary path</div>
             <div id="upgrade-cards" style="display: flex; gap: 15px; width: 90%; max-width: 900px; justify-content: center; flex-wrap: wrap;">
@@ -237,7 +275,7 @@
             </div>
         </div>
 
-        <div id="contract-modal" role="dialog" aria-modal="true" aria-label="深海契约" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.7); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+        <div id="contract-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-label="深海契约" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.7); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
             <div class="modal-panel" style="width: 85%; max-width: 500px; border-color: #ff4444; box-shadow: inset 0 0 50px rgba(255,0,0,0.1), 0 0 20px rgba(255,0,0,0.3);">
                 <h2 style="font-family: 'Orbitron', sans-serif; color: #ff4444; font-size: clamp(20px, 5cqw, 28px); margin: 0 0 5px 0; text-align: center; text-shadow: 0 0 10px #ff0000; letter-spacing: 2px;">ABYSSAL CONTRACT</h2>
                 <div style="text-align: center; color: #aaa; font-size: 14px; margin-bottom: 20px;">勾选深海畸变机制，换取极限挑战</div>
@@ -270,7 +308,7 @@
             </div>
         </div>
 
-        <div id="glossary-modal" role="dialog" aria-modal="true" aria-label="百科图鉴" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+        <div id="glossary-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-label="百科图鉴" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
             <style>
                 .gl-tab { flex: 1; text-align: center; padding: 8px 4px; cursor: pointer; color: #8ab; background: transparent; font-weight: bold; border: 0; border-bottom: 2px solid transparent; transition: all 0.2s; font-size: clamp(12px, 3cqw, 18px); font-family: 'Orbitron', sans-serif; white-space: nowrap; }
                 .gl-tab.active { color: #00ffff; border-bottom: 2px solid #00ffff; text-shadow: 0 0 10px #00ffff; }
@@ -454,7 +492,7 @@
             </script>
         </div>
 
-        <div id="skins-modal" role="dialog" aria-modal="true" aria-label="皮肤选择" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+        <div id="skins-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-label="皮肤选择" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
             <div class="modal-panel" style="width: 85%; max-width: 800px; max-height: 85%;">
                 <h2 style="font-family: 'Orbitron', sans-serif; color: #00ffff; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 15px 0; text-align: center; text-shadow: 0 0 10px #00ffff; letter-spacing: 2px;">SKIN SELECTOR</h2>
 
@@ -465,7 +503,7 @@
             </div>
         </div>
 
-        <div id="settings-modal" role="dialog" aria-modal="true" aria-label="设置" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
+        <div id="settings-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-label="设置" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 10, 20, 0.5); z-index: 2000; flex-direction: column; align-items: center; justify-content: center; backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);">
             <div class="modal-panel" style="width: 85%; max-width: 500px;">
                 <h2 style="font-family: 'Orbitron', sans-serif; color: #00ffff; font-size: clamp(24px, 5cqw, 36px); margin: 0 0 20px 0; text-align: center; text-shadow: 0 0 10px #00ffff; letter-spacing: 2px;">SETTINGS</h2>
 
@@ -612,6 +650,24 @@ function getZoneProfile(score) {
     if (score < 800) return ZONE_PROFILES.shipwreck;
     if (score < 1500) return ZONE_PROFILES.trench;
     return ZONE_PROFILES.dark;
+}
+
+function getFishSpawnPlan(profile, isDashing, bossType, frameCount) {
+    let interval = profile.fishInterval;
+    if (bossType === 'megalodon') {
+        interval = 40;
+    } else if (isDashing) {
+        interval = Math.min(interval, 48);
+    }
+
+    const count = !bossType
+        && isDashing
+        && profile === ZONE_PROFILES.dark
+        && frameCount % (interval * 4) === 0
+        ? 2
+        : 1;
+
+    return { interval, count };
 }
 
 function hexToRgb(hex) {
@@ -805,6 +861,7 @@ class MutationSystem {
 
         this.currentChoices = choices;
         modal.style.display = 'flex';
+        modal.setAttribute('aria-hidden', 'false');
         const firstCard = cardsContainer.querySelector('button');
         if (firstCard) firstCard.focus({ preventScroll: true });
     }
@@ -827,11 +884,13 @@ class MutationSystem {
 
         const modal = document.getElementById('levelup-modal');
         modal.style.display = 'none';
+        modal.setAttribute('aria-hidden', 'true');
 
         this.modifiers.invincibleTimer = PACING.LEVELUP_GRACE_TICKS;
 
         this.engine.lastTime = performance.now();
         this.engine.state = 'PLAYING';
+        this.engine.renderer.canvas.focus({ preventScroll: true });
     }
 
     updateLogic() {
@@ -850,11 +909,11 @@ class BossSystem {
         this.defeatedBosses = [];
     }
 
-    checkTrigger(score) {
+    checkTrigger(depth) {
         if (this.active) return false;
-        if (score >= 300 && !this.defeatedBosses.includes(300)) { this.spawnBoss(300); return true; }
-        if (score >= 800 && !this.defeatedBosses.includes(800)) { this.spawnBoss(800); return true; }
-        if (score >= 1500 && !this.defeatedBosses.includes(1500)) { this.spawnBoss(1500); return true; }
+        if (depth >= 300 && !this.defeatedBosses.includes(300)) { this.spawnBoss(300); return true; }
+        if (depth >= 800 && !this.defeatedBosses.includes(800)) { this.spawnBoss(800); return true; }
+        if (depth >= 1500 && !this.defeatedBosses.includes(1500)) { this.spawnBoss(1500); return true; }
         return false;
     }
 
@@ -1348,6 +1407,37 @@ class BossSystem {
 
         ctx.restore();
 
+        const bossNames = {
+            octopus: 'ABYSSAL KRAKEN',
+            submarine: 'GHOST SUBMARINE',
+            megalodon: 'APEX MEGALODON'
+        };
+        const bossColors = {
+            octopus: '#a75772',
+            submarine: '#ffb35c',
+            megalodon: '#ff315f'
+        };
+        const healthRatio = Math.max(0, Math.min(1, b.hp / b.maxHp));
+        const healthBarWidth = Math.min(360, engine.renderer.baseWidth * 0.42);
+        const healthBarHeight = 12;
+        const healthBarX = (engine.renderer.baseWidth - healthBarWidth) / 2;
+        const healthBarY = 38;
+        const healthColor = bossColors[b.type] || '#ff5b84';
+
+        ctx.save();
+        ctx.textAlign = 'center';
+        ctx.font = "700 12px 'Rajdhani', sans-serif";
+        ctx.fillStyle = '#eef8ff';
+        ctx.fillText(`${b.isDemo ? 'DEMO · ' : ''}${bossNames[b.type] || 'MASSIVE ENTITY'}`, engine.renderer.baseWidth / 2, healthBarY - 8);
+        ctx.fillStyle = 'rgba(2, 8, 16, 0.82)';
+        ctx.fillRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+        ctx.fillStyle = healthColor;
+        ctx.fillRect(healthBarX + 2, healthBarY + 2, Math.max(0, (healthBarWidth - 4) * healthRatio), healthBarHeight - 4);
+        ctx.strokeStyle = 'rgba(235, 247, 255, 0.72)';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(healthBarX, healthBarY, healthBarWidth, healthBarHeight);
+        ctx.restore();
+
         this.projectiles.forEach(p => {
             ctx.save();
             ctx.translate(p.x, p.y);
@@ -1494,11 +1584,13 @@ class AchievementManager {
         });
 
         document.getElementById('achievements-modal').style.display = 'flex';
+        document.getElementById('achievements-modal').setAttribute('aria-hidden', 'false');
         document.getElementById('btn-close-achievements').focus({ preventScroll: true });
     }
 
     closeModal() {
         document.getElementById('achievements-modal').style.display = 'none';
+        document.getElementById('achievements-modal').setAttribute('aria-hidden', 'true');
         document.getElementById('btn-achievements').focus({ preventScroll: true });
     }
 
@@ -1663,12 +1755,14 @@ class SkinManager {
         this.engine.audio.init();
         this.renderGrid();
         document.getElementById('skins-modal').style.display = 'flex';
+        document.getElementById('skins-modal').setAttribute('aria-hidden', 'false');
         const firstSkin = document.querySelector('#skins-grid button');
         if (firstSkin) firstSkin.focus({ preventScroll: true });
     }
 
     closeModal() {
         document.getElementById('skins-modal').style.display = 'none';
+        document.getElementById('skins-modal').setAttribute('aria-hidden', 'true');
         document.getElementById('btn-skins').focus({ preventScroll: true });
     }
 
@@ -2010,6 +2104,17 @@ class UIManager {
             } else {
                 heatBadge.style.display = 'none';
             }
+        }
+
+        if (this.statusReadout && shark) {
+            const states = [];
+            if (shark.shield) states.push('SHIELD READY');
+            if (shark.magnetTimer > 0) states.push('MAGNET ACTIVE');
+            if (shark.isParalyzed) states.push('PARALYZED');
+            if (engine && engine.mutationSystem && engine.mutationSystem.modifiers.invincibleTimer > 0) states.push('STABILIZING');
+            this.statusReadout.style.display = states.length ? 'block' : 'none';
+            this.statusReadout.style.color = shark.isParalyzed ? '#ff8cff' : '#dff';
+            this.statusReadout.innerText = states.join(' • ');
         }
     }
     triggerBloodScreen() { this.container.classList.remove('blood-screen'); void this.container.offsetWidth; this.container.classList.add('blood-screen'); }
@@ -2568,6 +2673,13 @@ class InputSystem {
     }
 
     bindEvents() {
+        const blockedGameplaySelector = '#main-menu, .modal-overlay, #tutorial-overlay, #orientation-overlay';
+        const openDialogs = () => Array.from(document.querySelectorAll('.modal-overlay'))
+            .filter((modal) => modal.style.display === 'flex');
+        const getFocusableElements = (modal) => Array.from(modal.querySelectorAll(
+            'button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+        )).filter((element) => element.getAttribute('aria-hidden') !== 'true' && element.getClientRects().length > 0);
+
         const handleInputDown = () => {
             if (this.engine.state === 'MENU') return;
             this.engine.audio.init();
@@ -2583,22 +2695,50 @@ class InputSystem {
             }
             if (this.engine.state === 'PAUSED') { this.engine.resume(); return; }
             this.isPressing = true;
+            this.engine.renderer.canvas.dataset.inputActive = 'true';
             this.engine.markTutorialEvent('dive');
         };
 
-        const handleInputUp = () => { this.isPressing = false; };
+        const handleInputUp = () => {
+            this.isPressing = false;
+            this.engine.renderer.canvas.dataset.inputActive = 'false';
+        };
 
         this.engine.ui.pauseBtn.addEventListener('mousedown', (e) => { e.stopPropagation(); });
         this.engine.ui.pauseBtn.addEventListener('touchstart', (e) => { e.stopPropagation(); }, {passive: true});
         this.engine.ui.pauseBtn.addEventListener('click', (e) => { e.stopPropagation(); this.engine.togglePause(); });
 
-        window.addEventListener('mousedown', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#contract-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal') || e.target.closest('#levelup-modal')) return; handleInputDown(); });
-        window.addEventListener('touchstart', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#contract-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal') || e.target.closest('#levelup-modal')) return; e.preventDefault(); handleInputDown(); }, {passive: false});
-        window.addEventListener('mouseup', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#contract-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal') || e.target.closest('#levelup-modal')) return; handleInputUp(); });
-        window.addEventListener('touchend', (e) => { if (e.target.closest('#main-menu') || e.target.closest('#glossary-modal') || e.target.closest('#contract-modal') || e.target.closest('#skins-modal') || e.target.closest('#achievements-modal') || e.target.closest('#settings-modal') || e.target.closest('#levelup-modal')) return; e.preventDefault(); handleInputUp(); }, {passive: false});
+        window.addEventListener('mousedown', (e) => { if (e.target.closest?.(blockedGameplaySelector)) return; handleInputDown(); });
+        window.addEventListener('touchstart', (e) => { if (e.target.closest?.(blockedGameplaySelector)) return; e.preventDefault(); handleInputDown(); }, {passive: false});
+        window.addEventListener('mouseup', handleInputUp);
+        window.addEventListener('touchend', (e) => {
+            handleInputUp();
+            if (!e.target.closest?.(blockedGameplaySelector)) e.preventDefault();
+        }, {passive: false});
         window.addEventListener('touchcancel', handleInputUp, {passive: true});
         window.addEventListener('pointercancel', handleInputUp, {passive: true});
         window.addEventListener('keydown', (e) => {
+            const activeDialog = openDialogs().at(-1);
+            if (e.key === 'Tab' && activeDialog) {
+                const focusable = getFocusableElements(activeDialog);
+                if (focusable.length === 0) {
+                    e.preventDefault();
+                    return;
+                }
+                const first = focusable[0];
+                const last = focusable[focusable.length - 1];
+                if (!activeDialog.contains(document.activeElement)) {
+                    e.preventDefault();
+                    first.focus({ preventScroll: true });
+                } else if (e.shiftKey && document.activeElement === first) {
+                    e.preventDefault();
+                    last.focus({ preventScroll: true });
+                } else if (!e.shiftKey && document.activeElement === last) {
+                    e.preventDefault();
+                    first.focus({ preventScroll: true });
+                }
+                return;
+            }
             if (e.key === 'Escape') {
                 const modalClosePairs = [
                     ['settings-modal', 'btn-close-settings'],
@@ -2647,6 +2787,14 @@ class InputSystem {
             handleInputUp();
             if (this.engine.state === 'PLAYING') this.engine.togglePause();
         });
+        const pauseForPortrait = () => {
+            handleInputUp();
+            if (window.matchMedia('(orientation: portrait) and (max-width: 900px)').matches && this.engine.state === 'PLAYING') {
+                this.engine.togglePause();
+            }
+        };
+        window.addEventListener('orientationchange', pauseForPortrait);
+        window.addEventListener('resize', pauseForPortrait);
 
         document.getElementById('btn-start').addEventListener('click', (e) => {
             e.stopPropagation();
@@ -2687,12 +2835,14 @@ class InputSystem {
             e.stopPropagation();
             this.engine.audio.init();
             document.getElementById('glossary-modal').style.display = 'flex';
+            document.getElementById('glossary-modal').setAttribute('aria-hidden', 'false');
             document.querySelector('#glossary-modal [role="tab"]').focus({ preventScroll: true });
         });
 
         document.getElementById('btn-close-glossary').addEventListener('click', (e) => {
             e.stopPropagation();
             document.getElementById('glossary-modal').style.display = 'none';
+            document.getElementById('glossary-modal').setAttribute('aria-hidden', 'true');
             document.getElementById('btn-glossary').focus({ preventScroll: true });
         });
 
@@ -2700,12 +2850,14 @@ class InputSystem {
             e.stopPropagation();
             this.engine.audio.init();
             document.getElementById('contract-modal').style.display = 'flex';
+            document.getElementById('contract-modal').setAttribute('aria-hidden', 'false');
             document.getElementById('contract-hydro').focus({ preventScroll: true });
         });
 
         document.getElementById('btn-close-contract').addEventListener('click', (e) => {
             e.stopPropagation();
             document.getElementById('contract-modal').style.display = 'none';
+            document.getElementById('contract-modal').setAttribute('aria-hidden', 'true');
             this.engine.activeContracts.hydrothermal = document.getElementById('contract-hydro').checked;
             this.engine.activeContracts.magneticInversion = document.getElementById('contract-magnet').checked;
             this.engine.activeContracts.cellularDecay = document.getElementById('contract-decay').checked;
@@ -2733,6 +2885,7 @@ class InputSystem {
             sVal.innerText = Math.round(this.engine.audio.sfxVol * 100) + '%';
 
             document.getElementById('settings-modal').style.display = 'flex';
+            document.getElementById('settings-modal').setAttribute('aria-hidden', 'false');
             mVol.focus({ preventScroll: true });
         });
 
@@ -2832,6 +2985,7 @@ class InputSystem {
         document.getElementById('btn-close-settings').addEventListener('click', (e) => {
             e.stopPropagation();
             document.getElementById('settings-modal').style.display = 'none';
+            document.getElementById('settings-modal').setAttribute('aria-hidden', 'true');
             document.getElementById('btn-settings').focus({ preventScroll: true });
         });
 
@@ -3065,10 +3219,6 @@ class GameEngine {
         if (this.renderer && this.renderer.canvas) {
             this.renderer.canvas.style.transform = 'translate(0, 0)';
         }
-        this.cameraShake = 0;
-        if (this.renderer && this.renderer.canvas) {
-            this.renderer.canvas.style.transform = 'translate(0, 0)';
-        }
         this.runStats = { fishesEaten: 0, damageTaken: 0, shieldsBroken: 0 };
         this.bossSystem.active = false;
         this.bossSystem.bossData = null;
@@ -3099,16 +3249,6 @@ class GameEngine {
             return;
         }
 
-        if (this.statusReadout && shark) {
-            const states = [];
-            if (shark.shield) states.push('SHIELD READY');
-            if (shark.magnetTimer > 0) states.push('MAGNET ACTIVE');
-            if (shark.isParalyzed) states.push('PARALYZED');
-            if (engine && engine.mutationSystem && engine.mutationSystem.modifiers.invincibleTimer > 0) states.push('STABILIZING');
-            this.statusReadout.style.display = states.length ? 'block' : 'none';
-            this.statusReadout.style.color = shark.isParalyzed ? '#ff8cff' : '#dff';
-            this.statusReadout.innerText = states.join(' • ');
-        }
         this.tutorialActive = false;
         localStorage.setItem('abyssDashTutorialSeen', '1');
         this.ui.hideTutorial();
@@ -3352,11 +3492,24 @@ class GameEngine {
             if (this.canSpawnHazard(debrisY, profile.hazardGap)) this.obstacles.push({ x: cvsW, y: debrisY, width: 35, height: 35, type: 'debris', passed: true });
         }
 
-        let actualFishInterval = profile.fishInterval;
-        if (this.bossSystem.active && this.bossSystem.bossData && this.bossSystem.bossData.type === 'megalodon') {
-            actualFishInterval = 40;
+        const bossType = this.bossSystem.active && this.bossSystem.bossData
+            ? this.bossSystem.bossData.type
+            : null;
+        const fishSpawnPlan = getFishSpawnPlan(profile, this.shark.isDashing, bossType, this.frameCount);
+        if (this.frameCount % fishSpawnPlan.interval === 0 && this.fishes.length < 30) {
+            const baseFishY = Math.random() * (cvsH - 120) + 60;
+            for (let fishIndex = 0; fishIndex < fishSpawnPlan.count && this.fishes.length < 30; fishIndex++) {
+                const schoolOffset = fishSpawnPlan.count > 1 ? (fishIndex === 0 ? -20 : 20) : 0;
+                this.fishes.push({
+                    x: cvsW + fishIndex * 18,
+                    y: Math.max(60, Math.min(cvsH - 60, baseFishY + schoolOffset)),
+                    vx: -Math.random()*2-1,
+                    vy: (Math.random()-0.5)*2,
+                    radius: 5,
+                    active: true
+                });
+            }
         }
-        if (this.frameCount % actualFishInterval === 0 && this.fishes.length < 30) this.fishes.push({ x: cvsW, y: Math.random() * (cvsH - 120) + 60, vx: -Math.random()*2-1, vy: (Math.random()-0.5)*2, radius: 5, active: true });
         if (hazardsAllowed && this.getActiveHazardCount() < profile.hazardCap && this.frameCount % profile.jellyInterval === 0 && this.score > 200) {
             let jellyY = Math.random() * (cvsH - 180) + 90;
             if (this.canSpawnHazard(jellyY, profile.hazardGap)) this.jellyfishes.push({ x: cvsW, y: jellyY, radius: 18, offset: Math.random() * Math.PI * 2, nearMissed: false });
