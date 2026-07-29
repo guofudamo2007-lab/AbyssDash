@@ -22,7 +22,7 @@ assert.match(
     /if \(Array\.isArray\(this\.particles\)[\s\S]*?this\.particles\.splice[\s\S]*?if \(Array\.isArray\(this\.planks\)\)[\s\S]*?this\.planks\.splice/,
     'quality changes should immediately enforce active visual limits'
 );
-assert.match(html, /role="dialog" aria-modal="true" aria-label="设置"/);
+assert.match(html, /id="settings-modal"[^>]*role="dialog"[^>]*aria-modal="true"[^>]*aria-label="设置"/);
 assert.match(html, /role="tablist" aria-label="图鉴分类"/);
 assert.doesNotMatch(html, /TEST OCTOPUS|VISUAL_TEST|runVisualTest/, 'temporary visual test controls must not ship');
 
