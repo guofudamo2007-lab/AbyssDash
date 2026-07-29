@@ -652,6 +652,24 @@ function getZoneProfile(score) {
     return ZONE_PROFILES.dark;
 }
 
+function getFishSpawnPlan(profile, isDashing, bossType, frameCount) {
+    let interval = profile.fishInterval;
+    if (bossType === 'megalodon') {
+        interval = 40;
+    } else if (isDashing) {
+        interval = Math.min(interval, 48);
+    }
+
+    const count = !bossType
+        && isDashing
+        && profile === ZONE_PROFILES.dark
+        && frameCount % (interval * 4) === 0
+        ? 2
+        : 1;
+
+    return { interval, count };
+}
+
 function hexToRgb(hex) {
     const value = hex.replace('#', '');
     return [parseInt(value.slice(0, 2), 16), parseInt(value.slice(2, 4), 16), parseInt(value.slice(4, 6), 16)];
@@ -3474,11 +3492,24 @@ class GameEngine {
             if (this.canSpawnHazard(debrisY, profile.hazardGap)) this.obstacles.push({ x: cvsW, y: debrisY, width: 35, height: 35, type: 'debris', passed: true });
         }
 
-        let actualFishInterval = profile.fishInterval;
-        if (this.bossSystem.active && this.bossSystem.bossData && this.bossSystem.bossData.type === 'megalodon') {
-            actualFishInterval = 40;
+        const bossType = this.bossSystem.active && this.bossSystem.bossData
+            ? this.bossSystem.bossData.type
+            : null;
+        const fishSpawnPlan = getFishSpawnPlan(profile, this.shark.isDashing, bossType, this.frameCount);
+        if (this.frameCount % fishSpawnPlan.interval === 0 && this.fishes.length < 30) {
+            const baseFishY = Math.random() * (cvsH - 120) + 60;
+            for (let fishIndex = 0; fishIndex < fishSpawnPlan.count && this.fishes.length < 30; fishIndex++) {
+                const schoolOffset = fishSpawnPlan.count > 1 ? (fishIndex === 0 ? -20 : 20) : 0;
+                this.fishes.push({
+                    x: cvsW + fishIndex * 18,
+                    y: Math.max(60, Math.min(cvsH - 60, baseFishY + schoolOffset)),
+                    vx: -Math.random()*2-1,
+                    vy: (Math.random()-0.5)*2,
+                    radius: 5,
+                    active: true
+                });
+            }
         }
-        if (this.frameCount % actualFishInterval === 0 && this.fishes.length < 30) this.fishes.push({ x: cvsW, y: Math.random() * (cvsH - 120) + 60, vx: -Math.random()*2-1, vy: (Math.random()-0.5)*2, radius: 5, active: true });
         if (hazardsAllowed && this.getActiveHazardCount() < profile.hazardCap && this.frameCount % profile.jellyInterval === 0 && this.score > 200) {
             let jellyY = Math.random() * (cvsH - 180) + 90;
             if (this.canSpawnHazard(jellyY, profile.hazardGap)) this.jellyfishes.push({ x: cvsW, y: jellyY, radius: 18, offset: Math.random() * Math.PI * 2, nearMissed: false });
