@@ -176,6 +176,59 @@
             width: min(90%, 800px) !important;
             max-height: calc(100% - 4px) !important;
         }
+        #game-over-modal {
+            z-index: 2400;
+            background: rgba(14, 0, 8, 0.68);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+        }
+        .game-over-panel {
+            width: min(92%, 620px) !important;
+            gap: 18px;
+            border-color: rgba(255, 48, 92, 0.55);
+            box-shadow: 0 30px 80px rgba(0,0,0,0.72), inset 0 0 36px rgba(255, 30, 90, 0.09), 0 0 32px rgba(255, 30, 90, 0.16);
+        }
+        .game-over-panel h2 {
+            margin: 0;
+            color: #ff5278;
+            font: 900 clamp(28px, 6cqw, 48px) 'Orbitron', sans-serif;
+            letter-spacing: 2px;
+            text-align: center;
+            text-shadow: 0 0 18px rgba(255, 34, 68, 0.75);
+        }
+        .game-over-subtitle {
+            margin: -8px 0 0;
+            color: #d8b8c3;
+            font: 700 clamp(11px, 1.8cqw, 14px) 'Rajdhani', sans-serif;
+            letter-spacing: 2px;
+            text-align: center;
+        }
+        .game-over-stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+        }
+        .game-over-stat {
+            display: flex;
+            align-items: baseline;
+            justify-content: space-between;
+            gap: 12px;
+            min-height: 52px;
+            padding: 10px 12px;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 12px;
+            background: rgba(255,255,255,0.045);
+        }
+        .game-over-stat-label { color: #aeb9c8; font: 700 11px 'Rajdhani', sans-serif; letter-spacing: 1px; text-transform: uppercase; }
+        .game-over-stat-value { color: #fff; font: 900 clamp(18px, 3.5cqw, 28px) 'Orbitron', sans-serif; text-shadow: 0 0 10px rgba(0,229,255,0.45); }
+        .game-over-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+        .game-over-actions .menu-btn { margin: 0; min-width: 170px; }
+        .game-over-actions .menu-btn.primary { border-color: rgba(255, 82, 120, 0.68); background: rgba(255, 35, 90, 0.16); }
+        .game-over-actions .menu-btn.primary:hover { background: rgba(255, 35, 90, 0.3); border-color: rgba(255, 130, 155, 0.9); box-shadow: 0 15px 35px rgba(255, 35, 90, 0.22), inset 0 0 25px rgba(255, 35, 90, 0.12); }
+        @media (max-width: 560px) {
+            .game-over-stats { grid-template-columns: 1fr; }
+            .game-over-actions .menu-btn { width: 100%; }
+        }
         #glossary-modal [role="tablist"] {
             overflow-x: auto;
             overflow-y: hidden;
@@ -555,6 +608,25 @@
                 </div>
 
                 <button type="button" class="menu-btn" id="btn-close-settings" style="margin: 15px auto 0; width: 60%; max-width: 200px;">CLOSE</button>
+            </div>
+        </div>
+        <div id="game-over-modal" class="modal-overlay" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="game-over-title" style="display: none; position: absolute; inset: 0; width: 100%; height: 100%; flex-direction: column; align-items: center; justify-content: center;">
+            <div class="modal-panel game-over-panel">
+                <h2 id="game-over-title">ABYSS CRASHED</h2>
+                <p class="game-over-subtitle">RUN SUMMARY · SIGNAL LOST</p>
+                <div class="game-over-stats" aria-label="Run statistics">
+                    <div class="game-over-stat"><span class="game-over-stat-label">Score</span><strong class="game-over-stat-value" data-stat="score">0</strong></div>
+                    <div class="game-over-stat"><span class="game-over-stat-label">Max depth</span><strong class="game-over-stat-value" data-stat="depth">0m</strong></div>
+                    <div class="game-over-stat"><span class="game-over-stat-label">Fish eaten</span><strong class="game-over-stat-value" data-stat="fishesEaten">0</strong></div>
+                    <div class="game-over-stat"><span class="game-over-stat-label">Best combo</span><strong class="game-over-stat-value" data-stat="maxCombo">0x</strong></div>
+                    <div class="game-over-stat"><span class="game-over-stat-label">Close calls</span><strong class="game-over-stat-value" data-stat="closeCalls">0</strong></div>
+                    <div class="game-over-stat"><span class="game-over-stat-label">Bosses defeated</span><strong class="game-over-stat-value" data-stat="bossesDefeated">0</strong></div>
+                    <div class="game-over-stat"><span class="game-over-stat-label">Mutations</span><strong class="game-over-stat-value" data-stat="mutationsAcquired">0</strong></div>
+                </div>
+                <div class="game-over-actions">
+                    <button type="button" class="menu-btn primary" id="btn-game-over-restart">RESTART</button>
+                    <button type="button" class="menu-btn" id="btn-game-over-menu">MAIN MENU</button>
+                </div>
             </div>
         </div>
         <div id="ripple-effect"></div>
@@ -1076,6 +1148,7 @@ class BossSystem {
                     this.engine.entityManager.spawnParticles(p.x, p.y, '#aaa', 15);
                 } else if (shark.shield) {
                     this.engine.runStats.shieldsBroken++;
+                    if (this.engine.registerShieldBlock) this.engine.registerShieldBlock(p.x, p.y);
                     shark.shield = false;
                     shark.comboCount = 0; shark.comboActive = false;
                     this.engine.audio.play('explosion');
@@ -1128,6 +1201,7 @@ class BossSystem {
             } else if (this.engine.checkCollision(sharkCX, sharkCY, shark.radius, b.x - b.width/2, b.y - b.height/2, b.width, b.height)) {
                 if (shark.shield) {
                     this.engine.runStats.shieldsBroken++;
+                    if (this.engine.registerShieldBlock) this.engine.registerShieldBlock(sharkCX, sharkCY);
                     shark.shield = false;
                     shark.comboCount = 0; shark.comboActive = false;
                     this.engine.audio.play('explosion');
@@ -1164,10 +1238,10 @@ class BossSystem {
         this.projectiles = [];
         this.engine.audio.play('powerup');
 
-        let msg = isDemo ? 'DEMO COMPLETE' : (isPacifist ? `PACIFIST WIN! +${bonus}` : `BOSS DEFEATED! +${bonus}`);
+        let msg = isDemo ? 'DEMO COMPLETE' : (isPacifist ? `PACIFIST WIN! +${bonus}` : `BOSS SLAIN! +${bonus}`);
         let color = isDemo ? '#ffb5d1' : (isPacifist ? "#00ff00" : "#ffd700");
 
-        this.engine.entityManager.spawnText(defeatedBoss.x, defeatedBoss.y, msg, color);
+        this.engine.entityManager.spawnText(defeatedBoss.x, defeatedBoss.y, msg, color, { style: isDemo ? 'default' : 'boss' });
         this.engine.entityManager.spawnParticles(defeatedBoss.x, defeatedBoss.y, color, 100, 3);
         this.engine.cameraShake = 40;
         if (isDemo && this.engine.setGodModeStatus) {
@@ -1989,6 +2063,9 @@ class UIManager {
         this.tutorialText = document.getElementById('tutorial-text');
         this.tutorialDismiss = document.getElementById('tutorial-dismiss');
         this.statusReadout = document.getElementById('status-readout');
+        this.gameOverModal = document.getElementById('game-over-modal');
+        this.gameOverRestartBtn = document.getElementById('btn-game-over-restart');
+        this.gameOverMenuBtn = document.getElementById('btn-game-over-menu');
         this.tutorialDismiss.addEventListener('click', () => {
             this.hideTutorial();
             localStorage.setItem('abyssDashTutorialSeen', '1');
@@ -2056,6 +2133,30 @@ class UIManager {
     }
     hideTutorial() {
         if (this.tutorialOverlay) this.tutorialOverlay.classList.remove('visible');
+    }
+    showGameOver(summary) {
+        if (!this.gameOverModal) return;
+        const values = {
+            score: `${Math.floor(summary.score || 0)}`,
+            depth: `${Math.floor(summary.depth || 0)}m`,
+            fishesEaten: `${Math.floor(summary.fishesEaten || 0)}`,
+            maxCombo: `${Math.floor(summary.maxCombo || 0)}x`,
+            closeCalls: `${Math.floor(summary.closeCalls || 0)}`,
+            bossesDefeated: `${Math.floor(summary.bossesDefeated || 0)}`,
+            mutationsAcquired: `${Math.floor(summary.mutationsAcquired || 0)}`
+        };
+        Object.entries(values).forEach(([key, value]) => {
+            const element = this.gameOverModal.querySelector(`[data-stat="${key}"]`);
+            if (element) element.textContent = value;
+        });
+        this.gameOverModal.style.display = 'flex';
+        this.gameOverModal.setAttribute('aria-hidden', 'false');
+        if (this.gameOverRestartBtn) this.gameOverRestartBtn.focus({ preventScroll: true });
+    }
+    hideGameOver() {
+        if (!this.gameOverModal) return;
+        this.gameOverModal.style.display = 'none';
+        this.gameOverModal.setAttribute('aria-hidden', 'true');
     }
     update(score, shark, highScore, depth, engine) {
         document.getElementById('score').innerText = Math.floor(score);
@@ -2379,12 +2480,13 @@ class Renderer {
             ctx.globalAlpha = 1.0;
         });
 
-        ctx.font = "bold 16px 'Orbitron', sans-serif";
         ctx.textAlign = 'center';
         engine.floatingTexts.forEach(ft => {
+            const fontSize = ft.size || (ft.style === 'boss' ? 24 : 16);
+            ctx.font = `bold ${fontSize}px 'Orbitron', sans-serif`;
             ctx.fillStyle = ft.color;
             ctx.globalAlpha = ft.alpha;
-            ctx.shadowBlur = 10; ctx.shadowColor = ft.color;
+            ctx.shadowBlur = ft.style === 'boss' ? 18 : 10; ctx.shadowColor = ft.color;
             ctx.fillText(ft.text, ft.x, ft.y);
             ctx.globalAlpha = 1.0;
             ctx.shadowBlur = 0;
@@ -2597,9 +2699,15 @@ class EntityManager {
             });
         }
     }
-    spawnText(x, y, text, color) {
+    spawnText(x, y, text, color, options = {}) {
         if (this.engine.floatingTexts.length > 30) return;
-        this.engine.floatingTexts.push({ x, y, text, color, alpha: 1.0, vy: -1.5 });
+        this.engine.floatingTexts.push({
+            x, y, text, color,
+            alpha: 1.0,
+            vy: options.vy ?? -1.5,
+            size: options.size || (options.style === 'boss' ? 24 : 16),
+            style: options.style || 'default'
+        });
     }
 }
 
@@ -2684,13 +2792,7 @@ class InputSystem {
             if (this.engine.state === 'MENU') return;
             this.engine.audio.init();
             if (this.engine.state === 'GAMEOVER') {
-                this.engine.state = 'MENU';
-                this.engine.initEntities();
-                document.getElementById('main-menu').style.display = 'flex';
-                setTimeout(() => {
-                    document.getElementById('main-menu').style.opacity = '1';
-                    document.getElementById('main-menu').style.pointerEvents = 'auto';
-                }, 50);
+                // Game over is modal: restart/menu buttons own the transition.
                 return;
             }
             if (this.engine.state === 'PAUSED') { this.engine.resume(); return; }
@@ -2745,7 +2847,8 @@ class InputSystem {
                     ['glossary-modal', 'btn-close-glossary'],
                     ['contract-modal', 'btn-close-contract'],
                     ['skins-modal', 'btn-close-skins'],
-                    ['achievements-modal', 'btn-close-achievements']
+                    ['achievements-modal', 'btn-close-achievements'],
+                    ['game-over-modal', 'btn-game-over-menu']
                 ];
                 const openModal = modalClosePairs.find(([modalId]) => document.getElementById(modalId).style.display === 'flex');
                 if (openModal) {
@@ -2774,10 +2877,7 @@ class InputSystem {
             if(e.code === 'Space') {
                 if (['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(document.activeElement?.tagName) || document.activeElement?.isContentEditable) return;
                 e.preventDefault();
-                if (document.getElementById('glossary-modal').style.display === 'flex') return;
-                if (document.getElementById('contract-modal').style.display === 'flex') return;
-                if (document.getElementById('skins-modal').style.display === 'flex') return;
-                if (document.getElementById('achievements-modal').style.display === 'flex') return;
+                if (openDialogs().length) return;
                 if (this.engine.state === 'MENU') return;
                 handleInputDown();
             }
@@ -2796,39 +2896,19 @@ class InputSystem {
         window.addEventListener('orientationchange', pauseForPortrait);
         window.addEventListener('resize', pauseForPortrait);
 
+        this.engine.ui.gameOverRestartBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.engine.restartFromGameOver();
+        });
+
+        this.engine.ui.gameOverMenuBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.engine.returnToMenuFromGameOver();
+        });
+
         document.getElementById('btn-start').addEventListener('click', (e) => {
             e.stopPropagation();
-            this.engine.fishes = [];
-            this.engine.bubbles = [];
-            this.engine.audio.init();
-            this.engine.audio.play('dash');
-
-            const ripple = document.getElementById('ripple-effect');
-            ripple.classList.remove('ripple-active');
-            void ripple.offsetWidth;
-            ripple.classList.add('ripple-active');
-
-            const menu = document.getElementById('main-menu');
-            menu.style.opacity = '0';
-            menu.style.pointerEvents = 'none';
-
-            setTimeout(() => {
-                menu.style.display = 'none';
-                this.engine.state = 'PLAYING';
-                this.engine.frameCount = 0;
-                this.engine.ui.setPauseBtnVisible(true);
-                this.engine.lastTime = performance.now();
-                this.engine.accumulator = 0;
-                this.engine.renderer.canvas.focus({ preventScroll: true });
-                this.engine.audio.playAmbient();
-                const demoBossStarted = this.engine.activatePendingGodBoss();
-                if (demoBossStarted) {
-                    this.engine.tutorialActive = false;
-                    this.engine.ui.hideTutorial();
-                } else {
-                    this.engine.startTutorial();
-                }
-            }, 600);
+            this.engine.startRun();
         });
 
         document.getElementById('btn-glossary').addEventListener('click', (e) => {
@@ -3070,6 +3150,8 @@ class GameEngine {
         this.pendingGodBossThreshold = null;
         this.tutorialStep = -1;
         this.tutorialActive = localStorage.getItem('abyssDashTutorialSeen') !== '1';
+        this.gameOverModalTimer = null;
+        this.runSummary = null;
 
         this.entityManager = new EntityManager(this);
         this.collisionSystem = new CollisionSystem(this);
@@ -3205,7 +3287,35 @@ class GameEngine {
         window.location.reload();
     }
 
+    createRunStats() {
+        return { fishesEaten: 0, damageTaken: 0, shieldsBroken: 0, maxCombo: 0, closeCalls: 0 };
+    }
+
+    getMutationCount() {
+        const upgrades = this.mutationSystem && Array.isArray(this.mutationSystem.upgradePool)
+            ? this.mutationSystem.upgradePool
+            : [];
+        return upgrades.reduce((total, upgrade) => total + Math.max(0, Number(upgrade.level) || 0), 0);
+    }
+
+    getRunSummary() {
+        const stats = this.runStats || (this.createRunStats ? this.createRunStats() : { fishesEaten: 0, maxCombo: 0, closeCalls: 0 });
+        return Object.freeze({
+            score: Math.floor(Number(this.score) || 0),
+            depth: Math.floor(Number(this.depth) || 0),
+            fishesEaten: Math.floor(Number(stats.fishesEaten) || 0),
+            maxCombo: Math.floor(Number(stats.maxCombo) || 0),
+            closeCalls: Math.floor(Number(stats.closeCalls) || 0),
+            bossesDefeated: this.bossSystem && Array.isArray(this.bossSystem.defeatedBosses)
+                ? this.bossSystem.defeatedBosses.length
+                : 0,
+            mutationsAcquired: this.getMutationCount()
+        });
+    }
+
     initEntities() {
+        if (this.gameOverModalTimer && typeof clearTimeout === 'function') clearTimeout(this.gameOverModalTimer);
+        this.gameOverModalTimer = null;
         this.audio.stopAmbient();
         this.audio.stopBossMusic({ resumeAmbient: false, immediate: true });
         this.entityManager.initEntities();
@@ -3219,7 +3329,8 @@ class GameEngine {
         if (this.renderer && this.renderer.canvas) {
             this.renderer.canvas.style.transform = 'translate(0, 0)';
         }
-        this.runStats = { fishesEaten: 0, damageTaken: 0, shieldsBroken: 0 };
+        this.runStats = this.createRunStats ? this.createRunStats() : { fishesEaten: 0, damageTaken: 0, shieldsBroken: 0, maxCombo: 0, closeCalls: 0 };
+        this.runSummary = null;
         this.bossSystem.active = false;
         this.bossSystem.bossData = null;
         this.bossSystem.defeatedBosses = [];
@@ -3231,6 +3342,7 @@ class GameEngine {
         this.ui.updatePauseBtnIcon(false);
         this.ui.update(this.score, this.shark, this.highScore, this.depth, this);
         this.ui.hideTutorial();
+        if (this.ui.hideGameOver) this.ui.hideGameOver();
     }
 
     startTutorial() {
@@ -3271,9 +3383,67 @@ class GameEngine {
         this.lastTime = performance.now();
     }
 
+    startRun({ fromGameOver = false } = {}) {
+        if (fromGameOver) this.initEntities();
+        if (this.ui.hideGameOver) this.ui.hideGameOver();
+        this.fishes = [];
+        this.bubbles = [];
+        this.audio.init();
+        this.audio.play('dash');
+
+        const ripple = document.getElementById('ripple-effect');
+        ripple.classList.remove('ripple-active');
+        void ripple.offsetWidth;
+        ripple.classList.add('ripple-active');
+
+        const menu = document.getElementById('main-menu');
+        menu.style.opacity = '0';
+        menu.style.pointerEvents = 'none';
+
+        setTimeout(() => {
+            menu.style.display = 'none';
+            this.state = 'PLAYING';
+            this.frameCount = 0;
+            this.ui.setPauseBtnVisible(true);
+            this.lastTime = performance.now();
+            this.accumulator = 0;
+            this.renderer.canvas.focus({ preventScroll: true });
+            this.audio.playAmbient();
+            const demoBossStarted = this.activatePendingGodBoss();
+            if (demoBossStarted) {
+                this.tutorialActive = false;
+                this.ui.hideTutorial();
+            } else {
+                this.startTutorial();
+            }
+        }, fromGameOver ? 220 : 600);
+    }
+
+    restartFromGameOver() {
+        if (this.state !== 'GAMEOVER') return;
+        this.startRun({ fromGameOver: true });
+    }
+
+    returnToMenuFromGameOver() {
+        if (this.state !== 'GAMEOVER') return;
+        if (this.gameOverModalTimer && typeof clearTimeout === 'function') clearTimeout(this.gameOverModalTimer);
+        this.gameOverModalTimer = null;
+        if (this.ui.hideGameOver) this.ui.hideGameOver();
+        this.initEntities();
+        this.state = 'MENU';
+        const menu = document.getElementById('main-menu');
+        menu.style.display = 'flex';
+        menu.style.opacity = '1';
+        menu.style.pointerEvents = 'auto';
+        const startButton = document.getElementById('btn-start');
+        if (startButton) startButton.focus({ preventScroll: true });
+    }
+
     triggerGameOver() {
         if (this.isCheatInvincible || (this.mutationSystem && this.mutationSystem.modifiers.invincibleTimer > 0)) return;
+        if (this.state === 'GAMEOVER') return;
         this.state = 'GAMEOVER';
+        this.runSummary = this.getRunSummary();
         this.ui.setPauseBtnVisible(false);
         this.audio.stopAmbient();
         this.audio.stopBossMusic({ resumeAmbient: false });
@@ -3289,6 +3459,10 @@ class GameEngine {
         }
 
         this.ui.update(this.score, this.shark, this.highScore, this.depth, this);
+        if (this.gameOverModalTimer && typeof clearTimeout === 'function') clearTimeout(this.gameOverModalTimer);
+        this.gameOverModalTimer = setTimeout(() => {
+            if (this.state === 'GAMEOVER' && this.runSummary) this.ui.showGameOver(this.runSummary);
+        }, 1000);
     }
 
     checkCollision(cx, cy, radius, rx, ry, rw, rh) {
@@ -3325,7 +3499,13 @@ class GameEngine {
             item.nearMissed = true;
             this.nearMissTimer = 24;
             this.score += 3;
+            this.runStats.closeCalls = (this.runStats.closeCalls || 0) + 1;
+            this.entityManager.spawnText(x, y - 18, label || 'CLOSE CALL +3', color || '#00ffff', { style: 'close-call' });
         }
+    }
+
+    registerShieldBlock(x, y) {
+        this.entityManager.spawnText(x, y - 24, 'BLOCKED', '#ff0055', { style: 'blocked', size: 18 });
     }
 
     updateLogic() {
@@ -3624,6 +3804,7 @@ class GameEngine {
                     this.mines.splice(i, 1);
                 } else if (this.shark.shield) {
                     this.runStats.shieldsBroken++;
+                    this.registerShieldBlock(m.x, m.y);
                     this.shark.comboCount = 0; this.shark.comboActive = false;
                     this.audio.play('explosion'); this.shark.shield = false;
                     this.ui.triggerImpactFlash();
@@ -3674,6 +3855,7 @@ class GameEngine {
                 }
                 else if (this.shark.shield) {
                     this.runStats.shieldsBroken++;
+                    this.registerShieldBlock(jelly.x, jelly.y);
                     this.shark.comboCount = 0; this.shark.comboActive = false;
                     this.audio.play('smash'); this.shark.shield = false;
                     this.ui.triggerImpactFlash();
@@ -3716,6 +3898,7 @@ class GameEngine {
                 }
                 else if (this.shark.shield) {
                     this.runStats.shieldsBroken++;
+                    this.registerShieldBlock(obs.x + obs.width / 2, sharkCY);
                     this.shark.comboCount = 0; this.shark.comboActive = false;
                     this.audio.play('smash'); this.shark.shield = false;
                     this.ui.triggerImpactFlash();
@@ -3823,6 +4006,7 @@ class GameEngine {
                 this.mutationSystem.addDna(this.mutationSystem.baseDnaPerFish * dnaMult * depthMult);
 
                 this.shark.comboCount++;
+                this.runStats.maxCombo = Math.max(this.runStats.maxCombo || 0, this.shark.comboCount);
                 this.shark.comboTimer = PACING.COMBO_WINDOW_TICKS;
                 if (this.shark.comboCount === 3) {
                     this.shark.comboActive = true;

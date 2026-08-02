@@ -215,6 +215,14 @@
 6. `test: record 30-minute endurance results`
 7. `release: Abyss Dash v9.9.0`
 
+### Stage 3 implementation record (2026-08-02)
+
+- [x] Added an immutable run-summary snapshot with score, depth, fish eaten, best combo, close calls, Bosses defeated, and mutations acquired.
+- [x] Added a delayed HTML game-over modal with explicit `RESTART` and `MAIN MENU` actions; arbitrary canvas input no longer changes state after death.
+- [x] Reused the existing floating-text pool for `CLOSE CALL +3`, `BLOCKED`, and highlighted `BOSS SLAIN` feedback.
+- [x] Added deterministic regression tests for summary derivation and feedback events.
+- [ ] Pacing/stress tuning and the Boss-music-before-entrance sequence remain Stage 4 work.
+
 ## 六、执行规则
 
 - 每完成一个阶段，先运行对应测试并记录结果，再进入下一阶段。
