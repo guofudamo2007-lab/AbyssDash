@@ -9,11 +9,7 @@ const classMatch = html.match(/class BossSystem \{[\s\S]*?\r?\n\}\r?\n\r?\nclass
 assert.ok(classMatch, 'BossSystem source was not found in index.html');
 
 const classSource = classMatch[0].replace(/\r?\n\r?\nclass AchievementManager$/, '');
-const pacing = {
-    BOSS_SUPPLY_INTERVAL_TICKS: 999999,
-    BOSS_EMERGENCY_TICKS: 999999
-};
-const BossSystem = new Function('PACING', `${classSource}\nreturn BossSystem;`)(pacing);
+const BossSystem = new Function(`${classSource}\nreturn BossSystem;`)();
 
 function createEngine() {
     return {

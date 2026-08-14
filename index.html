@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="application-version" content="9.9.0">
-    <title>深渊冲刺 (Abyss Dash) v9.9.0</title>
+    <meta name="application-version" content="10.0.0">
+    <title>深渊冲刺 (Abyss Dash) v10.0.0</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Rajdhani:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -25,14 +25,18 @@
 
         canvas { display: block; width: 100% !important; height: 100% !important; object-fit: contain; }
 
-        #ui-layer { position: absolute; top: max(3cqh, env(safe-area-inset-top)); left: max(3cqw, env(safe-area-inset-left)); right: max(3cqw, env(safe-area-inset-right)); z-index: 999; pointer-events: none; display: flex; justify-content: space-between; align-items: flex-start; }
-        #left-ui { display: flex; flex-direction: column; background: rgba(5, 15, 30, 0.4); padding: 1.5cqw 2.5cqw; border-radius: 24px; border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 20px rgba(0, 229, 255, 0.05); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); transition: opacity 0.2s ease-out; }
-        #score-box { font-family: 'Orbitron', sans-serif; font-size: clamp(14px, 3cqw, 32px); font-weight: 900; text-shadow: 0 0 1.5cqw rgba(0,255,255,0.9); display: flex; align-items: baseline; color: #fff; letter-spacing: 1px; }
-        #multiplier { color: #ff2a5f; font-size: clamp(10px, 2cqw, 18px); margin-left: 1.5cqw; text-shadow: 0 0 1.5cqw #ff0055; opacity: 0; transition: opacity 0.2s; font-weight: 700; }
+        #ui-layer { position: absolute; top: max(2cqh, env(safe-area-inset-top)); left: max(2cqw, env(safe-area-inset-left)); right: max(2cqw, env(safe-area-inset-right)); z-index: 999; pointer-events: none; display: flex; justify-content: space-between; align-items: flex-start; }
+        #left-ui { display: flex; flex-direction: column; width: fit-content; max-width: 30cqw; background: rgba(5, 15, 30, 0.34); padding: 0.85cqw 1.35cqw; border-radius: 14px; border: 1px solid rgba(255, 255, 255, 0.09); box-shadow: 0 6px 18px rgba(0,0,0,0.38), inset 0 0 12px rgba(0, 229, 255, 0.04); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); transition: opacity 0.2s ease-out; }
+        #score-box { font-family: 'Orbitron', sans-serif; font-size: clamp(12px, 2.15cqw, 23px); font-weight: 900; text-shadow: 0 0 1cqw rgba(0,255,255,0.9); display: flex; align-items: baseline; color: #fff; letter-spacing: 0.5px; white-space: nowrap; }
+        #score { margin-left: 4px !important; }
+        #combo-badge { margin-left: 4px !important; padding: 0 3px !important; }
+        #multiplier { color: #ff2a5f; font-size: clamp(9px, 1.35cqw, 14px); margin-left: 0.75cqw; text-shadow: 0 0 1cqw #ff0055; opacity: 0; transition: opacity 0.2s; font-weight: 700; }
         #multiplier.active { opacity: 1; animation: pulse 0.4s infinite alternate; }
-        #best-score-box { font-family: 'Orbitron', sans-serif; font-size: clamp(10px, 1.8cqw, 15px); color: #00ffff; margin-top: 0.5cqw; text-shadow: 0 0 0.8cqw rgba(0,255,255,0.5); font-weight: 500; opacity: 0.9; letter-spacing: 0.5px; }
+        #depth-box { margin-top: 2px !important; font-size: clamp(9px, 1.25cqw, 12px) !important; line-height: 1.1; white-space: nowrap; }
+        #best-score-box { font-family: 'Orbitron', sans-serif; font-size: clamp(8px, 1.25cqw, 12px); color: #00ffff; margin-top: 2px; text-shadow: 0 0 0.6cqw rgba(0,255,255,0.5); font-weight: 500; opacity: 0.9; letter-spacing: 0.25px; white-space: nowrap; }
+        #hunt-label { font-size: clamp(8px, 1.05cqw, 10px) !important; margin-top: 6px !important; letter-spacing: 0.5px !important; line-height: 1.1; }
 
-        #hunt-bar-container { width: clamp(80px, 20cqw, 220px); height: 1.2cqw; background: rgba(0,0,0,0.4); border-radius: 1cqw; margin-top: 1.5cqw; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; position: relative; box-shadow: inset 0 2px 5px rgba(0,0,0,0.5); }
+        #hunt-bar-container { width: clamp(64px, 14cqw, 150px); height: 0.8cqw; min-height: 5px; background: rgba(0,0,0,0.4); border-radius: 1cqw; margin-top: 0.75cqw; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; position: relative; box-shadow: inset 0 1px 3px rgba(0,0,0,0.5); }
         #hunt-bar { width: 0%; height: 100%; background: linear-gradient(90deg, #00e5ff, #00ffaa); box-shadow: 0 0 1.5cqw rgba(0, 229, 255, 0.6); transition: width 0.15s ease-out, background 0.3s; position: relative; border-radius: 1cqw; }
         #hunt-bar::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%); }
 
@@ -284,7 +288,7 @@
     <div id="game-container">
         <div id="main-menu">
             <div id="menu-logo">ABYSS DASH <span id="easter-egg-shark" role="button" tabindex="0" aria-label="鲨鱼彩蛋" style="display:inline-block; transition:transform 0.2s ease, filter 0.2s ease; cursor:pointer;">🦈</span></div>
-            <div id="version-label">v9.9.0 · ABYSS VOYAGE</div>
+            <div id="version-label">v10.0.0 · LAYERED DESCENT</div>
             <button type="button" class="menu-btn" id="btn-start">START GAME</button>
             <button type="button" class="menu-btn" id="btn-contract" style="display: none; background: linear-gradient(135deg, #8b0000, #ff0000); box-shadow: 0 4px 15px rgba(255, 0, 0, 0.4);">ABYSSAL CONTRACT (深海契约)</button>
             <button type="button" class="menu-btn" id="btn-skins">SKINS (皮肤)</button>
@@ -648,7 +652,7 @@
                 <div id="score-box">SCORE: <span id="score" style="margin-left: 8px;">0</span> <span id="combo-badge" style="display:none; color: #ff00ff; font-size: 0.6em; margin-left: 8px; text-shadow: 0 0 1cqw #ff00ff; border: 1px solid #ff00ff; padding: 0 4px; border-radius: 4px; align-self: center;">x2</span><span id="multiplier">x2 RUSH!</span></div>
                 <div id="depth-box" style="margin-top: 4px; font-size: 14px; color: #00ffff; font-family: 'Rajdhani', sans-serif;">DEPTH: <span id="depth">0</span>m</div>
                 <div id="best-score-box">BEST SCORE: <span id="high-score">0</span></div>
-                <div style="font-size: 13px; margin-top: 12px; color: #8ab; font-weight: bold; letter-spacing: 1px;">HUNTING LEVEL:</div>
+                <div id="hunt-label" style="font-size: 13px; margin-top: 12px; color: #8ab; font-weight: bold; letter-spacing: 1px;">HUNTING LEVEL:</div>
                 <div id="hunt-bar-container"><div id="hunt-bar"></div></div>
             </div>
             <div id="right-ui-container" style="display: flex; flex-direction: column; align-items: flex-end; gap: 10px;">
@@ -682,34 +686,66 @@ const CONFIG = {
 // Gameplay windows are expressed in seconds, then converted once for the
 // fixed-step loop. This keeps tuning honest when the simulation rate changes.
 const PACING = {
+    MAX_ACTIVE_FISH: 30,
+    FISH_MIN_INTERVAL_TICKS: 24,
+    FISH_SAFE_SPAWN_DISTANCE: 220,
     COMBO_WINDOW_TICKS: CONFIG.LOGIC_FPS * 3,
     LEVELUP_GRACE_TICKS: CONFIG.LOGIC_FPS * 2,
-    BOSS_SUPPLY_INTERVAL_TICKS: CONFIG.LOGIC_FPS * 6,
-    BOSS_EMERGENCY_TICKS: CONFIG.LOGIC_FPS * 16
+    MAP_TRANSITION_OUT_TICKS: Math.round(CONFIG.LOGIC_FPS * 0.7),
+    MAP_TRANSITION_HOLD_TICKS: Math.round(CONFIG.LOGIC_FPS * 0.35),
+    MAP_TRANSITION_IN_TICKS: Math.round(CONFIG.LOGIC_FPS * 0.85)
 };
 
 // One source of truth for the four traversal zones.  Keeping pacing and art
 // together makes it much easier to tune a zone without changing the game loop.
 const ZONE_PROFILES = {
     shallow: {
+        id: 'shallow', label: 'SHALLOW SEA', backgrounds: [
+            'assets/art/backgrounds/background-shallow-sea-01-v1.webp',
+            'assets/art/backgrounds/background-shallow-sea-02-v1.webp',
+            'assets/art/backgrounds/background-shallow-sea-03-v1.webp',
+            'assets/art/backgrounds/background-shallow-sea-04-v1.webp',
+            'assets/art/backgrounds/background-shallow-sea-05-v1.webp'
+        ],
         name: '浅海 (SHALLOW SEA)', threshold: 0, accent: '#00e5ff',
         top: '#0a1535', middle: '#06101c', bottom: '#020308',
         obstacleInterval: 118, fishInterval: 54, jellyInterval: 240, mineInterval: 999,
         currentChance: 0.18, debris: false, obstacleChance: 0.62, hazardGap: 110, hazardCap: 3
     },
     shipwreck: {
+        id: 'shipwreck', label: 'SHIPWRECK', backgrounds: [
+            'assets/art/backgrounds/background-shipwreck-01-v1.webp',
+            'assets/art/backgrounds/background-shipwreck-02-v1.webp',
+            'assets/art/backgrounds/background-shipwreck-03-v1.webp',
+            'assets/art/backgrounds/background-shipwreck-04-v1.webp',
+            'assets/art/backgrounds/background-shipwreck-05-v1.webp'
+        ],
         name: '沉船区 (SHIPWRECK)', threshold: 300, accent: '#ffb347',
         top: '#17223a', middle: '#101622', bottom: '#080a12',
         obstacleInterval: 102, fishInterval: 48, jellyInterval: 190, mineInterval: 330,
         currentChance: 0.28, debris: true, obstacleChance: 0.82, hazardGap: 105, hazardCap: 4
     },
     trench: {
+        id: 'trench', label: 'TRENCH', backgrounds: [
+            'assets/art/backgrounds/background-trench-01-v1.webp',
+            'assets/art/backgrounds/background-trench-02-v1.webp',
+            'assets/art/backgrounds/background-trench-03-v1.webp',
+            'assets/art/backgrounds/background-trench-04-v1.webp',
+            'assets/art/backgrounds/background-trench-05-v1.webp'
+        ],
         name: '海沟 (TRENCH)', threshold: 800, accent: '#ff5f45',
         top: '#17142d', middle: '#0b0b1c', bottom: '#03030b',
         obstacleInterval: 88, fishInterval: 66, jellyInterval: 120, mineInterval: 190,
         currentChance: 0.45, debris: false, obstacleChance: 0.9, hazardGap: 100, hazardCap: 5
     },
     dark: {
+        id: 'dark', label: 'DARK ZONE', backgrounds: [
+            'assets/art/backgrounds/background-dark-abyss-01-v1.webp',
+            'assets/art/backgrounds/background-dark-abyss-02-v1.webp',
+            'assets/art/backgrounds/background-dark-abyss-03-v1.webp',
+            'assets/art/backgrounds/background-dark-abyss-04-v1.webp',
+            'assets/art/backgrounds/background-dark-abyss-05-v1.webp'
+        ],
         name: '黑暗区 (DARK ZONE)', threshold: 1500, accent: '#d36bff',
         top: '#09061c', middle: '#050412', bottom: '#010107',
         obstacleInterval: 76, fishInterval: 78, jellyInterval: 88, mineInterval: 125,
@@ -717,29 +753,189 @@ const ZONE_PROFILES = {
     }
 };
 
-function getZoneProfile(score) {
-    if (score < 300) return ZONE_PROFILES.shallow;
-    if (score < 800) return ZONE_PROFILES.shipwreck;
-    if (score < 1500) return ZONE_PROFILES.trench;
+const GAMEPLAY_ART = Object.freeze({
+    mine: {
+        src: 'assets/art/obstacles/hazard-mine-pixel-v1.webp',
+        crop: [170, 178, 888, 843]
+    },
+    crate: {
+        src: 'assets/art/obstacles/cargo-crate-pixel-v2.webp',
+        crop: [237, 216, 924, 678]
+    },
+    pillar: {
+        src: 'assets/art/obstacles/hazard-pillar-pixel-v1.webp',
+        crop: [451, 58, 352, 1115]
+    },
+    boundaryWall: {
+        src: 'assets/art/obstacles/boundary-wall-pixel-v1.webp',
+        crop: [56, 231, 1418, 530]
+    }
+});
+function getZoneProfile(depth) {
+    if (depth < 300) return ZONE_PROFILES.shallow;
+    if (depth < 800) return ZONE_PROFILES.shipwreck;
+    if (depth < 1500) return ZONE_PROFILES.trench;
     return ZONE_PROFILES.dark;
 }
-
-function getFishSpawnPlan(profile, isDashing, bossType, frameCount) {
+function getFishSpawnPlan(profile, isDashing, frameCount) {
     let interval = profile.fishInterval;
-    if (bossType === 'megalodon') {
-        interval = 40;
-    } else if (isDashing) {
+    if (isDashing) {
         interval = Math.min(interval, 48);
     }
 
-    const count = !bossType
-        && isDashing
+    const count = isDashing
         && profile === ZONE_PROFILES.dark
         && frameCount % (interval * 4) === 0
         ? 2
         : 1;
 
     return { interval, count };
+}
+
+function getSharkTravelMotion(shark, bossActive = false) {
+    if (bossActive) return null;
+    if (shark.isDashing) return { targetX: 270, easing: 0.18 };
+    if (shark.inCurrent) return { targetX: 215, easing: 0.12 };
+    return { targetX: 150, easing: 0.08 };
+}
+
+function getBackgroundTravelDelta(currentSpeed, bossActive = false) {
+    const speed = Math.max(0, Number(currentSpeed) || 0);
+    return bossActive ? Math.max(0.55, speed * 0.12) : speed * 0.35;
+}
+
+class FishDirector {
+    constructor(engine) {
+        this.engine = engine;
+        this.reset();
+    }
+
+    reset() {
+        this.tick = 0;
+        this.zoneId = null;
+        this.nextNormalTick = PACING.FISH_MIN_INTERVAL_TICKS;
+        this.emptyNormalTicks = 0;
+        this.lastNormalSpawnTick = -Infinity;
+        this.rushSchoolIndex = 0;
+        this.bossType = null;
+    }
+
+    beginBoss(type) {
+        this.bossType = type;
+        this.engine.fishes = [];
+        this.emptyNormalTicks = 0;
+        this.lastNormalSpawnTick = this.tick;
+        this.nextNormalTick = this.tick + PACING.FISH_MIN_INTERVAL_TICKS;
+        // Boss encounters use the exact same fish entry as traversal: one
+        // readable school from the right side, then the normal pacing loop.
+        this.spawnSchool({ count: 1 });
+    }
+
+    endBoss() {
+        this.bossType = null;
+        this.engine.fishes = [];
+    }
+
+    update({ profile, currentSpeed, bossActive = false, bossType = null, isDashing = false }) {
+        if (!profile) return;
+        this.tick++;
+        if (this.zoneId !== profile.id) {
+            this.zoneId = profile.id;
+            this.nextNormalTick = Math.min(this.nextNormalTick, this.tick + PACING.FISH_MIN_INTERVAL_TICKS);
+            this.emptyNormalTicks = 0;
+        }
+
+        const bossEncounterActive = Boolean(bossActive && bossType);
+        if (bossEncounterActive && this.bossType !== bossType) this.beginBoss(bossType);
+        if (!bossEncounterActive && this.bossType) this.endBoss();
+
+        const plan = getFishSpawnPlan(profile, isDashing, this.tick);
+        const normalFishCount = this.engine.fishes.filter((fish) => fish.active !== false).length;
+        const reachableFishCount = this.countReachableFish();
+        this.emptyNormalTicks = reachableFishCount > 0 ? 0 : this.emptyNormalTicks + 1;
+
+        if (this.tick >= this.nextNormalTick) {
+            if (normalFishCount < PACING.MAX_ACTIVE_FISH) {
+                const schoolCount = this.getNormalSchoolCount(profile, isDashing);
+                this.spawnSchool({ count: schoolCount });
+                this.lastNormalSpawnTick = this.tick;
+            }
+            this.nextNormalTick = this.tick + Math.max(PACING.FISH_MIN_INTERVAL_TICKS, plan.interval);
+            this.emptyNormalTicks = 0;
+        }
+
+        const guaranteeGrace = Math.max(54, Math.round(plan.interval * (isDashing ? 0.9 : 1.25)));
+        if (
+            this.emptyNormalTicks >= guaranteeGrace
+            && this.tick - this.lastNormalSpawnTick >= PACING.FISH_MIN_INTERVAL_TICKS
+            && normalFishCount < PACING.MAX_ACTIVE_FISH
+        ) {
+            this.spawnSchool({ count: isDashing ? 2 : 1 });
+            this.lastNormalSpawnTick = this.tick;
+            this.nextNormalTick = Math.max(this.nextNormalTick, this.tick + PACING.FISH_MIN_INTERVAL_TICKS);
+            this.emptyNormalTicks = 0;
+        }
+    }
+
+    getNormalSchoolCount(profile, isDashing) {
+        if (!isDashing) return 1;
+        this.rushSchoolIndex++;
+        if (profile === ZONE_PROFILES.dark && this.rushSchoolIndex % 4 === 0) return 2;
+        return 1;
+    }
+
+    countReachableFish() {
+        const shark = this.engine.shark || { x: 140, y: 250 };
+        const sharkX = Number(shark.x) || 140;
+        const sharkY = Number(shark.y) || 250;
+        return this.engine.fishes.filter((fish) => {
+            if (!fish.active) return false;
+            return fish.x > sharkX + 70
+                && fish.x < sharkX + 760
+                && Math.abs(fish.y - sharkY) < 190;
+        }).length;
+    }
+
+    spawnSchool({ count }) {
+        const cvsW = this.engine.renderer.baseWidth;
+        const cvsH = this.engine.renderer.baseHeight;
+        const shark = this.engine.shark || { x: 140, y: 250 };
+        const sharkX = Number(shark.x) || 140;
+        const sharkY = Number(shark.y) || cvsH / 2;
+        const safeTop = 60;
+        const safeBottom = cvsH - 60;
+        const safeY = (value) => Math.max(safeTop, Math.min(safeBottom, value));
+        const randomFieldY = () => safeTop + Math.random() * (safeBottom - safeTop);
+        const laneRange = 300;
+        const laneChance = 0.62;
+        let anchorY = Math.random() < laneChance
+            ? sharkY + (Math.random() - 0.5) * laneRange * 2
+            : randomFieldY();
+        // Do not place a whole school directly across the shark's mouth.
+        if (Math.abs(anchorY - sharkY) < 80) {
+            const push = anchorY < sharkY ? -120 : 120;
+            anchorY = safeY(anchorY + push);
+        }
+        const randomEntranceX = cvsW + 90 + Math.random() * 220;
+        const spawnX = Math.max(randomEntranceX, sharkX + PACING.FISH_SAFE_SPAWN_DISTANCE);
+        const spacing = 30 + Math.random() * 18;
+        const available = Math.max(0, PACING.MAX_ACTIVE_FISH - this.engine.fishes.filter((fish) => fish.active !== false).length);
+
+        for (let index = 0; index < Math.min(count, available); index++) {
+            const offset = (index - (count - 1) / 2) * spacing;
+            const jitterX = (Math.random() - 0.5) * 30;
+            const jitterY = (Math.random() - 0.5) * 38;
+            this.engine.fishes.push({
+                x: spawnX + index * spacing + jitterX,
+                y: safeY(anchorY + offset + jitterY),
+                vx: -Math.random() * 0.7 - 0.8,
+                vy: (Math.random() - 0.5) * 1.2,
+                radius: 5,
+                active: true,
+                source: 'traversal'
+            });
+        }
+    }
 }
 
 function hexToRgb(hex) {
@@ -989,6 +1185,26 @@ class BossSystem {
         return false;
     }
 
+    spawnBossSafetyShield() {
+        if (!this.bossData || this.bossData.isDemo) return false;
+        const shark = this.engine.shark || {};
+        const powerups = this.engine.powerups;
+        if (!Array.isArray(powerups) || shark.shield) return false;
+        if (powerups.some((powerup) => powerup && powerup.source === 'boss-safety')) return false;
+        if (powerups.length >= 5) return false;
+
+        const baseHeight = this.engine.renderer.baseHeight;
+        const sharkY = Number.isFinite(Number(shark.y)) ? Number(shark.y) : baseHeight / 2;
+        powerups.push({
+            x: this.engine.renderer.baseWidth + 90,
+            y: Math.max(60, Math.min(baseHeight - 60, sharkY)),
+            radius: 14,
+            type: 'shield',
+            source: 'boss-safety'
+        });
+        return true;
+    }
+
     spawnBoss(threshold, { force = false, isDemo = false } = {}) {
         if (![300, 800, 1500].includes(threshold)) return false;
         if (this.active || (!force && this.defeatedBosses.includes(threshold))) return false;
@@ -1002,37 +1218,19 @@ class BossSystem {
         let restX = cvsW * 0.62;
 
         if (threshold === 300) {
-            this.bossData = { type: 'octopus', threshold: 300, maxHp: 2, hp: 2, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 155, height: 130, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0, supplyTimer: 0, emergencySupplyUsed: false, attackPulse: 0, attackTelegraph: 0, musicStarted: false, isDemo: Boolean(isDemo) };
+            this.bossData = { type: 'octopus', threshold: 300, maxHp: 2, hp: 2, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 155, height: 130, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0, attackPulse: 0, attackTelegraph: 0, musicStarted: false, isDemo: Boolean(isDemo) };
         } else if (threshold === 800) {
-            this.bossData = { type: 'submarine', threshold: 800, maxHp: 3, hp: 3, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 150, height: 80, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0, supplyTimer: 0, emergencySupplyUsed: false, attackPulse: 0, attackTelegraph: 0, musicStarted: false, isDemo: Boolean(isDemo) };
+            this.bossData = { type: 'submarine', threshold: 800, maxHp: 3, hp: 3, x: cvsW + 200, y: cvsH / 2, targetY: cvsH / 2, restX: restX, width: 150, height: 80, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0, attackPulse: 0, attackTelegraph: 0, musicStarted: false, isDemo: Boolean(isDemo) };
         } else if (threshold === 1500) {
-            this.bossData = { type: 'megalodon', threshold: 1500, maxHp: 4, hp: 4, x: cvsW + 300, y: cvsH / 2, targetY: cvsH / 2, restX: restX + 50, width: 250, height: 120, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0, supplyTimer: 0, emergencySupplyUsed: false, attackPulse: 0, attackTelegraph: 0, musicStarted: false, isDemo: Boolean(isDemo) };
+            this.bossData = { type: 'megalodon', threshold: 1500, maxHp: 4, hp: 4, x: cvsW + 300, y: cvsH / 2, targetY: cvsH / 2, restX: restX + 50, width: 250, height: 120, state: 'entering', timer: 0, fightTime: 0, hitCooldown: 0, attackPulse: 0, attackTelegraph: 0, musicStarted: false, isDemo: Boolean(isDemo) };
         }
-        this.deliverSupply({ emergency: true });
+        if (!this.bossData.musicStarted) {
+            this.bossData.musicStarted = true;
+            this.engine.audio.playBossMusic();
+        }
+        if (!this.bossData.isDemo) this.spawnBossSafetyShield();
+        if (this.engine.fishDirector) this.engine.fishDirector.beginBoss(this.bossData.type);
         return true;
-    }
-
-    deliverSupply({ emergency = false } = {}) {
-        const engine = this.engine;
-        const cvsW = engine.renderer.baseWidth;
-        const cvsH = engine.renderer.baseHeight;
-        const baseY = Math.max(60, Math.min(cvsH - 60, engine.shark.y));
-        const fishCount = emergency ? 4 : 3;
-        for (let i = 0; i < fishCount && engine.fishes.length < 30; i++) {
-            const offset = (i - (fishCount - 1) / 2) * 42;
-            engine.fishes.push({
-                x: cvsW * 0.48 + i * 36,
-                y: Math.max(50, Math.min(cvsH - 50, baseY + offset)),
-                vx: -1.4,
-                vy: 0,
-                radius: 5,
-                active: true
-            });
-        }
-        if (emergency && !engine.shark.shield && engine.powerups.length < 5) {
-            engine.powerups.push({ x: cvsW * 0.7, y: baseY, radius: 14, type: 'shield' });
-        }
-        engine.entityManager.spawnText(cvsW / 2, Math.max(54, baseY - 70), emergency ? 'EMERGENCY SUPPLY' : 'SUPPLY CURRENT', '#00ffaa');
     }
 
     update(dynamicBaseSpeed, speedMult) {
@@ -1046,18 +1244,8 @@ class BossSystem {
 
         b.timer++;
         b.fightTime++;
-        b.supplyTimer++;
         if (b.attackPulse > 0) b.attackPulse--;
         if (b.attackTelegraph > 0) b.attackTelegraph--;
-
-        if (b.supplyTimer >= PACING.BOSS_SUPPLY_INTERVAL_TICKS) {
-            b.supplyTimer = 0;
-            this.deliverSupply();
-        }
-        if (!b.emergencySupplyUsed && b.fightTime >= PACING.BOSS_EMERGENCY_TICKS && b.hp > 0) {
-            b.emergencySupplyUsed = true;
-            this.deliverSupply({ emergency: true });
-        }
 
         if (b.fightTime > 3600) {
             this.defeatBoss(true);
@@ -1070,11 +1258,7 @@ class BossSystem {
                 b.x = b.restX;
                 b.state = 'idle';
                 b.timer = 0;
-                if (!b.musicStarted) {
-                    b.musicStarted = true;
-                    this.engine.audio.playBossMusic();
-                    this.engine.entityManager.spawnText(cvsW / 2, 84, 'BOSS ENGAGED', '#ff5b84');
-                }
+                this.engine.entityManager.spawnText(cvsW / 2, 84, 'BOSS ENGAGED', '#ff5b84');
             }
         } else if (b.state === 'idle' || b.state === 'attacking') {
             const visualHalfHeight = b.type === 'octopus'
@@ -1225,6 +1409,7 @@ class BossSystem {
         const defeatedBoss = this.bossData;
         const isDemo = Boolean(defeatedBoss.isDemo);
         this.active = false;
+        if (this.engine.fishDirector) this.engine.fishDirector.endBoss();
         if (defeatedBoss.musicStarted) this.engine.audio.stopBossMusic();
         let bonus = 0;
         if (!isDemo) {
@@ -1259,6 +1444,9 @@ class BossSystem {
             if (ach && !ach.unlocked) {
                 this.engine.achievementManager.unlock(ach);
             }
+        }
+        if (!isDemo && this.engine.startMapTransition) {
+            this.engine.startMapTransition(defeatedBoss.threshold, defeatedBoss.type);
         }
         this.bossData = null;
     }
@@ -2231,7 +2419,31 @@ class Renderer {
         this.baseWidth = 900;
         this.baseHeight = 500;
         this.devicePixelRatio = window.devicePixelRatio || 1;
+        this.artAssets = {};
+        this.loadArtAssets();
         this.setQuality('high');
+    }
+
+    loadArtAssets() {
+        const register = (key, src, crop = null) => {
+            const image = new Image();
+            const asset = { image, src, crop, loaded: false, failed: false };
+            image.onload = () => { asset.loaded = true; };
+            image.onerror = () => {
+                asset.failed = true;
+                console.warn(`Gameplay art failed to load: ${src}`);
+            };
+            image.src = src;
+            this.artAssets[key] = asset;
+        };
+
+        Object.values(ZONE_PROFILES).forEach((profile) => {
+            const backgrounds = Array.isArray(profile.backgrounds)
+                ? profile.backgrounds
+                : [profile.background].filter(Boolean);
+            backgrounds.forEach((src, index) => register(`background:${profile.id}:${index}`, src));
+        });
+        Object.entries(GAMEPLAY_ART).forEach(([key, config]) => register(key, config.src, config.crop));
     }
 
     setQuality(quality) {
@@ -2241,13 +2453,182 @@ class Renderer {
         this.canvas.width = Math.round(this.baseWidth * dpr);
         this.canvas.height = Math.round(this.baseHeight * dpr);
         this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        this.ctx.imageSmoothingEnabled = false;
     }
 
-    drawZoneTheme(ctx, engine, profile) {
+    drawArtAsset(ctx, key, x, y, width, height, options = {}) {
+        const asset = this.artAssets[key];
+        if (!asset || !asset.loaded || asset.failed) return false;
+        const crop = asset.crop || [0, 0, asset.image.width, asset.image.height];
+        ctx.save();
+        ctx.globalAlpha *= options.alpha ?? 1;
+        ctx.translate(x + width / 2, y + height / 2);
+        ctx.scale(options.flipX ? -1 : 1, options.flipY ? -1 : 1);
+        ctx.drawImage(asset.image, crop[0], crop[1], crop[2], crop[3], -width / 2, -height / 2, width, height);
+        ctx.restore();
+        return true;
+    }
+
+    drawBackgroundArt(ctx, engine, profile) {
+        const sources = Array.isArray(profile.backgrounds)
+            ? profile.backgrounds
+            : [profile.background].filter(Boolean);
+        const assets = sources.map((_, index) => this.artAssets[`background:${profile.id}:${index}`]);
+        const readyAssets = assets.filter((asset) => asset && asset.loaded && !asset.failed);
+        if (!readyAssets.length) return false;
+
+        const overscanY = engine.reduceMotion ? 0 : 6;
+        if (readyAssets.length !== assets.length || assets.length === 1) {
+            ctx.save();
+            ctx.globalAlpha = 0.94;
+            ctx.drawImage(readyAssets[0].image, 0, -overscanY, this.baseWidth, this.baseHeight + overscanY * 2);
+            ctx.restore();
+            return true;
+        }
+
+        const overlap = 24;
+        const segmentWidth = this.baseWidth;
+        const stride = segmentWidth - overlap;
+        const loopWidth = stride * assets.length;
+        const travel = ((Number(engine.backgroundTravel) || 0) % loopWidth + loopWidth) % loopWidth;
+        const activeIndex = Math.floor(travel / stride) % assets.length;
+        const localOffset = travel % stride;
+        const firstIndex = (activeIndex - 1 + assets.length) % assets.length;
+        const firstX = -localOffset - stride;
+        const blendSteps = 8;
+
+        const drawSegment = (asset, x, blendLeft) => {
+            const drawImage = () => ctx.drawImage(
+                asset.image,
+                x,
+                -overscanY,
+                segmentWidth,
+                this.baseHeight + overscanY * 2
+            );
+
+            if (!blendLeft) {
+                ctx.save();
+                ctx.globalAlpha = 0.94;
+                drawImage();
+                ctx.restore();
+                return;
+            }
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(x + overlap, -overscanY, segmentWidth - overlap, this.baseHeight + overscanY * 2);
+            ctx.clip();
+            ctx.globalAlpha = 0.94;
+            drawImage();
+            ctx.restore();
+
+            const stripWidth = overlap / blendSteps;
+            for (let step = 0; step < blendSteps; step++) {
+                ctx.save();
+                ctx.beginPath();
+                ctx.rect(x + step * stripWidth, -overscanY, stripWidth + 0.5, this.baseHeight + overscanY * 2);
+                ctx.clip();
+                ctx.globalAlpha = 0.94 * ((step + 1) / blendSteps);
+                drawImage();
+                ctx.restore();
+            }
+        };
+
+        for (let slot = 0; slot < 4; slot++) {
+            const asset = assets[(firstIndex + slot) % assets.length];
+            drawSegment(asset, firstX + slot * stride, slot > 0);
+        }
+        return true;
+    }
+
+    drawMapTransition(ctx, engine) {
+        const transition = engine.mapTransition;
+        if (!transition || !transition.active) return;
+
+        let alpha = 1;
+        if (transition.phase === 'closing') {
+            alpha = Math.min(1, transition.ticks / Math.max(1, transition.outTicks));
+        } else if (transition.phase === 'opening') {
+            alpha = Math.max(0, 1 - transition.ticks / Math.max(1, transition.inTicks));
+        }
+
+        const eased = alpha * alpha * (3 - 2 * alpha);
+        const centerY = this.baseHeight / 2;
+        ctx.save();
+        ctx.fillStyle = `rgba(1, 4, 12, ${0.94 * eased})`;
+        ctx.fillRect(0, 0, this.baseWidth, this.baseHeight);
+
+        if (!engine.reduceMotion) {
+            const shutterHeight = centerY * eased;
+            const accent = transition.targetProfile.accent;
+            ctx.fillStyle = `rgba(2, 8, 18, ${0.96 * eased})`;
+            ctx.fillRect(0, 0, this.baseWidth, shutterHeight);
+            ctx.fillRect(0, this.baseHeight - shutterHeight, this.baseWidth, shutterHeight);
+            ctx.strokeStyle = accent;
+            ctx.globalAlpha = 0.6 * eased;
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 14;
+            ctx.shadowColor = accent;
+            ctx.beginPath();
+            ctx.moveTo(0, shutterHeight);
+            ctx.lineTo(this.baseWidth, shutterHeight);
+            ctx.moveTo(0, this.baseHeight - shutterHeight);
+            ctx.lineTo(this.baseWidth, this.baseHeight - shutterHeight);
+            ctx.stroke();
+            ctx.shadowBlur = 0;
+
+            const gateHeight = 112;
+            const gateWidth = 300;
+            for (let x = 0; x < this.baseWidth; x += gateWidth) {
+                this.drawArtAsset(
+                    ctx,
+                    'boundaryWall',
+                    x,
+                    shutterHeight - gateHeight,
+                    gateWidth,
+                    gateHeight,
+                    { flipY: true, alpha: 0.82 * eased }
+                );
+                this.drawArtAsset(
+                    ctx,
+                    'boundaryWall',
+                    x,
+                    this.baseHeight - shutterHeight,
+                    gateWidth,
+                    gateHeight,
+                    { alpha: 0.82 * eased }
+                );
+            }
+        }
+
+        if (eased > 0.42) {
+            const textAlpha = Math.min(1, (eased - 0.42) / 0.28);
+            ctx.globalAlpha = textAlpha;
+            ctx.textAlign = 'center';
+            ctx.fillStyle = transition.targetProfile.accent;
+            ctx.font = "700 14px 'Orbitron', sans-serif";
+            ctx.letterSpacing = '4px';
+            ctx.fillText('DESCENDING TO', this.baseWidth / 2, centerY - 34);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = "900 34px 'Orbitron', sans-serif";
+            ctx.shadowBlur = 20;
+            ctx.shadowColor = transition.targetProfile.accent;
+            ctx.fillText(transition.targetProfile.label, this.baseWidth / 2, centerY + 10);
+            ctx.shadowBlur = 0;
+            ctx.fillStyle = '#9bb3c8';
+            ctx.font = "600 12px 'Rajdhani', sans-serif";
+            ctx.fillText(`DEPTH GATE ${transition.targetThreshold}m`, this.baseWidth / 2, centerY + 38);
+            ctx.globalAlpha = textAlpha * 0.72;
+            ctx.fillText('CLICK / SPACE TO SKIP', this.baseWidth / 2, this.baseHeight - 42);
+        }
+        ctx.restore();
+    }
+
+    drawZoneTheme(ctx, engine, profile, intensity = 1) {
         const { baseWidth: w, baseHeight: h } = this;
         const t = engine.frameCount;
         ctx.save();
-        ctx.globalAlpha = 0.9;
+        ctx.globalAlpha = 0.9 * intensity;
         if (profile === ZONE_PROFILES.shallow) {
             ctx.strokeStyle = 'rgba(70, 210, 255, 0.15)';
             ctx.lineWidth = 2;
@@ -2318,19 +2699,22 @@ class Renderer {
         ctx.fillStyle = bgGradient;
         ctx.fillRect(0, 0, baseWidth, baseHeight);
 
-        this.drawZoneTheme(ctx, engine, profile);
+        const backgroundDrawn = this.drawBackgroundArt(ctx, engine, profile);
+        this.drawZoneTheme(ctx, engine, profile, backgroundDrawn ? 0.24 : 1);
 
         let mR = Math.floor(4 * (1 - depth) + 1 * depth);
         let mG = Math.floor(7 * (1 - depth) + 1 * depth);
         let mB = Math.floor(20 * (1 - depth) + 4 * depth);
         ctx.fillStyle = `rgb(${mR}, ${mG}, ${mB})`;
-        engine.bgMountains.forEach(m => {
-            ctx.beginPath();
-            ctx.moveTo(m.x, baseHeight);
-            ctx.lineTo(m.x + m.width/2, baseHeight - m.height);
-            ctx.lineTo(m.x + m.width, baseHeight);
-            ctx.fill();
-        });
+        if (!backgroundDrawn) {
+            engine.bgMountains.forEach(m => {
+                ctx.beginPath();
+                ctx.moveTo(m.x, baseHeight);
+                ctx.lineTo(m.x + m.width/2, baseHeight - m.height);
+                ctx.lineTo(m.x + m.width, baseHeight);
+                ctx.fill();
+            });
+        }
 
         let rayOpacity1 = 0.08 * (1 - depth * 0.8);
         let rayOpacity2 = 0.03 * (1 - depth * 0.8);
@@ -2442,6 +2826,19 @@ class Renderer {
         ctx.shadowBlur = 0;
 
         engine.mines.forEach(m => {
+            const mineSize = m.radius * 3.55;
+            if (this.drawArtAsset(ctx, 'mine', m.x - mineSize / 2, m.y - mineSize / 2, mineSize, mineSize)) {
+                ctx.save();
+                ctx.globalAlpha = engine.frameCount % 20 < 10 ? 0.75 : 0.3;
+                ctx.fillStyle = '#ff315f';
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = '#ff315f';
+                ctx.beginPath();
+                ctx.arc(m.x, m.y, Math.max(2, m.radius * 0.16), 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+                return;
+            }
             ctx.fillStyle = '#222'; ctx.strokeStyle = '#666'; ctx.lineWidth = 2;
             ctx.beginPath(); ctx.arc(m.x, m.y, m.radius, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
             for(let i=0; i<8; i++) {
@@ -2458,6 +2855,16 @@ class Renderer {
         ctx.fillStyle = '#09081a'; ctx.strokeStyle = '#222144'; ctx.lineWidth = 3;
         engine.obstacles.forEach(obs => {
             if (obs.type === 'debris') {
+                const crateWidth = obs.width * 1.35;
+                const crateHeight = obs.height * 0.95;
+                if (this.drawArtAsset(
+                    ctx,
+                    'crate',
+                    obs.x + (obs.width - crateWidth) / 2,
+                    obs.y + (obs.height - crateHeight) / 2,
+                    crateWidth,
+                    crateHeight
+                )) return;
                 ctx.fillStyle = '#1a0d0d'; ctx.strokeStyle = '#331a1a';
                 ctx.fillRect(obs.x, obs.y, obs.width, obs.height); ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
                 ctx.beginPath(); ctx.moveTo(obs.x + 5, obs.y + 5); ctx.lineTo(obs.x + obs.width - 5, obs.y + obs.height - 5); ctx.stroke();
@@ -2465,6 +2872,9 @@ class Renderer {
             } else if (obs.type === 'jellyfish') {
                 ctx.fillStyle = 'rgba(255, 100, 255, 0.4)'; ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
             } else {
+                const pillarWidth = obs.width * 1.3;
+                const pillarX = obs.x - (pillarWidth - obs.width) * 0.5;
+                if (this.drawArtAsset(ctx, 'pillar', pillarX, obs.y, pillarWidth, obs.height, { flipY: obs.type === 'top' })) return;
                 ctx.fillStyle = '#09081a'; ctx.strokeStyle = '#222144';
                 ctx.fillRect(obs.x, obs.y, obs.width, obs.height); ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
                 ctx.fillStyle = '#151433';
@@ -2493,7 +2903,10 @@ class Renderer {
         });
 
         if (engine.state !== 'MENU') {
-            ctx.save(); ctx.translate(shark.x, shark.y);
+            const impactJolt = engine.reduceMotion ? 0 : Math.min(8, engine.cameraShake * 0.22);
+            const impactX = impactJolt ? Math.random() * impactJolt * 2 - impactJolt : 0;
+            const impactY = impactJolt ? Math.random() * impactJolt * 2 - impactJolt : 0;
+            ctx.save(); ctx.translate(shark.x + impactX, shark.y + impactY);
 
             if (engine.mutationSystem && engine.mutationSystem.modifiers.invincibleTimer > 0) {
                 ctx.globalAlpha = engine.reduceMotion ? 0.85 : 0.5 + Math.sin(engine.frameCount * 0.15) * 0.5;
@@ -2606,13 +3019,15 @@ class Renderer {
             ctx.restore(); ctx.shadowBlur = 0;
         }
 
-        ctx.fillStyle = `rgb(${Math.floor(1 * (1-depth))}, ${Math.floor(2 * (1-depth))}, ${Math.floor(5 * (1-depth))})`;
-        for(let i=0; i<4; i++) {
-            let sx = ((i * 250 - engine.frameCount * 0.5) % (baseWidth + 250) + (baseWidth + 250)) % (baseWidth + 250) - 100;
-            ctx.beginPath(); ctx.moveTo(sx, baseHeight);
-            ctx.quadraticCurveTo(sx + Math.sin(engine.frameCount*0.02 + i)*30, baseHeight - 80, sx + 10 + Math.sin(engine.frameCount*0.02 + i)*40, baseHeight - 150);
-            ctx.quadraticCurveTo(sx + 30 + Math.sin(engine.frameCount*0.02 + i)*30, baseHeight - 80, sx + 40, baseHeight);
-            ctx.fill();
+        if (!backgroundDrawn) {
+            ctx.fillStyle = `rgb(${Math.floor(1 * (1-depth))}, ${Math.floor(2 * (1-depth))}, ${Math.floor(5 * (1-depth))})`;
+            for(let i=0; i<4; i++) {
+                let sx = ((i * 250 - engine.frameCount * 0.5) % (baseWidth + 250) + (baseWidth + 250)) % (baseWidth + 250) - 100;
+                ctx.beginPath(); ctx.moveTo(sx, baseHeight);
+                ctx.quadraticCurveTo(sx + Math.sin(engine.frameCount*0.02 + i)*30, baseHeight - 80, sx + 10 + Math.sin(engine.frameCount*0.02 + i)*40, baseHeight - 150);
+                ctx.quadraticCurveTo(sx + 30 + Math.sin(engine.frameCount*0.02 + i)*30, baseHeight - 80, sx + 40, baseHeight);
+                ctx.fill();
+            }
         }
 
         if (depth > 0) {
@@ -2636,6 +3051,8 @@ class Renderer {
             ctx.fillRect(0, 0, baseWidth, baseHeight);
             ctx.globalCompositeOperation = 'source-over';
         }
+
+        this.drawMapTransition(ctx, engine);
 
         if (engine.state === 'PAUSED') {
             ctx.fillStyle = 'rgba(2, 3, 8, 0.8)'; ctx.fillRect(0, 0, baseWidth, baseHeight);
@@ -2732,11 +3149,12 @@ class ProgressionSystem {
     constructor(engine) {
         this.engine = engine;
     }
-    updateZoneAndSpeed(score) {
-        let dynamicBaseSpeed = Math.min(CONFIG.MAX_BASE_SPEED, CONFIG.INITIAL_SPEED + score * CONFIG.SPEED_GROWTH);
+    updateZoneAndSpeed(depth) {
+        let dynamicBaseSpeed = Math.min(CONFIG.MAX_BASE_SPEED, CONFIG.INITIAL_SPEED + depth * CONFIG.SPEED_GROWTH);
         let speedBonus = this.engine.mutationSystem ? this.engine.mutationSystem.modifiers.speedBonus : 0;
         let oldZone = this.engine.currentZoneName;
-        const profile = getZoneProfile(score);
+        const unlockedZoneThreshold = Math.max(0, Number(this.engine.unlockedZoneThreshold) || 0);
+        const profile = getZoneProfile(Math.min(depth, unlockedZoneThreshold));
         this.engine.currentZoneName = profile.name;
         this.engine.zoneProfile = profile;
         let zoneChanged = (oldZone !== this.engine.currentZoneName && oldZone !== undefined);
@@ -2791,6 +3209,10 @@ class InputSystem {
         const handleInputDown = () => {
             if (this.engine.state === 'MENU') return;
             this.engine.audio.init();
+            if (this.engine.mapTransition && this.engine.mapTransition.active) {
+                this.engine.skipMapTransition();
+                return;
+            }
             if (this.engine.state === 'GAMEOVER') {
                 // Game over is modal: restart/menu buttons own the transition.
                 return;
@@ -3159,6 +3581,7 @@ class GameEngine {
         this.inputSystem = new InputSystem(this);
         this.skinManager = new SkinManager(this);
         this.achievementManager = new AchievementManager(this);
+        this.fishDirector = new FishDirector(this);
         this.bossSystem = new BossSystem(this);
         this.mutationSystem = new MutationSystem(this);
 
@@ -3291,6 +3714,111 @@ class GameEngine {
         return { fishesEaten: 0, damageTaken: 0, shieldsBroken: 0, maxCombo: 0, closeCalls: 0 };
     }
 
+    createMapTransitionState() {
+        return {
+            active: false,
+            phase: 'idle',
+            ticks: 0,
+            outTicks: PACING.MAP_TRANSITION_OUT_TICKS,
+            holdTicks: PACING.MAP_TRANSITION_HOLD_TICKS,
+            inTicks: PACING.MAP_TRANSITION_IN_TICKS,
+            targetThreshold: 0,
+            targetProfile: ZONE_PROFILES.shallow,
+            defeatedBossType: null,
+            committed: false
+        };
+    }
+
+    startMapTransition(threshold, defeatedBossType = null) {
+        const targetThreshold = Number(threshold);
+        if (![300, 800, 1500].includes(targetThreshold)) return false;
+        const targetProfile = getZoneProfile(targetThreshold);
+        if (targetProfile.threshold <= (Number(this.unlockedZoneThreshold) || 0)) return false;
+
+        const reducedMotion = Boolean(this.reduceMotion);
+        this.mapTransition = {
+            active: true,
+            phase: 'closing',
+            ticks: 0,
+            outTicks: reducedMotion ? 1 : PACING.MAP_TRANSITION_OUT_TICKS,
+            holdTicks: reducedMotion ? 8 : PACING.MAP_TRANSITION_HOLD_TICKS,
+            inTicks: reducedMotion ? 1 : PACING.MAP_TRANSITION_IN_TICKS,
+            targetThreshold,
+            targetProfile,
+            defeatedBossType,
+            committed: false
+        };
+
+        this.zoneTransitionTimer = this.mapTransition.outTicks + this.mapTransition.holdTicks + this.mapTransition.inTicks + 60;
+        this.obstacles = [];
+        this.mines = [];
+        this.jellyfishes = [];
+        this.currentZones = [];
+        this.powerups = [];
+        if (this.fishDirector) this.fishDirector.reset();
+        if (this.inputSystem) this.inputSystem.isPressing = false;
+        return true;
+    }
+
+    commitMapTransition() {
+        const transition = this.mapTransition;
+        if (!transition || !transition.active || transition.committed) return false;
+        transition.committed = true;
+        this.unlockedZoneThreshold = Math.max(Number(this.unlockedZoneThreshold) || 0, transition.targetThreshold);
+        this.zoneProfile = transition.targetProfile;
+        this.currentZoneName = transition.targetProfile.name;
+        this.backgroundTravel = 0;
+        this.obstacles = [];
+        this.mines = [];
+        this.jellyfishes = [];
+        this.currentZones = [];
+        return true;
+    }
+
+    finishMapTransition() {
+        const transition = this.mapTransition;
+        if (!transition || !transition.active) return false;
+        this.commitMapTransition();
+        const targetProfile = transition.targetProfile;
+        transition.active = false;
+        transition.phase = 'idle';
+        transition.ticks = 0;
+        this.zoneTransitionTimer = 90;
+        this.ui.triggerZoneDisplay(this.currentZoneName, targetProfile);
+        this.entityManager.spawnText(
+            this.renderer.baseWidth / 2,
+            112,
+            `${targetProfile.label} CURRENT STABILIZED`,
+            targetProfile.accent
+        );
+        this.audio.play('dash');
+        return true;
+    }
+
+    updateMapTransition() {
+        const transition = this.mapTransition;
+        if (!transition || !transition.active) return false;
+        transition.ticks++;
+
+        if (transition.phase === 'closing' && transition.ticks >= transition.outTicks) {
+            this.commitMapTransition();
+            transition.phase = 'holding';
+            transition.ticks = 0;
+        } else if (transition.phase === 'holding' && transition.ticks >= transition.holdTicks) {
+            transition.phase = 'opening';
+            transition.ticks = 0;
+        } else if (transition.phase === 'opening' && transition.ticks >= transition.inTicks) {
+            this.finishMapTransition();
+        }
+        return true;
+    }
+
+    skipMapTransition() {
+        if (!this.mapTransition || !this.mapTransition.active) return false;
+        this.commitMapTransition();
+        return this.finishMapTransition();
+    }
+
     getMutationCount() {
         const upgrades = this.mutationSystem && Array.isArray(this.mutationSystem.upgradePool)
             ? this.mutationSystem.upgradePool
@@ -3319,9 +3847,15 @@ class GameEngine {
         this.audio.stopAmbient();
         this.audio.stopBossMusic({ resumeAmbient: false, immediate: true });
         this.entityManager.initEntities();
+        if (this.fishDirector) this.fishDirector.reset();
         this.score = 0; this.depth = 0; this.frameCount = 0; this.isNewRecord = false;
+        this.backgroundTravel = 0;
         this.currentZoneName = '浅海 (SHALLOW SEA)';
         this.zoneProfile = ZONE_PROFILES.shallow;
+        this.unlockedZoneThreshold = 0;
+        this.mapTransition = this.createMapTransitionState
+            ? this.createMapTransitionState()
+            : { active: false, phase: 'idle', ticks: 0 };
         this.zoneTransitionTimer = 0;
         this.hazardWarningTimer = 0;
         this.nearMissTimer = 0;
@@ -3510,6 +4044,10 @@ class GameEngine {
 
     updateLogic() {
         if (this.state === 'LEVELUP') return;
+        if (this.mapTransition && this.mapTransition.active) {
+            this.updateMapTransition();
+            return;
+        }
         if (this.mutationSystem) this.mutationSystem.updateLogic();
         this.frameCount++;
         let cvsW = this.renderer.baseWidth;
@@ -3574,6 +4112,8 @@ class GameEngine {
         if (this.shark.inkTimer > 0) this.shark.inkTimer--;
 
         let currentSpeed = Math.min(dynamicBaseSpeed * speedMult, CONFIG.SPEED_HARD_CAP);
+        this.backgroundTravel = (Number(this.backgroundTravel) || 0)
+            + getBackgroundTravelDelta(currentSpeed, this.bossSystem.active);
 
         if (!this.bossSystem.active) {
             this.depth += currentSpeed * 0.05;
@@ -3624,18 +4164,14 @@ class GameEngine {
                 }
             }
         } else {
-            let targetX = 140;
-            if (this.shark.x < targetX) {
-                this.shark.x += (targetX - this.shark.x) * 0.05;
-            }
+            const travelMotion = getSharkTravelMotion(this.shark, false);
+            this.shark.x += (travelMotion.targetX - this.shark.x) * travelMotion.easing;
         }
 
         this.shark.velocity = Math.max(-CONFIG.MAX_VELOCITY, Math.min(CONFIG.MAX_VELOCITY, this.shark.velocity));
         this.shark.y += this.shark.velocity;
 
-        if (this.shark.x < 140) {
-            this.shark.x += (140 - this.shark.x) * 0.05;
-        }
+        if (this.shark.x < 90) this.shark.x = 90;
 
         if (this.shark.y - this.shark.radius < 0) {
             if (isInvincible) { this.shark.y = this.shark.radius; this.shark.velocity = 0; }
@@ -3675,20 +4211,14 @@ class GameEngine {
         const bossType = this.bossSystem.active && this.bossSystem.bossData
             ? this.bossSystem.bossData.type
             : null;
-        const fishSpawnPlan = getFishSpawnPlan(profile, this.shark.isDashing, bossType, this.frameCount);
-        if (this.frameCount % fishSpawnPlan.interval === 0 && this.fishes.length < 30) {
-            const baseFishY = Math.random() * (cvsH - 120) + 60;
-            for (let fishIndex = 0; fishIndex < fishSpawnPlan.count && this.fishes.length < 30; fishIndex++) {
-                const schoolOffset = fishSpawnPlan.count > 1 ? (fishIndex === 0 ? -20 : 20) : 0;
-                this.fishes.push({
-                    x: cvsW + fishIndex * 18,
-                    y: Math.max(60, Math.min(cvsH - 60, baseFishY + schoolOffset)),
-                    vx: -Math.random()*2-1,
-                    vy: (Math.random()-0.5)*2,
-                    radius: 5,
-                    active: true
-                });
-            }
+        if (this.fishDirector) {
+            this.fishDirector.update({
+                profile,
+                currentSpeed,
+                bossActive: this.bossSystem.active,
+                bossType,
+                isDashing: this.shark.isDashing
+            });
         }
         if (hazardsAllowed && this.getActiveHazardCount() < profile.hazardCap && this.frameCount % profile.jellyInterval === 0 && this.score > 200) {
             let jellyY = Math.random() * (cvsH - 180) + 90;
@@ -3981,14 +4511,14 @@ class GameEngine {
 
             // Speed limit & drift
             let speed = Math.hypot(fish.vx, fish.vy);
-            let maxSpeed = 2.0; // Keep them slow and easy to catch
+            let maxSpeed = 2.0; // All fish share one readable traversal profile, including Boss fights.
             if (speed > maxSpeed) {
                 fish.vx = (fish.vx / speed) * maxSpeed;
                 fish.vy = (fish.vy / speed) * maxSpeed;
             }
-            fish.vx -= 0.02; // General leftward drift
+            fish.vx -= 0.02;
 
-            fish.x += fish.vx - currentSpeed * 0.7; // 0.7 factor applies ocean scroll
+            fish.x += fish.vx - currentSpeed * 0.7;
             fish.y += fish.vy;
 
             // Y Bounds bounce
@@ -4144,7 +4674,8 @@ class GameEngine {
             this.cameraShake = 0;
             this.renderer.canvas.style.transform = 'translate(0, 0)';
         } else if (this.cameraShake > 0) {
-            this.renderer.canvas.style.transform = `translate(${Math.random()*this.cameraShake - this.cameraShake/2}px, ${Math.random()*this.cameraShake - this.cameraShake/2}px)`;
+            // Keep the environment anchored; impact motion is applied locally to the shark.
+            this.renderer.canvas.style.transform = 'translate(0, 0)';
             this.cameraShake *= 0.85;
             if (this.cameraShake < 0.5) { this.cameraShake = 0; this.renderer.canvas.style.transform = 'translate(0, 0)'; }
         }

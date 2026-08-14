@@ -33,16 +33,13 @@ function extractMethod(source, methodName) {
 const BossSystem = vm.runInNewContext(
     `${extractClass(html, 'BossSystem', 'AchievementManager')}\nBossSystem`,
     {
-        Math,
-        PACING: {
-            BOSS_SUPPLY_INTERVAL_TICKS: 10_000,
-            BOSS_EMERGENCY_TICKS: 10_000
-        }
+        Math
     }
 );
 
 function createEngine() {
     const calls = [];
+    const bossCalls = [];
     const achievements = [
         { id: 'boss_octopus', unlocked: false },
         { id: 'boss_submarine', unlocked: false },
@@ -100,6 +97,12 @@ function createEngine() {
                 leviathan: false
             }
         },
+        fishDirector: {
+            beginBoss(type) {
+                bossCalls.push(type);
+            },
+            endBoss() {}
+        },
         runStats: { shieldsBroken: 0, damageTaken: 0 },
         isCheatInvincible: false,
         checkCollision() {
@@ -112,26 +115,34 @@ function createEngine() {
             calls.push(`status:${message}`);
         }
     };
-    return { engine, calls, achievements };
+    return { engine, calls, achievements, bossCalls };
 }
 
 {
-    const { engine, calls, achievements } = createEngine();
+    const { engine, calls, achievements, bossCalls } = createEngine();
     const bossSystem = new BossSystem(engine);
 
     assert.equal(bossSystem.checkTrigger(299), false);
     assert.equal(bossSystem.checkTrigger(300), true);
     assert.equal(bossSystem.bossData.type, 'octopus');
     assert.equal(bossSystem.bossData.isDemo, false);
-    assert.equal(engine.fishes.length, 4, 'normal Boss entry should provide four emergency fish');
-    assert.equal(engine.powerups.length, 1, 'normal Boss entry should provide an emergency shield');
-    assert.equal(calls.includes('boss-music:play'), false, 'music must wait until entry is complete');
+    assert.deepEqual(bossCalls, ['octopus'], 'BossSystem should delegate Boss entry without fabricating FishDirector output');
+    assert.equal(engine.fishes.length, 0, 'BossSystem should not fabricate Boss fish');
+    assert.equal(engine.powerups.length, 1, 'formal Boss entry should create one safety shield');
+    assert.equal(engine.powerups[0].type, 'shield');
+    assert.equal(engine.powerups[0].source, 'boss-safety');
+    assert.equal(engine.powerups[0].x, engine.renderer.baseWidth + 90, 'safety shield should enter from the right');
+    assert.ok(engine.powerups[0].y >= 60 && engine.powerups[0].y <= engine.renderer.baseHeight - 60);
+    assert.equal(engine.shark.shield, false, 'the safety shield should remain a world pickup');
+    assert.equal(calls.filter((call) => call === 'boss-music:play').length, 1, 'Boss music must start exactly once when spawnBoss succeeds');
+    assert.equal(bossSystem.bossData.musicStarted, true, 'Boss music should be marked started before entry updates');
 
     for (let tick = 0; tick < 200 && bossSystem.bossData.state === 'entering'; tick++) {
         bossSystem.update(3, 1);
     }
     assert.equal(bossSystem.bossData.state, 'idle');
     assert.equal(calls.filter((call) => call === 'boss-music:play').length, 1);
+    assert.deepEqual(bossCalls, ['octopus'], 'Boss entry delegation should happen exactly once');
 
     bossSystem.defeatBoss();
     assert.deepEqual(Array.from(bossSystem.defeatedBosses), [300]);
@@ -154,6 +165,38 @@ function createEngine() {
     assert.equal(engine.score, 900);
     assert.equal(achievements[2].unlocked, true);
     assert.equal(bossSystem.checkTrigger(5000), false, 'completed Bosses must not retrigger');
+}
+
+{
+    const { engine } = createEngine();
+    engine.shark.shield = true;
+    const bossSystem = new BossSystem(engine);
+
+    assert.equal(bossSystem.spawnBoss(300), true);
+    assert.equal(engine.powerups.length, 0, 'a player-held shield should block the safety pickup');
+    assert.equal(engine.fishes.length, 0, 'safety-shield guards must not add fish');
+}
+
+{
+    const { engine } = createEngine();
+    engine.powerups.push({ type: 'shield', source: 'boss-safety', x: 990, y: 360, radius: 14 });
+    const bossSystem = new BossSystem(engine);
+
+    assert.equal(bossSystem.spawnBoss(300), true);
+    assert.equal(engine.powerups.length, 1, 'an existing safety shield should not be duplicated');
+    assert.equal(engine.fishes.length, 0, 'duplicate-shield guards must not add fish');
+}
+
+{
+    const { engine } = createEngine();
+    for (let index = 0; index < 5; index++) {
+        engine.powerups.push({ type: 'shield', source: 'test', x: 990 + index, y: 360, radius: 14 });
+    }
+    const bossSystem = new BossSystem(engine);
+
+    assert.equal(bossSystem.spawnBoss(300), true);
+    assert.equal(engine.powerups.length, 5, 'the powerup cap must not be exceeded for a safety shield');
+    assert.equal(engine.fishes.length, 0, 'powerup-cap guards must not add fish');
 }
 
 {
@@ -188,6 +231,8 @@ const initEntities = vm.runInNewContext(
         isNewRecord: true,
         currentZoneName: 'OLD',
         zoneProfile: { id: 'old' },
+        unlockedZoneThreshold: 800,
+        mapTransition: { active: true, phase: 'opening' },
         zoneTransitionTimer: 99,
         hazardWarningTimer: 99,
         nearMissTimer: 99,
@@ -235,6 +280,10 @@ const initEntities = vm.runInNewContext(
     assert.equal(engine.frameCount, 0);
     assert.equal(engine.cameraShake, 0);
     assert.equal(engine.renderer.canvas.style.transform, 'translate(0, 0)');
+    assert.equal(engine.backgroundTravel, 0);
+    assert.equal(engine.unlockedZoneThreshold, 0);
+    assert.equal(engine.zoneProfile.id, 'shallow');
+    assert.equal(engine.mapTransition.active, false);
     assert.equal(engine.bossSystem.active, false);
     assert.equal(engine.bossSystem.bossData, null);
     assert.deepEqual(Array.from(engine.bossSystem.defeatedBosses), []);

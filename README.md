@@ -1,23 +1,24 @@
 # 🦈 Abyss Dash / 深渊冲刺
 
-![Version](https://img.shields.io/badge/version-v9.9.0-00d7ff)
+![Version](https://img.shields.io/badge/version-v10.0.0-00d7ff)
 ![Status](https://img.shields.io/badge/status-active_development-19c37d)
 ![HTML5 Canvas](https://img.shields.io/badge/engine-HTML5_Canvas-f16529)
 ![Vanilla JavaScript](https://img.shields.io/badge/code-Vanilla_JavaScript-f7df1e)
 
 一款以深海生存跑酷、Roguelite 进化和巨型 Boss 战为核心的单文件网页游戏。游戏使用原生 HTML、CSS 与 JavaScript 构建，无需打包工具。
 
-> 当前版本：**v9.9.0「深渊长航」**
-> 迭代日期：**2026-08-01**
+> 当前版本：**v10.0.0「层渊迁航」**
+> 阶段 6 记录日期：**2026-08-14**（最终发布验收待阶段 7）
 > 在线游玩：<https://guofudamo2007-lab.github.io/AbyssDash/>
 
-## v9.9.0 更新重点
+## v10.0.0 更新重点
 
-- 建立正常长局与深度 300、800、1500 三个 Boss 节点的确定性回归，演示 Boss 与正式进度继续保持隔离。
-- 完善横竖屏、触摸取消、安全区域、高倍率缩放、弹窗焦点和 Canvas Boss 血条适配。
-- 修复后期频繁 RUSH 时鱼群短暂断档；普通速度、Boss 补给和 30 条鱼资源上限保持不变。
-- 扩展设置持久化、重开清理、资源完整性、响应式输入和鱼群节奏测试。
-- Boss 音频流程按“音乐先起奏、Boss 后登场”进入本轮收尾，暂停、重开与返回菜单仍需保证无叠加和残留。
+- 四个深度区域各使用五张 WebP 背景循环滚动，正式 Boss 击败后通过地图门闸完成区域转场。
+- 深度 300、800、1500 依次触发正式 Boss；演示 Boss 与正式进度、奖励和地图转场保持隔离。
+- 普通路段与 Boss 路段共用 `FishDirector` 的刷鱼规则和 30 条鱼上限，`BossSystem` 不管理鱼群。
+- 正式 Boss 战提供一个独立安全护盾，不把它描述为 Boss 专用鱼群补给。
+- Boss 音乐在 Boss 入场移动前起奏，并覆盖暂停、恢复、击败、重开和返回菜单生命周期。
+- `references`、`workfiles` 和 PNG/source 原稿不由运行时读取。
 
 ## 核心玩法
 
@@ -48,7 +49,7 @@
 | 800 | 深海潜艇 | 鱼雷攻击 |
 | 1500 | 远古巨齿鲨 | 声波冲击、最终对决 |
 
-Boss 战会提供动态补给和紧急护盾，避免长时间战斗断粮。
+正式 Boss 战会生成一个独立安全护盾；鱼群仍由 `FishDirector` 统一管理，`BossSystem` 不负责鱼群生成。
 
 ### 皮肤与成就
 
@@ -91,6 +92,8 @@ AbyssDash/
 ├─ index.html
 ├─ README.md
 ├─ DEVELOPMENT_PLAN_v9.9.0.md
+├─ LUNA_V10_EXECUTION_PLAN.md
+├─ RELEASE_REPORT_v10.0.0.md
 ├─ BASELINE_REPORT_v9.8.0.md
 ├─ STAGE1_REPORT_v9.9.0.md
 ├─ STAGE2_REPORT_v9.9.0.md
@@ -115,7 +118,8 @@ AbyssDash/
 
 - `GameEngine`：游戏状态和主循环。
 - `Renderer`：Canvas 场景、区域和特效渲染。
-- `BossSystem`：Boss 入场、攻击、补给与音乐状态。
+- `BossSystem`：Boss 入场、攻击、正式安全护盾与音乐状态。
+- `FishDirector`：普通路段与 Boss 路段的统一鱼群生成、上限和节奏。
 - `MutationSystem`：升级选择与能力修正。
 - `SkinManager`：代码皮肤与序列帧皮肤。
 - `InputSystem`、`CollisionSystem`、`EntityManager`、`ProgressionSystem`：输入、碰撞、实体与成长逻辑。
@@ -123,7 +127,14 @@ AbyssDash/
 
 ## 版本记录
 
-### v9.9.0 — 深渊长航（2026-08-01，当前版本）
+### v10.0.0 — 层渊迁航（2026-08-14，阶段 6 记录）
+
+- 完成四区五屏运行背景、正式 Boss 后门闸转场和深度语义回归。
+- 统一普通鱼与 Boss 路段的 `FishDirector` 规则，保留 30 条鱼上限与正式安全护盾。
+- 完成 Boss 音乐先起奏、暂停恢复、击败和演示 Boss 生命周期自动化验证。
+- 最终浏览器矩阵、人工听音和 30 分钟墙钟验收列入阶段 7，尚未宣称完成。
+
+### v9.9.0 — 深渊长航（2026-08-01）
 
 - 建立正常长局、Boss 节点、重开清理和设置持久化回归。
 - 完成横竖屏、触摸、高缩放、焦点和 Boss 血条适配。
@@ -177,8 +188,8 @@ AbyssDash/
 ## 验证范围
 
 - JavaScript 主脚本语法和运行资源路径检查。
-- 十二项 Node 自动化回归：正常进度、Boss 演示隔离、音频生命周期、设置持久化、响应式输入、鱼群节奏、资源完整性等。
-- 本地 HTTP 环境下的菜单、设置、教程、暂停恢复、三档画质、减少动态效果和三种 Boss 演示检查。
+- 18 项 Node 自动化回归：正常进度、Boss 演示隔离、音频生命周期、设置持久化、响应式输入、鱼群节奏、资源完整性等。
+- 本地 HTTP 环境下的菜单、设置、教程、暂停恢复、三档画质、减少动态效果、三次正式 Boss 转场和演示 Boss 检查。
 - 实体触摸设备、真实高倍率缩放、30 分钟墙钟游玩和人工听音仍保留为人工验收项。
 
 ---

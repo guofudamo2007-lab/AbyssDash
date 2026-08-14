@@ -6,6 +6,8 @@
 
 - `art/characters`：游戏运行时使用的角色精灵图。
 - `art/bosses`：游戏运行时使用的 Boss 精灵图。
+- `art/backgrounds`：四个区域各自使用的五张运行时滚动背景 WebP。
+- `art/obstacles`：运行时矿雷、货箱、石柱与地图过渡边界墙 WebP。
 - `art/references`：AI 生成或录制的原始参考视频，不由游戏直接加载。
 - `art/workfiles`：抽帧、抠图和生成过程中的中间文件。
 - `art/archive`：已被替换、仅用于回退对照的旧素材。
@@ -20,11 +22,19 @@
 | `art/characters/shark-cyber-spritesheet.png` | 赛博鲨鱼动画 |
 | `art/bosses/boss-octopus-spritesheet.png` | 章鱼 Boss 三帧动画 |
 | `art/bosses/boss-submarine-spritesheet.png` | 潜艇 Boss 三帧动画 |
+| `art/backgrounds/background-shallow-sea-01-v1.webp` 至 `05-v1.webp` | 浅海区域五屏循环背景 |
+| `art/backgrounds/background-shipwreck-01-v1.webp` 至 `05-v1.webp` | 沉船区域五屏循环背景 |
+| `art/backgrounds/background-trench-01-v1.webp` 至 `05-v1.webp` | 深沟区域五屏循环背景 |
+| `art/backgrounds/background-dark-abyss-01-v1.webp` 至 `05-v1.webp` | 黑暗深渊区域五屏循环背景 |
+| `art/obstacles/hazard-mine-pixel-v1.webp` | 矿雷运行时绘制素材 |
+| `art/obstacles/cargo-crate-pixel-v2.webp` | 货箱运行时绘制素材 |
+| `art/obstacles/hazard-pillar-pixel-v1.webp` | 石柱运行时绘制素材 |
+| `art/obstacles/boundary-wall-pixel-v1.webp` | 地图过渡遮罩素材；仅用于过渡，不作为永久上下边界 |
 | `audio/music/boss-battle-beneath-the-crush.mp3` | Boss 战音乐 |
 
 > v9.8.0 说明：最终 Boss 巨齿鲨复用
 > `art/characters/shark-default-spritesheet.png` 的固定序列帧，不读取玩家当前皮肤。
-> `references`、`workfiles` 和 `archive` 中的文件均不参与运行时加载。
+> `references`、`workfiles`、`archive` 中的文件，以及 PNG/source/originals 等制作源文件，均不参与运行时加载。
 
 ## 命名规则
 
